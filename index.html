@@ -276,6 +276,11 @@ table.pt th b{font-size:10px}
       <div class="hint">A lista de produtos muda conforme a escolha: <b>Parcial</b> mostra Prata, Prata Max, Ouro, Ouro Max, Advance 600/700 e Premium 900 Care; <b>Total</b> mostra Diamante, Diamante Max, Advance 600/700, Premium 900 Care, Premium 900 e Infinity.</div>
     </div>
   </div>
+  <div style="margin-top:12px">
+    <label class="f">ACOMODAÇÃO NA PROPOSTA</label>
+    <div class="seg" id="segAcom"><button data-v="enf">Enfermaria</button><button data-v="apt">Apartamento</button><button data-v="ambos" class="on">Ambas</button></div>
+    <div class="hint"><b>Enfermaria e Apartamento</b> disponíveis em Prata, Prata Max, Advance 600 e Advance 700. Os demais produtos têm <b>somente Apartamento</b> — por isso não aparecem quando a acomodação é Enfermaria.</div>
+  </div>
 </section>
 
 <!-- 4. Produtos -->
@@ -466,7 +471,7 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
 const brDate=d=>String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
 
-const state={client:"",cnpj:"",consultor:"",city:"sp",mei:false,lives:Array(10).fill(0),copart:"total",reemb:"parcial",sel:{},result:null};
+const state={client:"",cnpj:"",consultor:"",city:"sp",mei:false,lives:Array(10).fill(0),copart:"total",reemb:"parcial",acom:"ambos",sel:{},result:null};
 PRODUCTS.forEach(p=>state.sel[p.id]={on:false,acom:[...p.acom]});
 let people=[]; // conversor
 
@@ -480,12 +485,15 @@ function reembsFor(p){const allow=state.reemb==="ambos"?["parcial","total"]:[sta
 /* tabela usada para filtrar a lista de produtos (mesmo antes de informar vidas) */
 function filterTable(){const t=currentTable();if(t==="v1"||t==="mei"||t==="demais")return t;return state.mei?"mei":"demais";}
 function filterPrices(){const t=filterTable();return PRICES[t][cityObj().g[t]][effCopart(t)];}
-function visibleAcoms(p){const P=filterPrices();return p.acom.filter(a=>reembsFor(p).some(r=>P[p.id+"|"+a+"|"+r]));}
+function acomAllowed(){return state.acom==="ambos"?["enf","apt"]:[state.acom];}
+function visibleAcoms(p){const P=filterPrices();const al=acomAllowed();return p.acom.filter(a=>al.includes(a)&&reembsFor(p).some(r=>P[p.id+"|"+a+"|"+r]));}
+/* acomodações efetivamente cotadas: no modo "ambos" respeita os chips do produto */
+function quotedAcoms(p){const v=visibleAcoms(p);if(state.acom!=="ambos")return v;const q=v.filter(a=>state.sel[p.id].acom.includes(a));return q.length?q:v;}
 function isVisible(p){return visibleAcoms(p).length>0;}
 
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2600);}
-function save(){try{localStorage.setItem("nd_cotador_v1",JSON.stringify({client:state.client,cnpj:state.cnpj,consultor:state.consultor,city:state.city,mei:state.mei,lives:state.lives,copart:state.copart,reemb:state.reemb,sel:state.sel}));}catch(e){}}
-function load(){try{const s=JSON.parse(localStorage.getItem("nd_cotador_v1")||"null");if(!s)return;Object.assign(state,{client:s.client||"",cnpj:s.cnpj||"",consultor:s.consultor||"",city:s.city||"sp",mei:!!s.mei,copart:s.copart||"total",reemb:s.reemb||"parcial"});if(Array.isArray(s.lives)&&s.lives.length===10)state.lives=s.lives.map(x=>Math.max(0,parseInt(x)||0));if(s.sel){PRODUCTS.forEach(p=>{if(s.sel[p.id]){state.sel[p.id].on=!!s.sel[p.id].on;const a=(s.sel[p.id].acom||[]).filter(x=>p.acom.includes(x));state.sel[p.id].acom=a.length?a:[...p.acom];}});}}catch(e){}}
+function save(){try{localStorage.setItem("nd_cotador_v1",JSON.stringify({client:state.client,cnpj:state.cnpj,consultor:state.consultor,city:state.city,mei:state.mei,lives:state.lives,copart:state.copart,reemb:state.reemb,acom:state.acom,sel:state.sel}));}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem("nd_cotador_v1")||"null");if(!s)return;Object.assign(state,{client:s.client||"",cnpj:s.cnpj||"",consultor:s.consultor||"",city:s.city||"sp",mei:!!s.mei,copart:s.copart||"total",reemb:s.reemb||"parcial",acom:["enf","apt","ambos"].includes(s.acom)?s.acom:"ambos"});if(Array.isArray(s.lives)&&s.lives.length===10)state.lives=s.lives.map(x=>Math.max(0,parseInt(x)||0));if(s.sel){PRODUCTS.forEach(p=>{if(s.sel[p.id]){state.sel[p.id].on=!!s.sel[p.id].on;const a=(s.sel[p.id].acom||[]).filter(x=>p.acom.includes(x));state.sel[p.id].acom=a.length?a:[...p.acom];}});}}catch(e){}}
 function maskCNPJ(v){v=(v||"").replace(/\D/g,"").slice(0,14);let o=v;if(v.length>12)o=v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2}).*/,"$1.$2.$3/$4-$5");else if(v.length>8)o=v.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4}).*/,"$1.$2.$3/$4");else if(v.length>5)o=v.replace(/^(\d{2})(\d{3})(\d{0,3}).*/,"$1.$2.$3");else if(v.length>2)o=v.replace(/^(\d{2})(\d{0,3}).*/,"$1.$2");return o;}
 
 /* ---------- Conversor de idades ---------- */
@@ -515,15 +523,16 @@ function renderTableInfo(){const t=currentTable();const el=$("#tableInfo"),h=$("
 
 /* ---------- Produtos ---------- */
 function renderProducts(){const t=filterTable();const box=$("#products");let html="";let shown=0;
- const reembLabel=state.reemb==="ambos"?"reembolso parcial e total":"reembolso "+state.reemb;
+ const reembLabel=(state.reemb==="ambos"?"reembolso parcial e total":"reembolso "+state.reemb)+" · "+(state.acom==="ambos"?"enfermaria e apartamento":ACOM[state.acom].toLowerCase());
  html+='<div class="hint" style="margin:2px 0 4px">Exibindo produtos com <b style="color:var(--gold2)">'+reembLabel+'</b> · '+COPL[effCopart(t)].toLowerCase()+' · tabela '+TABLE_SHORT[t]+(livesTotal()===0?' (informe as vidas para confirmar a tabela)':'')+'</div>';
  ["metais","tradicional"].forEach(line=>{const list=PRODUCTS.filter(p=>p.line===line&&isVisible(p));if(!list.length)return;
   html+='<div class="lineh">'+LINE_LABEL[line]+'</div>';
   list.forEach(p=>{shown++;const s=state.sel[p.id];const acs=visibleAcoms(p);const rs=reembsFor(p);
-   const chips=acs.map(a=>'<span class="chip '+(s.acom.includes(a)?"on":"")+'" data-p="'+p.id+'" data-a="'+a+'">'+ACOM[a]+'</span>').join("");
+   const qa=quotedAcoms(p);const toggle=state.acom==="ambos"&&acs.length>1;
+   const chips=acs.map(a=>toggle?'<span class="chip '+(qa.includes(a)?"on":"")+'" data-p="'+p.id+'" data-a="'+a+'">'+ACOM[a]+'</span>':'<span class="chip on" style="cursor:default">'+ACOM[a]+(p.acom.length===1?' (somente)':'')+'</span>').join("");
    const rtxt=rs.length===2?"Reembolso parcial e total":REEMB[rs[0]];
    const rchip='<span class="chip fixed">'+rtxt+(p.reemb.length===1?" (fixo)":"")+'</span>';
-   html+='<div class="prod '+(s.on?"on":"")+'" data-p="'+p.id+'"><span class="ck">'+(s.on?"✓":"")+'</span><div class="nm">'+p.name+'<small>'+(p.reemb.length===1?REEMB[p.reemb[0]]:"Reembolso parcial ou total")+'</small></div><div class="chips">'+chips+rchip+'</div></div>';});});
+   html+='<div class="prod '+(s.on?"on":"")+'" data-p="'+p.id+'"><span class="ck">'+(s.on?"✓":"")+'</span><div class="nm">'+p.name+'<small>'+(p.acom.length>1?"Enfermaria ou Apartamento":"Somente Apartamento")+' · '+(p.reemb.length===1?REEMB[p.reemb[0]]:"Reembolso parcial ou total")+'</small></div><div class="chips">'+chips+rchip+'</div></div>';});});
  if(!shown)html+='<div class="hint warn" style="margin-top:10px">Nenhum produto disponível com esta modalidade nesta tabela.</div>';
  box.innerHTML=html;renderBar();}
 /* recalcula automaticamente o resultado já exibido quando algo muda */
@@ -532,12 +541,12 @@ function refreshResults(){if(!state.result)return;const t=currentTable();const o
  const min=Math.min(...opts.map(o=>o.total));opts.forEach(o=>o.best=o.total===min);
  state.result=Object.assign(state.result,{table:t,cop:effCopart(t),opts,N:livesTotal(),city:cityObj().name,group:cityObj().g[t],lives:[...state.lives],client:state.client,cnpj:state.cnpj,consultor:state.consultor});
  renderResults();}
-function countOptions(){const prices=getPrices();if(!prices)return 0;let n=0;PRODUCTS.forEach(p=>{const s=state.sel[p.id];if(!s.on)return;p.acom.forEach(a=>{if(!s.acom.includes(a))return;reembsFor(p).forEach(r=>{if(prices[p.id+"|"+a+"|"+r])n++;});});});return n;}
+function countOptions(){const prices=getPrices();if(!prices)return 0;let n=0;PRODUCTS.forEach(p=>{const s=state.sel[p.id];if(!s.on)return;quotedAcoms(p).forEach(a=>{reembsFor(p).forEach(r=>{if(prices[p.id+"|"+a+"|"+r])n++;});});});return n;}
 function renderBar(){const n=livesTotal();$("#barTitle").textContent=n+(n===1?" vida":" vidas")+(n?" · "+cityObj().name.replace(/ - (SP|RJ)$/,""):"");const o=countOptions();$("#barSub").textContent=o?o+" opção(ões) no comparativo · "+COPL[effCopart(currentTable())]:"Selecione produtos para comparar";}
 
 /* ---------- Cálculo ---------- */
 function buildOptions(){const prices=getPrices();const t=currentTable();const cop=effCopart(t);const out=[];
- PRODUCTS.forEach(p=>{const s=state.sel[p.id];if(!s.on)return;p.acom.forEach(a=>{if(!s.acom.includes(a))return;reembsFor(p).forEach(r=>{const key=p.id+"|"+a+"|"+r;const unit=prices[key];if(!unit)return;
+ PRODUCTS.forEach(p=>{const s=state.sel[p.id];if(!s.on)return;quotedAcoms(p).forEach(a=>{reembsFor(p).forEach(r=>{const key=p.id+"|"+a+"|"+r;const unit=prices[key];if(!unit)return;
   const lines=[];let cents=0;BANDS.forEach((b,i)=>{const q=state.lives[i];const uc=Math.round(unit[i]*100);const sub=q*uc;cents+=sub;lines.push({band:b,qty:q,unit:unit[i],sub:sub/100});});
   const n=livesTotal();out.push({p,acom:a,reemb:r,cop,key,unit,lines,total:cents/100,avg:cents/100/n,ans:ANS[p.id+"|"+a]||"",cg:p.cg[cop]});});});});
  return out;}
@@ -653,6 +662,8 @@ function bind(){
  $("#segCop").onclick=e=>{const b=e.target.closest("button");if(!b||b.disabled)return;state.copart=b.dataset.v;renderTableInfo();renderProducts();refreshResults();save();};
  $("#segReemb").onclick=e=>{const b=e.target.closest("button");if(!b)return;state.reemb=b.dataset.v;$$("#segReemb button").forEach(x=>x.classList.toggle("on",x===b));renderProducts();refreshResults();save();};
  $$("#segReemb button").forEach(b=>b.classList.toggle("on",b.dataset.v===state.reemb));
+ $("#segAcom").onclick=e=>{const b=e.target.closest("button");if(!b)return;state.acom=b.dataset.v;$$("#segAcom button").forEach(x=>x.classList.toggle("on",x===b));renderProducts();refreshResults();save();};
+ $$("#segAcom button").forEach(b=>b.classList.toggle("on",b.dataset.v===state.acom));
  // conversor
  $("#convH").onclick=()=>$("#conv").classList.toggle("open");
  $$("#conv .tabs button").forEach(b=>b.onclick=()=>{$$("#conv .tabs button").forEach(x=>x.classList.toggle("on",x===b));$("#tabMulti").style.display=b.dataset.tab==="multi"?"block":"none";$("#tabOne").style.display=b.dataset.tab==="one"?"block":"none";});
