@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#09090b">
+<title>Cotador PME · NotreDame Saúde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#08080a;--panel:#111114;--panel2:#18181d;--border:#26262e;--text:#f3f3f5;--muted:#9b9ba6;--gold:#d4af37;--gold2:#f3d57c;--gold-dark:#9c7a1a;--navy:#00134F;--green:#39d98a;--red:#ff6b6b;--radius:16px}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:radial-gradient(1200px 600px at 10% -10%,rgba(212,175,55,.09),transparent 60%),radial-gradient(900px 500px at 100% 0%,rgba(0,19,79,.45),transparent 60%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+.wrap{max-width:1120px;margin:0 auto;padding:14px 16px 120px}
+header.top{display:flex;align-items:center;gap:14px;padding:10px 0 16px;border-bottom:1px solid var(--border);margin-bottom:18px;flex-wrap:wrap}
+header.top img{height:40px;width:auto}
+header.top .t{flex:1;min-width:200px}
+header.top h1{margin:0;font-size:19px;font-weight:800;letter-spacing:-.01em}
+header.top p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(212,175,55,.45);color:var(--gold2);background:rgba(212,175,55,.08);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;white-space:nowrap}
+.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.card h2{margin:0 0 4px;font-size:17px;font-weight:700;display:flex;align-items:center;gap:10px}
+.card h2 .n{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#111;font-size:13px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.sub{color:var(--muted);font-size:13px;margin:0 0 14px;line-height:1.45}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}}
+label.f{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:.02em}
+input,select,textarea{width:100%;background:#0d0d10;border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px 14px;font-size:15px;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 15px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:38px}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.15)}
+textarea{min-height:110px;resize:vertical}
+.seg{display:flex;background:#0d0d10;border:1px solid var(--border);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;background:transparent;border:0;color:var(--muted);padding:10px 6px;border-radius:9px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;transition:.15s}
+.seg button.on{background:linear-gradient(135deg,var(--gold),#b8912a);color:#111}
+.seg button:disabled{opacity:.35;cursor:not-allowed}
+.hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}
+.hint.warn{color:#ffd166}
+.hint.err{color:var(--red)}
+.btn{border:1px solid var(--border);background:#15151a;color:var(--text);border-radius:12px;padding:11px 16px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px;transition:.15s;white-space:nowrap}
+.btn:hover{border-color:rgba(212,175,55,.5)}
+.btn.gold{background:linear-gradient(135deg,var(--gold),#b8912a);color:#111;border-color:transparent}
+.btn.gold:hover{filter:brightness(1.07)}
+.btn.sm{padding:8px 12px;font-size:12.5px;border-radius:10px}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* conversor */
+.conv{border:1px solid rgba(0,19,79,.9);border-radius:14px;overflow:hidden;margin-bottom:16px;background:#0b0f1f}
+.conv-h{display:flex;align-items:center;gap:12px;padding:12px 14px;background:linear-gradient(135deg,#0b1a4e,#132566);cursor:pointer;user-select:none}
+.conv-h .ic{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:17px}
+.conv-h b{display:block;font-size:14px}.conv-h span{font-size:12px;color:#b9c3e6}
+.conv-h .ar{margin-left:auto;color:#b9c3e6;transition:.2s}
+.conv.open .conv-h .ar{transform:rotate(180deg)}
+.conv-b{display:none;padding:14px;background:#0d1328}
+.conv.open .conv-b{display:block}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#c9d1ee;border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.tabs button.on{background:#c45c1a;border-color:#c45c1a;color:#fff}
+.conv input,.conv textarea{background:#0b0f1f;border-color:rgba(255,255,255,.12)}
+.conv .btn{background:#c45c1a;border-color:#c45c1a;color:#fff}
+.people{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.person{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);border-radius:999px;padding:6px 10px 6px 12px;font-size:12.5px}
+.person b{color:var(--gold2)}
+.person .x{cursor:pointer;color:#b9c3e6;font-weight:800;padding:0 2px}
+.person.bad{border-color:rgba(255,107,107,.5);color:var(--red)}
+/* faixas */
+.bands{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media(max-width:900px){.bands{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:480px){.bands{grid-template-columns:repeat(2,1fr)}}
+.band{background:#0d0d10;border:1px solid var(--border);border-radius:14px;padding:10px 8px;text-align:center;transition:.15s}
+.band.has{border-color:rgba(212,175,55,.6);background:rgba(212,175,55,.06)}
+.band .lb{font-size:12.5px;color:var(--muted);font-weight:700;margin-bottom:8px}
+.band.has .lb{color:var(--gold2)}
+.stepper{display:flex;align-items:center;justify-content:center;gap:5px}
+.stepper button{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:#15151a;color:var(--text);font-size:19px;cursor:pointer;font-family:inherit;line-height:1}
+.stepper button.plus{background:linear-gradient(135deg,var(--gold),#b8912a);color:#111;border-color:transparent}
+.stepper input{width:50px;text-align:center;padding:7px 4px;border-radius:9px;font-weight:800;font-size:15px}
+.totalbar{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:13px;color:var(--muted);flex-wrap:wrap;gap:8px}
+.totalbar b{color:var(--text);font-size:15px}
+.pill{display:inline-block;border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:700;border:1px solid var(--border);color:var(--muted)}
+.pill.ok{border-color:rgba(57,217,138,.5);color:var(--green)}
+.pill.warn{border-color:rgba(255,209,102,.5);color:#ffd166}
+/* produtos */
+.lineh{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:800;margin:14px 0 8px}
+.prod{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--border);border-radius:14px;background:#0d0d10;margin-bottom:8px;cursor:pointer;transition:.15s}
+.prod.on{border-color:rgba(212,175,55,.65);background:rgba(212,175,55,.06)}
+.prod.off{opacity:.38;cursor:not-allowed}
+.prod .ck{width:22px;height:22px;border-radius:7px;border:2px solid var(--border);display:inline-flex;align-items:center;justify-content:center;flex:none;font-size:13px;font-weight:900;color:#111}
+.prod.on .ck{background:linear-gradient(135deg,var(--gold),#b8912a);border-color:transparent}
+.prod .nm{font-weight:700;flex:1;min-width:120px;font-size:14.5px}
+.prod .nm small{display:block;color:var(--muted);font-weight:500;font-size:11.5px;margin-top:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--border);background:#15151a;color:var(--muted);border-radius:999px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;user-select:none}
+.chip.on{border-color:var(--gold);color:var(--gold2);background:rgba(212,175,55,.14)}
+.chip.fixed{cursor:default;border-style:dashed;color:#b9c3e6;background:rgba(0,19,79,.35);border-color:rgba(120,140,220,.35)}
+/* resultados */
+.opts{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));margin-bottom:14px}
+.opt{border:1px solid var(--border);border-radius:14px;padding:14px;background:#0d0d10;position:relative}
+.opt.best{border-color:rgba(57,217,138,.55);box-shadow:0 0 0 1px rgba(57,217,138,.25) inset}
+.opt .best-tag{position:absolute;top:-9px;right:12px;background:var(--green);color:#052;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 9px;letter-spacing:.04em}
+.opt .nm{font-weight:800;font-size:15.5px}
+.opt .meta{color:var(--muted);font-size:12px;margin-top:3px;line-height:1.4}
+.opt .tot{font-size:24px;font-weight:800;color:var(--gold2);margin-top:10px;letter-spacing:-.01em}
+.opt .avg{font-size:12.5px;color:var(--muted)}
+.opt details{margin-top:10px}
+.opt summary{cursor:pointer;font-size:12.5px;color:var(--gold2);font-weight:600}
+table.t{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+table.t th,table.t td{padding:7px 8px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+table.t th{color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em}
+table.t th:first-child,table.t td:first-child{text-align:left}
+table.t tr.tot td{font-weight:800;color:var(--gold2);border-top:1px solid rgba(212,175,55,.5);border-bottom:0}
+table.t td.mut{color:var(--muted);font-size:11.5px}
+.scroll{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px;padding:0 10px 6px;background:#0d0d10;margin-bottom:14px}
+h3.sec{font-size:14px;margin:18px 0 8px;color:var(--gold2);font-weight:800;letter-spacing:.02em}
+.rules{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.rule{border:1px solid var(--border);border-radius:12px;padding:12px;background:#0d0d10;font-size:12.5px}
+.rule b{display:block;color:var(--gold2);margin-bottom:6px;font-size:12.5px}
+.rule div{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dashed rgba(255,255,255,.06)}
+.rule div span:last-child{text-align:right;color:var(--text)}
+.rule div span:first-child{color:var(--muted)}
+ul.obs{margin:0;padding-left:18px;color:var(--muted);font-size:12.5px;line-height:1.55}
+ul.obs li{margin-bottom:4px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.txtbox{margin-top:12px;display:none}
+.txtbox textarea{min-height:260px;font-size:13px;line-height:1.5}
+/* barra fixa */
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(10,10,12,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;z-index:50}
+.bar .info{flex:1;font-size:12.5px;color:var(--muted);line-height:1.3}
+.bar .info b{color:var(--text);display:block;font-size:14px}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#1d1d24;border:1px solid var(--border);color:var(--text);padding:11px 16px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:100;box-shadow:0 10px 30px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.2s;max-width:90vw;text-align:center}
+.toast.show{opacity:1;bottom:100px}
+details.diag{margin-top:20px;border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--muted);font-size:12.5px}
+details.diag summary{cursor:pointer;font-weight:700}
+.diag-line{padding:4px 0;border-bottom:1px dashed rgba(255,255,255,.06)}
+.diag-line.ok{color:var(--green)}.diag-line.fail{color:var(--red)}
+.foot{color:var(--muted);font-size:11.5px;text-align:center;margin-top:22px;line-height:1.5}
+/* ========== PDF / IMPRESSÃO ========== */
+#printView{display:none}
+body.pv-open{background:#2a2a2e}
+body.pv-open #app,body.pv-open .bar,body.pv-open .toast{display:none!important}
+body.pv-open #printView{display:block}
+.pv-tools{position:sticky;top:0;z-index:60;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.pv-tools span{color:var(--muted);font-size:12.5px}
+.pv-wrap{padding:16px 8px 40px;overflow:auto}
+.pg{width:210mm;min-height:297mm;background:#fff;color:#13151c;margin:0 auto 14px;padding:14mm 14mm 16mm;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.5);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:11.5px;line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pg.cover{height:297mm;padding:0;background:var(--navy);color:#fff;overflow:hidden}
+.cv-logo{position:absolute;top:18mm;left:18mm;width:62mm;height:auto}
+.cv-body{position:absolute;left:18mm;right:18mm;top:70mm}
+.kicker{color:var(--gold);letter-spacing:.32em;font-size:11px;font-weight:800;text-transform:uppercase}
+.cv-body h1{font-size:40px;line-height:1.05;margin:10px 0 10px;font-weight:800;letter-spacing:-.02em}
+.cv-sub{font-size:13px;color:#c9d3f2;margin-bottom:26mm}
+.cv-client{font-size:26px;font-weight:800;line-height:1.15;word-break:break-word}
+.cv-info{font-size:13px;color:#c9d3f2;margin-top:6px}
+.cv-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.cv-pill{border:1.5px solid rgba(255,255,255,.55);border-radius:999px;padding:5px 12px;font-size:11px;font-weight:700}
+.cv-pill.hi{background:var(--gold);border-color:var(--gold);color:#13151c}
+.cv-foot{position:absolute;left:18mm;right:18mm;bottom:16mm;display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:10.5px;color:#dfe5fa;z-index:3}
+.cv-foot b{display:block;color:#fff;font-size:12px}
+.cv-stripe{position:absolute;left:-10%;right:-10%;bottom:66mm;height:9mm;background:var(--gold);transform:rotate(-11deg);z-index:2}
+.cv-block{position:absolute;left:-10%;right:-10%;bottom:-30mm;height:110mm;background:#000b2e;transform:rotate(-11deg);z-index:1}
+.ph{display:flex;align-items:center;gap:12px;background:var(--navy);color:#fff;margin:-14mm -14mm 10mm;padding:8mm 14mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ph img{height:34px;width:auto}
+.ph .ph-t{margin-left:auto;text-align:right;font-size:10.5px;color:#c9d3f2}
+.ph .ph-t b{display:block;color:#fff;font-size:12.5px}
+.pg h2{font-size:16px;margin:0 0 8px;color:var(--navy);font-weight:800;letter-spacing:-.01em}
+.pg h3{font-size:12.5px;margin:12px 0 6px;color:var(--navy);font-weight:800}
+.pg .lead{color:#4a4f63;margin:0 0 12px;font-size:11px}
+table.pt{width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:12px}
+table.pt th,table.pt td{padding:6px 7px;border-bottom:1px solid #e3e5ec;text-align:right;vertical-align:middle}
+table.pt th{background:#f0f2f8;color:var(--navy);font-weight:800;text-align:right;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em}
+table.pt th:first-child,table.pt td:first-child{text-align:left}
+table.pt tr.tot td{font-weight:800;color:var(--navy);background:#f7f3e6;border-top:2px solid var(--gold)}
+table.pt tr.best td{background:#edf9f2}
+table.pt tr.hl td{background:#fbf7ea;font-weight:700}
+table.pt th b{font-size:10px}
+.blk{border:1px solid #e3e5ec;border-radius:8px;padding:10px 12px;margin-bottom:10px;break-inside:avoid;page-break-inside:avoid}
+.blk .bh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:4px}
+.blk .bh b{font-size:13px;color:var(--navy)}
+.blk .bh span{font-size:10.5px;color:#4a4f63}
+.blk .bt{font-size:15px;font-weight:800;color:var(--navy)}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;font-size:10.5px;margin:0 0 12px}
+.kv div{display:flex;justify-content:space-between;border-bottom:1px dashed #e3e5ec;padding:3px 0}
+.kv div span:first-child{color:#4a4f63}
+.pg ul{margin:0;padding-left:16px;font-size:10.5px;color:#2c3040}
+.pg ul li{margin-bottom:3px}
+.pf{position:absolute;left:14mm;right:14mm;bottom:8mm;font-size:8.5px;color:#7a7f94;border-top:1px solid #e3e5ec;padding-top:4px;display:flex;justify-content:space-between}
+@media print{
+ @page{size:A4;margin:0}
+ html,body{background:#fff!important}
+ .pv-tools,.pv-wrap{padding:0;background:transparent}
+ .pv-tools{display:none!important}
+ .pg{box-shadow:none;margin:0;height:297mm;min-height:0;overflow:hidden;break-after:page;page-break-after:always}
+ .pg:last-child{break-after:auto;page-break-after:auto}
+}
+</style>
+</head>
+<body>
+<div id="app"><div class="wrap">
+<header class="top">
+  <img id="logoTop" alt="NotreDame Saúde">
+  <div class="t"><h1>Cotador PME · NotreDame Saúde</h1><p>Planos empresariais · Tabela promocional para contratos assinados de 21/10/2026 a 31/12/2026</p></div>
+  <span class="badge">● SP &amp; RJ · Porte I</span>
+</header>
+
+<!-- 1. Dados -->
+<section class="card">
+  <h2><span class="n">1</span>Dados da cotação</h2>
+  <p class="sub">Nome, CNPJ e consultor são opcionais — aparecem na proposta.</p>
+  <div class="grid g2">
+    <div><label class="f">NOME DO CLIENTE / EMPRESA</label><input id="client" placeholder="Ex.: Indústria Exemplo Ltda" autocomplete="organization"></div>
+    <div><label class="f">CNPJ</label><input id="cnpj" placeholder="00.000.000/0000-00" inputmode="numeric"></div>
+    <div><label class="f">NOME DO CONSULTOR</label><input id="consultor" placeholder="Ex.: Gabriel" autocomplete="name"></div>
+    <div><label class="f">CIDADE DO CONTRATO</label><select id="city"></select></div>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div>
+      <label class="f">TIPO DE EMPRESA (tabela 2 a 29 vidas)</label>
+      <div class="seg" id="segMei"><button data-v="0" class="on">Demais empresas</button><button data-v="1">MEI</button></div>
+      <div class="hint">Com 1 vida é usada a tabela "1 vida" (somente coparticipação total), independentemente do tipo.</div>
+    </div>
+    <div>
+      <label class="f">TABELA APLICADA</label>
+      <div id="tableInfo" class="seg" style="padding:12px 14px;display:block;font-size:13.5px;font-weight:700">—</div>
+      <div class="hint" id="tableHint">Informe as vidas por faixa etária.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Vidas -->
+<section class="card">
+  <h2><span class="n">2</span>Distribuir vidas por idade</h2>
+  <p class="sub">Use o conversor para transformar datas de nascimento em faixas etárias, ou informe a quantidade diretamente em cada faixa.</p>
+
+  <div class="conv" id="conv">
+    <div class="conv-h" id="convH"><div class="ic">🎂</div><div><b>Conversor de Idades</b><span>Transforme datas de nascimento em faixas etárias</span></div><div class="ar">▼</div></div>
+    <div class="conv-b">
+      <div class="tabs"><button class="on" data-tab="multi">📄 Várias datas</button><button data-tab="one">☰ Uma por vez</button></div>
+      <div id="tabMulti">
+        <textarea id="multiDates" placeholder="Uma data por linha — DD/MM/AAAA&#10;Também aceita idades (ex.: 35) e listas separadas por vírgula ou espaço"></textarea>
+        <div class="row" style="margin-top:10px"><button class="btn" id="btnConvMulti">＋ Converter</button><span class="hint">Referência: <input id="refDate" type="date" style="width:auto;display:inline-block;padding:6px 10px;font-size:13px"></span></div>
+      </div>
+      <div id="tabOne" style="display:none">
+        <div class="row"><input id="oneDate" placeholder="DD/MM/AAAA ou idade" inputmode="numeric" style="flex:1;min-width:180px"><button class="btn" id="btnConvOne">＋ Adicionar</button></div>
+        <div class="hint">Digite uma data e clique em Adicionar; depois use "Aplicar à cotação".</div>
+      </div>
+      <div class="people" id="people"></div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="btnApply" disabled>✔ Aplicar à cotação (substituir)</button>
+        <button class="btn" id="btnApplyAdd" disabled>＋ Somar à cotação</button>
+        <button class="btn ghost sm" id="btnClearPeople">Limpar lista</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="justify-content:space-between;margin-bottom:8px"><label class="f" style="margin:0">FAIXAS ETÁRIAS *</label><span class="hint" style="margin:0">Total: <b id="totLives" style="color:var(--text)">0 vidas</b></span></div>
+  <div class="bands" id="bands"></div>
+  <div class="totalbar"><span id="livesMsg">Informe pelo menos uma vida em alguma faixa etária</span><button class="btn ghost sm" id="btnZero">Zerar faixas</button></div>
+</section>
+
+<!-- 3. Modalidade -->
+<section class="card">
+  <h2><span class="n">3</span>Modalidade</h2>
+  <p class="sub">Escolha a coparticipação e o reembolso desejados pelo cliente. Os valores de coparticipação são incluídos na cotação.</p>
+  <div class="grid g2">
+    <div>
+      <label class="f">COPARTICIPAÇÃO</label>
+      <div class="seg" id="segCop"><button data-v="parcial">Parcial</button><button data-v="total" class="on">Total</button></div>
+      <div class="hint" id="copHint">Parcial: coparticipação apenas em terapias. Total: coparticipação em consultas, exames, terapias e internação.</div>
+    </div>
+    <div>
+      <label class="f">REEMBOLSO</label>
+      <div class="seg" id="segReemb"><button data-v="parcial" class="on">Parcial</button><button data-v="total">Total</button><button data-v="ambos">Comparar ambos</button></div>
+      <div class="hint">A lista de produtos muda conforme a escolha: <b>Parcial</b> mostra Prata, Prata Max, Ouro, Ouro Max, Advance 600/700 e Premium 900 Care; <b>Total</b> mostra Diamante, Diamante Max, Advance 600/700, Premium 900 Care, Premium 900 e Infinity.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Produtos -->
+<section class="card">
+  <h2><span class="n">4</span>Produtos para comparativo</h2>
+  <p class="sub">Selecione um ou mais produtos e as acomodações. Cada combinação vira uma coluna no comparativo.</p>
+  <div class="row" style="margin-bottom:6px"><button class="btn sm" id="btnAll">Selecionar disponíveis</button><button class="btn sm ghost" id="btnNone">Limpar seleção</button></div>
+  <div id="products"></div>
+</section>
+
+<!-- 5. Resultado -->
+<section class="card" id="results" style="display:none"></section>
+
+<details class="diag"><summary>🔎 Diagnóstico e testes de valores</summary><div id="diag">Carregando…</div></details>
+<p class="foot">Valores conforme tabela promocional NotreDame Saúde (ANS nº 359017) · Reembolso conforme previsto em instrumento contratual · Os valores são confirmados no momento da contratação.</p>
+</div></div>
+
+<div class="bar">
+  <div class="info"><b id="barTitle">0 vidas</b><span id="barSub">Nenhum produto selecionado</span></div>
+  <button class="btn gold" id="btnCalc">Calcular cotação</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<div id="printView"></div>
+
+<script>
+/* =====================================================================
+   DADOS — Tabela de vendas promocional NotreDame Saúde (ANS 359017)
+   Contratos assinados de 21/10/2026 a 31/12/2026 · PME Porte I
+   Valores por faixa etária: [00-18, 19-23, 24-28, 29-33, 34-38, 39-43, 44-48, 49-53, 54-58, 59+]
+   ===================================================================== */
+const VIGENCIA="21/10/2026 a 31/12/2026";
+const BANDS=["00 a 18","19 a 23","24 a 28","29 a 33","34 a 38","39 a 43","44 a 48","49 a 53","54 a 58","59 ou mais"];
+const BAND_MIN=[0,19,24,29,34,39,44,49,54,59];
+const TABLE_LABEL={v1:"PME Porte I · 1 vida",mei:"PME Porte I · 2 a 29 vidas · MEI",demais:"PME Porte I · 2 a 29 vidas · Demais Empresas"};
+const TABLE_SHORT={v1:"1 vida",mei:"2 a 29 vidas (MEI)",demais:"2 a 29 vidas (Demais Empresas)"};
+const ACOM={enf:"Enfermaria",apt:"Apartamento"};
+const ACOM_S={enf:"Enf.",apt:"Apto."};
+const REEMB={parcial:"Reembolso parcial",total:"Reembolso total"};
+const COPL={parcial:"Coparticipação parcial",total:"Coparticipação total"};
+const CITIES=[
+ {id:"sp",name:"São Paulo - SP",g:{demais:"A",mei:"A",v1:"A"}},
+ {id:"mogi",name:"Mogi das Cruzes - SP",g:{demais:"A",mei:"A",v1:"A"}},
+ {id:"santos",name:"Santos - SP",g:{demais:"A",mei:"A",v1:"A"}},
+ {id:"sbc",name:"São Bernardo do Campo - SP",g:{demais:"A",mei:"A",v1:"A"}},
+ {id:"jundiai",name:"Jundiaí - SP",g:{demais:"B",mei:"JUN",v1:"B"}},
+ {id:"sorocaba",name:"Sorocaba - SP",g:{demais:"B",mei:"SOR",v1:"B"}},
+ {id:"campinas",name:"Campinas - SP",g:{demais:"B",mei:"CAM",v1:"B"}},
+ {id:"americana",name:"Americana - SP",g:{demais:"B",mei:"CAM",v1:"B"}},
+ {id:"rj",name:"Rio de Janeiro - RJ",g:{demais:"RJ",mei:"RJ",v1:"RJ"}}
+];
+const PRODUCTS=[
+ {id:"prata",name:"Prata",line:"metais",acom:["enf","apt"],reemb:["parcial"],cg:{parcial:"g1",total:"g1"}},
+ {id:"prata_max",name:"Prata Max",line:"metais",acom:["enf","apt"],reemb:["parcial"],cg:{parcial:"g1",total:"g1"}},
+ {id:"ouro",name:"Ouro",line:"metais",acom:["apt"],reemb:["parcial"],cg:{parcial:"g1",total:"g1"}},
+ {id:"ouro_max",name:"Ouro Max",line:"metais",acom:["apt"],reemb:["parcial"],cg:{parcial:"g2",total:"g2"}},
+ {id:"diamante",name:"Diamante",line:"metais",acom:["apt"],reemb:["total"],cg:{parcial:"g2",total:"g2"}},
+ {id:"diamante_max",name:"Diamante Max",line:"metais",acom:["apt"],reemb:["total"],cg:{parcial:"g2",total:"g3"}},
+ {id:"adv600",name:"Advance 600",line:"tradicional",acom:["enf","apt"],reemb:["parcial","total"],cg:{parcial:"g1",total:"g1"}},
+ {id:"adv700",name:"Advance 700",line:"tradicional",acom:["enf","apt"],reemb:["parcial","total"],cg:{parcial:"g1",total:"g1"}},
+ {id:"p900care",name:"Premium 900 Care",line:"tradicional",acom:["apt"],reemb:["parcial","total"],cg:{parcial:"g2",total:"g2"}},
+ {id:"p900",name:"Premium 900",line:"tradicional",acom:["apt"],reemb:["total"],cg:{parcial:"g2",total:"g2"}},
+ {id:"infinity",name:"Infinity 1000.11",line:"tradicional",acom:["apt"],reemb:["total"],cg:{parcial:"g2",total:"g3"}}
+];
+const LINE_LABEL={metais:"Linha Metais",tradicional:"Linha Tradicional"};
+const ANS={"prata|enf":"509.293/26-1","prata|apt":"509.291/26-4","prata_max|enf":"509.273/26-6","prata_max|apt":"509.271/26-0","ouro|apt":"509.333/26-3","ouro_max|apt":"509.323/26-6","diamante|apt":"509.310/26-4","diamante_max|apt":"509.298/26-1","adv600|enf":"474.439/15-0","adv600|apt":"474.438/15-1","adv700|enf":"474.341/15-5","adv700|apt":"474.340/15-7","p900care|apt":"476.795/16-1","p900|apt":"474.424/15-1","infinity|apt":"482.848/19-8"};
+const COPART_ROWS=["Consultas eletivas","Consultas de urgência","Exames simples","Exames complexos","Terapias especiais","Demais terapias","Internações (rede credenciada)"];
+const COPART={
+ parcial:{
+  g1:{label:"Prata | Prata Max | Ouro | Advance 600 / 700",v:["Sem coparticipação","Sem coparticipação","Sem coparticipação","Sem coparticipação","Valor fixo R$ 79,00","Valor fixo R$ 42,00","Sem coparticipação"]},
+  g2:{label:"Ouro Max | Diamante | Diamante Max | Premium 900 / Care | Infinity",v:["Sem coparticipação","Sem coparticipação","Sem coparticipação","Sem coparticipação","Valor fixo R$ 129,00","Valor fixo R$ 66,00","Sem coparticipação"]}
+ },
+ total:{
+  g1:{label:"Prata | Prata Max | Ouro | Advance 600 / 700",v:["30% limitado a R$ 30,00","30% limitado a R$ 90,00","30% limitado a R$ 25,00","30% limitado a R$ 110,00","Valor fixo R$ 79,00","Valor fixo R$ 42,00","Valor fixo R$ 220,00"]},
+  g2:{label:"Ouro Max | Diamante | Premium 900 / Care",v:["30% limitado a R$ 55,00","30% limitado a R$ 165,00","30% limitado a R$ 35,00","30% limitado a R$ 130,00","Valor fixo R$ 129,00","Valor fixo R$ 66,00","Valor fixo R$ 400,00"]},
+  g3:{label:"Diamante Max | Infinity",v:["30% limitado a R$ 166,00","30% limitado a R$ 355,00","30% limitado a R$ 84,00","30% limitado a R$ 150,00","Valor fixo R$ 129,00","Valor fixo R$ 66,00","Valor fixo R$ 570,00"]}
+ }
+};
+const REAJUSTE=[["00 a 18 → 19 a 23","17%"],["19 a 23 → 24 a 28","22%"],["24 a 28 → 29 a 33","20%"],["29 a 33 → 34 a 38","5%"],["34 a 38 → 39 a 43","10%"],["39 a 43 → 44 a 48","25%"],["44 a 48 → 49 a 53","10%"],["49 a 53 → 54 a 58","25%"],["54 a 58 → 59 ou mais","75%"]];
+
+/* Colunas de cada bloco da tabela (ordem exata das colunas do PDF) */
+const K={
+ m:["prata|enf|parcial","prata|apt|parcial","prata_max|enf|parcial","prata_max|apt|parcial","ouro|apt|parcial","ouro_max|apt|parcial","diamante|apt|total","diamante_max|apt|total"],
+ rp:["adv600|enf|parcial","adv600|apt|parcial","adv700|enf|parcial","adv700|apt|parcial","p900care|apt|parcial"],
+ rt:["adv600|enf|total","adv600|apt|total","adv700|enf|total","adv700|apt|total","p900care|apt|total","p900|apt|total","infinity|apt|total"]
+};
+
+/* ---------- DEMAIS EMPRESAS (2 a 29 vidas) ---------- */
+const D_A_P_M=[[226.21,251.09,257.93,286.30,373.68,409.45,612.89,875.56],[264.67,293.76,301.78,334.97,437.21,479.06,717.08,1024.41],[322.90,358.39,368.17,408.66,533.40,584.45,874.84,1249.78],[387.47,430.07,441.81,490.40,640.08,701.34,1049.81,1499.74],[406.85,451.58,463.90,514.92,672.09,736.41,1102.30,1574.72],[447.52,496.74,510.29,566.42,739.30,810.05,1212.53,1732.19],[559.41,620.93,637.86,708.03,924.13,1012.57,1515.66,2165.24],[615.35,683.02,701.65,778.84,1016.55,1113.82,1667.23,2381.76],[769.19,853.78,877.06,973.55,1270.69,1392.28,2084.04,2977.20],[1346.08,1494.11,1534.86,1703.71,2223.71,2436.49,3647.07,5210.10]];
+const D_A_P_RP=[[247.22,274.42,303.90,337.34,409.45],[289.25,321.06,355.56,394.69,479.06],[352.89,391.70,433.78,481.53,584.45],[423.46,470.04,520.54,577.83,701.34],[444.64,493.55,546.58,606.73,736.41],[489.09,542.91,601.24,667.40,810.05],[611.37,678.64,751.54,834.25,1012.57],[672.51,746.50,826.70,917.68,1113.82],[840.64,933.13,1033.38,1147.10,1392.28],[1471.12,1632.97,1808.42,2007.43,2436.49]];
+const D_A_P_RT=[[257.53,285.86,340.06,377.48,501.04,527.60,916.35],[301.31,334.44,397.87,441.65,586.22,617.30,1072.13],[367.60,408.02,485.40,538.82,715.18,753.10,1308.00],[441.11,489.62,582.48,646.58,858.22,903.72,1569.60],[463.17,514.11,611.62,678.92,901.13,948.90,1648.08],[509.47,565.53,672.78,746.81,991.24,1043.79,1812.89],[636.85,706.92,840.96,933.51,1239.06,1304.75,2266.11],[700.54,777.61,925.06,1026.87,1362.96,1435.22,2492.72],[875.68,972.02,1156.33,1283.59,1703.71,1794.03,3115.91],[1532.44,1701.03,2023.58,2246.29,2981.49,3139.55,5452.84]];
+const D_A_T_M=[[169.66,188.33,193.45,214.73,280.27,307.10,532.95,761.36],[198.51,220.35,226.34,251.24,327.91,359.31,623.55,890.79],[242.17,268.83,276.14,306.52,400.05,438.35,760.73,1086.77],[290.61,322.60,331.37,367.82,480.06,526.02,912.87,1304.12],[305.14,338.73,347.94,386.21,504.07,552.33,958.52,1369.33],[335.65,372.60,382.73,424.83,554.48,607.56,1054.37,1506.26],[419.56,465.76,478.41,531.04,693.10,759.45,1317.96,1882.82],[461.52,512.34,526.25,584.14,762.41,835.40,1449.76,2071.10],[576.91,640.42,657.82,730.17,953.02,1044.25,1812.20,2588.88],[1009.59,1120.74,1151.18,1277.80,1667.79,1827.44,3171.35,4530.54]];
+const D_A_T_RP=[[185.42,205.82,227.93,253.01,307.10],[216.95,240.81,266.68,296.02,359.31],[264.67,293.79,325.35,361.14,438.35],[317.61,352.55,390.41,433.37,526.02],[333.49,370.18,409.93,455.04,552.33],[366.84,407.20,450.92,500.54,607.56],[458.55,509.01,563.65,625.68,759.45],[504.41,559.91,620.01,688.24,835.40],[630.52,699.88,775.01,860.31,1044.25],[1103.41,1224.80,1356.28,1505.54,1827.44]];
+const D_A_T_RT=[[193.15,214.40,255.05,283.12,375.80,395.71,796.83],[225.99,250.85,298.41,331.25,439.69,462.98,932.29],[275.70,306.04,364.06,404.12,536.41,564.84,1137.40],[330.85,367.25,436.86,484.95,643.69,677.81,1364.87],[347.39,385.62,458.70,509.20,675.89,711.69,1433.12],[382.13,424.18,504.57,560.12,743.48,782.86,1576.44],[477.66,530.24,630.71,700.16,929.35,978.58,1970.55],[525.43,583.26,693.78,770.17,1022.29,1076.43,2167.61],[656.80,729.07,867.22,962.72,1277.86,1345.54,2709.50],[1149.40,1275.88,1517.65,1684.76,2236.26,2354.70,4741.63]];
+
+const D_B_P_M=[[192.28,213.43,219.24,243.36,317.63,348.03,520.96,744.22],[224.97,249.70,256.51,284.73,371.63,407.20,609.52,870.74],[274.47,304.64,312.94,347.37,453.39,496.78,743.61,1062.30],[329.36,365.57,375.53,416.85,544.06,596.14,892.33,1274.76],[345.83,383.85,394.31,437.69,571.26,625.95,936.94,1338.50],[380.40,422.24,433.74,481.46,628.39,688.54,1030.63,1472.35],[475.51,527.80,542.17,601.83,785.49,860.68,1288.29,1840.44],[523.06,580.58,596.39,662.02,864.04,946.74,1417.12,2024.48],[653.83,725.73,745.49,827.53,1080.05,1183.43,1771.40,2530.60],[1144.20,1270.02,1304.61,1448.18,1890.09,2071.00,3099.95,4428.55]];
+const D_B_P_RP=[[210.14,233.26,258.32,286.74,348.03],[245.87,272.90,302.23,335.49,407.20],[299.97,332.94,368.72,409.30,496.78],[359.96,399.53,442.47,491.15,596.14],[377.96,419.51,464.60,515.71,625.95],[415.74,461.47,511.06,567.28,688.54],[519.68,576.84,638.82,709.10,860.68],[571.65,634.52,702.71,780.01,946.74],[714.56,793.15,878.39,975.01,1183.43],[1250.48,1388.01,1537.19,1706.27,2071.00]];
+const D_B_P_RT=[[218.90,242.98,289.05,320.86,425.88,448.46,778.90],[256.11,284.27,338.19,375.40,498.28,524.71,911.31],[312.46,346.81,412.59,457.99,607.89,640.14,1111.80],[374.94,416.17,495.11,549.58,729.47,768.17,1334.16],[393.69,436.99,519.88,577.07,765.94,806.57,1400.87],[433.04,480.70,571.87,634.78,842.53,887.23,1540.96],[541.31,600.88,714.82,793.47,1053.17,1109.05,1926.20],[595.45,660.97,786.31,872.82,1158.48,1219.95,2118.82],[744.32,826.22,982.89,1091.03,1448.11,1524.94,2648.53],[1302.56,1445.88,1720.06,1909.31,2534.19,2668.64,4634.93]];
+const D_B_T_M=[[144.21,160.08,164.44,182.52,238.23,261.04,453.01,647.15],[168.73,187.29,192.40,213.55,278.73,305.42,530.02,757.16],[205.84,228.50,234.73,260.53,340.05,372.61,646.63,923.74],[247.01,274.20,281.67,312.64,408.06,447.13,775.95,1108.49],[259.36,287.91,295.76,328.27,428.47,469.49,814.75,1163.92],[285.30,316.70,325.33,361.10,471.32,516.44,896.23,1280.31],[356.63,395.88,406.66,451.37,589.15,645.55,1120.29,1600.39],[392.30,435.47,447.32,496.51,648.07,710.11,1232.32,1760.43],[490.38,544.33,559.15,620.64,810.09,887.64,1540.40,2200.54],[858.17,952.59,978.51,1086.12,1417.66,1553.37,2695.70,3850.95]];
+const D_B_T_RP=[[157.61,174.95,193.74,215.06,261.04],[184.41,204.69,226.68,251.62,305.42],[224.97,249.72,276.55,306.97,372.61],[269.97,299.67,331.85,368.37,447.13],[283.47,314.66,348.44,386.79,469.49],[311.82,346.13,383.28,425.47,516.44],[389.78,432.67,479.10,531.84,645.55],[428.76,475.94,527.01,585.02,710.11],[535.96,594.92,658.76,731.28,887.64],[937.93,1041.12,1152.84,1279.74,1553.37]];
+const D_B_T_RT=[[164.18,182.24,216.79,240.65,319.43,336.35,677.31],[192.09,213.22,253.65,281.56,373.74,393.53,792.45],[234.34,260.13,309.45,343.50,455.95,480.11,966.79],[281.22,312.16,371.33,412.21,547.14,576.13,1160.14],[295.28,327.77,389.89,432.82,574.51,604.93,1218.15],[324.81,360.55,428.88,476.10,631.96,665.42,1339.97],[406.01,450.70,536.10,595.13,789.95,831.78,1674.96],[446.61,495.77,589.71,654.64,868.95,914.95,1842.46],[558.27,619.71,737.13,818.31,1086.19,1143.69,2303.06],[976.97,1084.50,1289.99,1432.04,1900.84,2001.46,4030.36]];
+
+const D_RJ_P_M=[[212.86,236.27,233.34,259.01,301.89,333.86,514.55,686.07],[249.04,276.43,273.01,303.04,353.21,390.62,602.02,802.70],[303.84,337.25,333.07,369.71,430.92,476.55,734.46,979.29],[364.61,404.70,399.68,443.66,517.10,571.86,881.35,1175.15],[382.84,424.93,419.66,465.84,542.96,600.45,925.42,1233.91],[421.12,467.43,461.63,512.43,597.26,660.50,1017.96,1357.30],[526.41,584.29,577.04,640.54,746.58,825.63,1272.45,1696.63],[579.04,642.72,634.74,704.59,821.24,908.19,1399.69,1866.29],[723.81,803.40,793.43,880.74,1026.55,1135.24,1749.61,2332.86],[1266.67,1405.94,1388.51,1541.30,1796.47,1986.67,3061.82,4082.51]];
+const D_RJ_P_RP=[[216.10,239.87,259.45,287.99,333.86],[252.83,280.64,303.55,336.95,390.62],[308.46,342.39,370.33,411.08,476.55],[370.15,410.87,444.40,493.30,571.86],[388.66,431.41,466.62,517.97,600.45],[427.52,474.56,513.28,569.77,660.50],[534.41,593.20,641.60,712.21,825.63],[587.84,652.52,705.76,783.43,908.19],[734.81,815.65,882.20,979.29,1135.24],[1285.92,1427.38,1543.86,1713.76,1986.67]];
+const D_RJ_P_RT=[[224.74,249.46,269.83,299.51,367.25,443.51,682.13],[262.94,291.86,315.69,350.43,429.69,518.91,798.10],[320.79,356.08,385.14,427.53,524.21,633.07,973.67],[384.95,427.30,462.17,513.04,629.05,759.69,1168.41],[404.20,448.66,485.28,538.70,660.50,797.67,1226.83],[444.61,493.54,533.81,592.57,726.56,877.44,1349.51],[555.77,616.93,667.26,740.71,908.21,1096.80,1686.90],[611.34,678.62,733.99,814.78,999.03,1206.48,1855.59],[764.19,848.28,917.49,1018.48,1248.79,1508.10,2319.48],[1337.34,1484.48,1605.62,1782.34,2185.38,2639.17,4059.09]];
+const D_RJ_T_M=[[159.64,177.20,175.01,205.82,226.43,250.41,447.44,596.58],[186.78,207.32,204.76,240.81,264.93,292.98,523.51,698.00],[227.88,252.93,249.81,293.79,323.21,357.44,638.68,851.56],[273.46,303.52,299.77,352.55,387.85,428.92,766.41,1021.87],[287.13,318.70,314.76,370.18,407.25,450.37,804.73,1072.96],[315.84,350.57,346.24,407.20,447.97,495.41,885.21,1180.26],[394.80,438.21,432.80,509.00,559.96,619.26,1106.52,1475.33],[434.28,482.03,476.08,559.90,615.96,681.19,1217.17,1622.86],[542.86,602.55,595.10,699.88,769.95,851.49,1521.47,2028.58],[949.99,1054.45,1041.43,1224.79,1347.41,1490.11,2662.58,3550.02]];
+const D_RJ_T_RP=[[162.07,179.90,194.59,216.00,250.41],[189.62,210.48,227.67,252.71,292.98],[231.34,256.79,277.76,308.31,357.44],[277.61,308.15,333.32,369.98,428.92],[291.49,323.56,349.98,388.48,450.37],[320.64,355.91,384.98,427.32,495.41],[400.80,444.89,481.22,534.15,619.26],[440.88,489.38,529.34,587.57,681.19],[551.11,611.72,661.68,734.46,851.49],[964.43,1070.51,1157.95,1285.31,1490.11]];
+const D_RJ_T_RT=[[168.55,187.10,202.37,224.64,275.45,332.64,593.15],[197.20,218.90,236.77,262.82,322.28,389.19,693.98],[240.59,267.06,288.86,320.64,393.19,474.81,846.66],[288.71,320.47,346.64,384.78,471.82,569.77,1015.99],[303.14,336.50,363.97,404.02,495.42,598.26,1066.78],[333.46,370.14,400.37,444.41,544.97,658.09,1173.46],[416.83,462.68,500.46,555.51,681.21,822.62,1466.83],[458.51,508.95,550.50,611.07,749.34,904.88,1613.51],[573.15,636.18,688.13,763.83,936.68,1131.10,2016.89],[1003.00,1113.32,1204.24,1336.71,1639.19,1979.43,3529.55]];
+
+/* ---------- MEI (2 a 29 vidas) ---------- */
+const M_A_P_M=[[261.27,290.01,297.91,330.68,431.60,472.91],[305.69,339.29,348.56,386.89,504.98,553.31],[372.94,413.94,425.24,472.00,616.08,675.03],[447.52,496.73,510.29,566.41,739.30,810.04],[469.90,521.57,535.80,594.73,776.27,850.55],[516.87,573.73,589.38,654.21,853.90,935.60],[646.10,717.17,736.72,817.77,1067.38,1169.51],[710.71,788.88,810.40,899.56,1174.13,1286.45],[888.39,986.11,1013.00,1124.45,1467.67,1608.07],[1554.68,1725.69,1772.76,1967.78,2568.43,2814.12]];
+const M_A_P_RP=[[285.54,316.96,351.00,389.63,454.00],[334.08,370.83,410.67,455.87,531.18],[407.58,452.42,501.01,556.17,648.04],[489.09,542.90,601.22,667.40,777.65],[513.55,570.05,631.30,700.78,816.54],[564.89,627.06,694.43,770.85,898.19],[706.12,783.83,868.03,963.56,1122.75],[776.74,862.21,954.84,1059.92,1235.02],[970.93,1077.77,1193.56,1324.90,1543.78],[1699.13,1886.09,2088.74,2318.58,2701.62]];
+const M_A_P_RT=[[297.45,330.17,392.77,435.99,555.55,609.38],[348.02,386.28,459.54,510.11,650.00,712.98],[424.59,471.27,560.64,622.34,792.99,869.83],[509.50,565.52,672.77,746.80,951.59,1043.80],[534.98,593.81,706.43,784.15,999.17,1095.98],[588.46,653.20,777.07,862.56,1099.08,1205.58],[735.59,816.51,971.32,1078.20,1373.86,1506.99],[809.15,898.16,1068.46,1186.03,1511.24,1657.68],[1011.44,1122.71,1335.58,1482.54,1889.06,2072.11],[1770.02,1964.74,2337.27,2594.45,3305.85,3626.19]];
+const M_A_T_M=[[195.96,217.52,223.43,248.01,323.71,354.70],[229.28,254.50,261.42,290.18,378.73,415.00],[279.71,310.49,318.94,354.03,462.05,506.29],[335.66,372.59,382.73,424.83,554.46,607.55],[352.44,391.22,401.87,446.07,582.19,637.94],[387.68,430.34,442.05,490.68,640.41,701.73],[484.60,537.94,552.56,613.35,800.51,877.16],[533.06,591.74,607.81,674.68,880.56,964.88],[666.34,739.67,759.77,843.34,1100.71,1206.10],[1166.09,1294.43,1329.59,1475.85,1926.25,2110.68]];
+const M_A_T_RP=[[214.16,237.72,263.26,292.23,354.70],[250.58,278.13,308.02,341.91,415.00],[305.70,339.32,375.78,417.13,506.29],[366.85,407.19,450.92,500.56,607.55],[385.19,427.55,473.47,525.59,637.94],[423.71,470.31,520.81,578.14,701.73],[529.64,587.90,651.01,722.68,877.16],[582.61,646.69,716.11,794.94,964.88],[728.27,808.35,895.13,993.69,1206.10],[1274.47,1414.62,1566.49,1738.95,2110.68]];
+const M_A_T_RT=[[223.09,247.63,294.58,327.00,434.05,457.05],[261.02,289.73,344.66,382.59,507.84,534.75],[318.44,353.47,420.48,466.75,619.55,652.40],[382.14,424.17,504.56,560.11,743.46,782.88],[401.24,445.39,529.78,588.12,780.65,822.01],[441.37,489.93,582.76,646.93,858.72,904.21],[551.71,612.43,728.45,808.67,1073.40,1130.27],[606.89,673.67,801.29,889.53,1180.75,1243.29],[758.63,842.08,1001.61,1111.92,1475.93,1554.12],[1327.60,1473.65,1752.83,1945.86,2582.88,2719.72]];
+
+/* Interior SP (Jundiaí, Sorocaba, Campinas, Americana) — Linha Metais igual nas 4 cidades */
+const M_INT_P_M=[[222.08,246.51,253.22,281.08,366.86,401.97],[259.84,288.40,296.27,328.86,429.23,470.31],[317.01,351.85,361.45,401.21,523.66,573.77],[380.41,422.22,433.74,481.46,628.38,688.53],[399.43,443.33,455.43,505.53,659.80,722.96],[439.36,487.67,500.97,556.08,725.78,795.25],[549.21,609.59,626.21,695.11,907.23,994.07],[604.13,670.55,688.83,764.63,997.95,1093.47],[755.17,838.19,861.04,955.79,1247.44,1366.84],[1321.54,1466.82,1506.82,1672.64,2183.02,2391.97]];
+const M_INT_T_M=[[166.56,184.89,189.93,210.81,275.16,301.50],[194.88,216.32,222.22,246.65,321.94,352.76],[237.74,263.92,271.11,300.91,392.77,430.36],[285.29,316.70,325.33,361.10,471.32,516.43],[299.55,332.54,341.60,379.15,494.89,542.26],[329.51,365.79,375.75,417.07,544.38,596.49],[411.89,457.24,469.68,521.33,680.48,745.61],[453.09,502.97,516.64,573.47,748.53,820.18],[566.37,628.70,645.80,716.84,935.67,1025.23],[991.15,1100.24,1130.15,1254.47,1637.43,1794.15]];
+/* Jundiaí */
+const M_JUN_P_RP=[[231.15,252.27,284.15,315.41,456.09],[270.45,295.14,332.45,369.03,533.63],[329.96,360.07,405.59,450.22,651.02],[395.95,432.09,486.71,540.25,781.23],[415.75,453.70,511.05,567.27,820.30],[457.31,499.08,562.16,624.00,902.32],[571.64,623.85,702.69,780.00,1127.91],[628.81,686.23,772.97,858.00,1240.69],[786.01,857.79,966.22,1072.50,1550.87],[1375.52,1501.13,1690.89,1876.88,2714.02]];
+const M_JUN_P_RT=[[240.79,262.42,317.38,352.30,514.38,493.31],[281.72,307.01,371.34,412.18,601.83,577.19],[343.70,374.55,453.03,502.86,734.22,704.16],[412.43,449.46,543.64,603.42,881.07,844.99],[433.05,471.95,570.84,633.60,925.12,887.23],[476.33,519.16,627.93,696.96,1017.63,975.96],[595.42,648.96,784.89,871.19,1272.05,1219.96],[654.97,713.86,863.39,958.31,1399.25,1341.95],[818.72,892.33,1079.24,1197.89,1749.07,1677.44],[1432.76,1561.57,1888.67,2096.32,3060.87,2935.51]];
+const M_JUN_T_RP=[[173.37,189.21,213.11,236.57,342.09],[202.85,221.37,249.34,276.79,400.25],[247.47,270.07,304.20,337.68,488.30],[296.97,324.09,365.03,405.22,585.96],[311.82,340.30,383.28,425.48,615.26],[343.01,374.33,421.60,468.03,676.79],[428.77,467.92,527.00,585.04,845.99],[471.65,514.72,579.70,643.54,930.60],[589.57,643.39,724.62,804.43,1163.25],[1031.75,1125.94,1268.10,1407.75,2035.69]];
+const M_JUN_T_RT=[[180.60,196.82,238.04,264.23,385.81,369.99],[211.30,230.28,278.51,309.15,451.41,432.89],[257.78,280.94,339.78,377.16,550.70,528.13],[309.35,337.13,407.73,452.60,660.84,633.75],[324.82,353.99,428.11,475.23,693.90,665.43],[357.30,389.39,470.92,522.75,763.29,731.97],[446.62,486.75,588.65,653.44,954.11,914.97],[491.28,535.43,647.52,718.78,1049.53,1006.46],[614.11,669.28,809.39,898.49,1311.92,1258.08],[1074.69,1171.25,1416.45,1572.35,2295.87,2201.64]];
+/* Sorocaba */
+const M_SOR_P_RP=[[251.12,278.75,308.69,342.65,410.68],[293.82,326.12,361.16,400.91,480.50],[358.47,397.87,440.61,489.11,586.21],[430.16,477.45,528.74,586.92,703.46],[451.67,501.33,555.18,616.27,738.64],[496.82,551.47,610.70,677.90,812.50],[621.03,689.34,763.37,847.38,1015.63],[683.14,758.27,839.72,932.12,1117.18],[853.92,947.84,1049.65,1165.15,1396.48],[1494.36,1658.72,1836.90,2039.02,2443.84]];
+const M_SOR_P_RT=[[261.59,290.36,345.41,383.43,502.54,535.91],[306.06,339.70,404.13,448.61,587.97,627.03],[373.40,414.43,493.04,547.31,717.31,764.97],[448.07,497.31,591.65,656.76,860.77,917.97],[470.48,522.19,621.25,689.61,903.80,963.86],[517.51,574.42,683.38,758.57,994.18,1060.25],[646.90,718.03,854.20,948.21,1242.73,1325.33],[711.60,789.84,939.63,1043.03,1366.99,1457.86],[889.51,987.31,1174.54,1303.79,1708.75,1822.33],[1556.64,1727.79,2055.45,2281.64,2990.31,3189.07]];
+const M_SOR_T_RP=[[188.34,209.07,231.52,257.00,308.03],[220.37,244.61,270.88,300.69,360.40],[268.84,298.42,330.47,366.83,439.69],[322.62,358.11,396.55,440.20,527.63],[338.75,376.02,416.37,462.21,554.02],[372.63,413.63,458.00,508.43,609.42],[465.79,517.05,572.50,635.54,761.78],[512.37,568.76,629.75,699.09,837.96],[640.47,710.94,787.18,873.87,1047.45],[1120.82,1244.16,1377.58,1529.27,1833.04]];
+const M_SOR_T_RT=[[196.20,217.78,259.06,287.58,376.93,401.94],[229.55,254.80,303.11,336.47,441.02,470.27],[280.04,310.86,369.79,410.49,538.03,573.73],[336.06,373.04,443.74,492.60,645.64,688.47],[352.86,391.69,465.92,517.23,677.94,722.89],[388.15,430.86,512.51,568.95,745.73,795.18],[485.18,538.59,640.64,711.19,932.16,993.98],[533.70,592.45,704.70,782.31,1025.38,1093.37],[667.13,740.56,880.87,977.90,1281.73,1366.72],[1167.47,1295.99,1541.54,1711.32,2243.04,2391.76]];
+/* Campinas / Americana */
+const M_CAM_P_RP=[[231.15,256.59,308.69,342.65,415.90],[270.45,300.19,361.16,400.91,486.61],[329.96,366.23,440.61,489.11,593.66],[395.95,439.48,528.74,586.92,712.40],[415.75,461.46,555.18,616.27,748.02],[457.31,507.62,610.70,677.90,822.82],[571.64,634.53,763.37,847.38,1028.53],[628.81,697.98,839.72,932.12,1131.37],[786.01,872.48,1049.65,1165.15,1414.22],[1375.52,1526.84,1836.90,2039.02,2474.88]];
+const M_CAM_P_RT=[[240.79,267.28,345.41,383.43,510.20,493.31],[281.72,312.70,404.13,448.61,596.93,577.19],[343.70,381.49,493.04,547.31,728.24,704.16],[412.43,457.79,591.65,656.76,873.89,844.99],[433.05,480.69,621.25,689.61,917.58,887.23],[476.33,528.77,683.38,758.57,1009.33,975.96],[595.42,660.97,854.20,948.21,1261.67,1219.96],[654.97,727.07,939.63,1043.03,1387.83,1341.95],[818.72,908.85,1174.54,1303.79,1734.80,1677.44],[1432.76,1590.48,2055.45,2281.64,3035.90,2935.51]];
+const M_CAM_T_RP=[[173.37,192.45,231.52,257.00,311.94],[202.85,225.16,270.88,300.69,364.97],[247.47,274.69,330.47,366.83,445.26],[296.97,329.63,396.55,440.20,534.31],[311.82,346.12,416.37,462.21,561.03],[343.01,380.74,458.00,508.43,617.13],[428.77,475.93,572.50,635.54,771.41],[471.65,523.53,629.75,699.09,848.56],[589.57,654.41,787.18,873.87,1060.70],[1031.75,1145.23,1377.58,1529.27,1856.23]];
+const M_CAM_T_RT=[[180.60,200.46,259.06,287.58,382.68,369.99],[211.30,234.54,303.11,336.47,447.74,432.89],[257.78,286.14,369.79,410.49,546.23,528.13],[309.35,343.37,443.74,492.60,655.48,633.75],[324.82,360.54,465.92,517.23,688.27,665.43],[357.30,396.60,512.51,568.95,757.10,731.97],[446.62,495.76,640.64,711.19,946.38,914.97],[491.28,545.34,704.70,782.31,1041.02,1006.46],[614.11,681.67,880.87,977.90,1301.28,1258.08],[1074.69,1192.93,1541.54,1711.32,2277.25,2201.64]];
+/* Rio de Janeiro MEI */
+const M_RJ_P_M=[[245.85,272.89,269.51,299.16,348.68,385.61],[287.64,319.27,315.33,350.02,407.95,451.17],[350.93,389.52,384.70,427.03,497.70,550.42],[421.12,467.42,461.64,512.45,597.24,660.50],[442.18,490.79,484.72,538.07,627.11,693.52],[486.39,539.88,533.20,591.88,689.83,762.88],[608.00,674.85,666.50,739.85,862.29,953.61],[668.79,742.34,733.15,813.83,948.52,1048.97],[836.00,927.93,916.44,1017.29,1185.65,1311.22],[1463.00,1623.87,1603.78,1780.26,2074.90,2294.64]];
+const M_RJ_P_RP=[[258.24,286.64,310.04,344.15,398.96],[302.13,335.36,362.74,402.66,466.79],[368.61,409.15,442.54,491.25,569.48],[442.33,490.98,531.05,589.50,683.38],[464.45,515.52,557.60,618.98,717.55],[510.89,567.08,613.36,680.88,789.31],[638.62,708.85,766.70,851.10,986.64],[702.47,779.74,843.37,936.21,1085.30],[878.10,974.68,1054.21,1170.27,1356.63],[1536.68,1705.68,1844.88,2047.98,2374.10]];
+const M_RJ_P_RT=[[268.56,298.10,322.45,357.91,438.86,529.99],[314.21,348.77,377.25,418.76,513.48,620.09],[383.34,425.51,460.24,510.89,626.43,756.51],[460.01,510.62,552.29,613.07,751.71,907.82],[483.01,536.15,579.91,643.73,789.29,953.21],[531.30,589.78,637.90,708.10,868.23,1048.53],[664.13,737.23,797.37,885.12,1085.30,1310.66],[730.53,810.95,877.11,973.63,1193.83,1441.73],[913.18,1013.69,1096.39,1217.04,1492.29,1802.16],[1598.07,1773.95,1918.70,2129.82,2611.50,3153.77]];
+const M_RJ_T_M=[[184.38,204.67,202.14,237.72,261.53,289.22],[215.73,239.46,236.50,278.13,306.00,338.39],[263.20,292.14,288.53,339.32,373.31,412.84],[315.84,350.57,346.23,407.19,447.97,495.40],[331.63,368.10,363.54,427.55,470.38,520.17],[364.79,404.91,399.90,470.31,517.41,572.19],[455.99,506.13,499.88,587.89,646.76,715.23],[501.59,556.74,549.87,646.68,711.44,786.76],[627.00,695.94,687.34,808.36,889.30,983.45],[1097.23,1217.88,1202.85,1414.63,1556.27,1721.04]];
+const M_RJ_T_RP=[[193.67,214.98,232.54,258.12,299.24],[226.59,251.52,272.07,301.99,350.11],[276.44,306.86,331.93,368.43,427.14],[331.73,368.23,398.33,442.13,512.56],[348.32,386.64,418.24,464.24,538.19],[383.15,425.30,460.07,510.65,592.01],[478.94,531.63,575.08,638.31,740.01],[526.83,584.79,632.59,702.15,814.02],[658.55,730.98,790.74,877.68,1017.53],[1152.45,1279.22,1383.81,1535.95,1780.68]];
+const M_RJ_T_RT=[[201.42,223.58,241.83,268.44,329.16,397.50],[235.66,261.58,282.94,314.06,385.12,465.08],[287.51,319.13,345.19,383.15,469.86,567.40],[345.01,382.95,414.24,459.79,563.82,680.88],[362.25,402.11,434.95,482.78,592.02,714.93],[398.48,442.31,478.45,531.04,651.23,786.43],[498.11,552.89,598.06,663.80,814.03,983.05],[547.92,608.18,657.86,730.19,895.44,1081.35],[684.91,760.22,822.33,912.73,1119.31,1351.69],[1198.58,1330.39,1439.09,1597.29,1958.79,2365.46]];
+
+/* ---------- 1 VIDA (somente coparticipação total) ---------- */
+const V_A_M=[[212.08,235.41,241.81,268.41],[248.14,275.43,282.92,314.05],[302.72,336.03,345.17,383.15],[363.27,403.24,414.21,459.78],[381.43,423.40,434.92,482.77],[419.57,465.74,478.41,531.05],[524.46,582.19,598.01,663.82],[576.91,640.41,657.81,730.20],[721.15,800.51,822.27,912.74],[1262.01,1400.90,1438.97,1597.30]];
+const V_A_RP=[[227.14,252.13,279.21,309.94,376.20],[265.76,294.99,326.68,362.63,440.16],[324.22,359.89,398.55,442.40,536.99],[389.07,431.87,478.25,530.88,644.39],[408.52,453.47,502.16,557.43,676.62],[449.37,498.82,552.37,613.17,744.28],[561.71,623.54,690.46,766.47,930.35],[617.89,685.89,759.50,843.11,1023.39],[772.37,857.35,949.37,1053.90,1279.24],[1351.65,1500.37,1661.41,1844.32,2238.67]];
+const V_A_RT=[[236.61,262.64,312.44,346.82,460.36],[276.84,307.29,365.56,405.78,538.63],[337.74,374.90,445.98,495.05,657.11],[405.30,449.88,535.16,594.07,788.53],[425.56,472.38,561.91,623.78,827.98],[468.12,519.62,618.10,686.16,910.78],[585.15,649.54,772.62,857.71,1138.48],[643.67,714.49,849.88,943.47,1252.33],[804.60,893.11,1062.34,1179.35,1565.41],[1408.05,1562.95,1859.11,2063.86,2739.47]];
+const V_B_M=[[180.26,200.10,205.55,228.15],[210.91,234.11,240.50,266.94],[257.30,285.62,293.41,325.67],[308.76,342.74,352.08,390.81],[324.20,359.88,369.69,410.35],[356.63,395.87,406.65,451.39],[445.79,494.84,508.31,564.23],[490.38,544.33,559.13,620.66],[612.98,680.40,698.91,775.83],[1072.72,1190.72,1223.09,1357.70]];
+const V_B_RP=[[193.07,214.31,237.33,263.45,319.77],[225.90,250.74,277.68,308.24,374.13],[275.59,305.90,338.77,376.04,456.44],[330.72,367.09,406.51,451.26,547.73],[347.26,385.45,426.83,473.82,575.12],[381.99,424.00,469.51,521.20,632.63],[477.49,530.01,586.89,651.50,790.79],[525.24,583.01,645.58,716.65,869.88],[656.56,728.76,806.97,895.82,1087.35],[1148.98,1275.34,1412.21,1567.69,1902.86]];
+const V_B_RT=[[201.12,223.24,265.57,294.80,391.30],[235.31,261.19,310.72,344.92,457.83],[287.07,318.65,379.07,420.80,558.54],[344.50,382.38,454.87,504.97,670.25],[361.72,401.50,477.61,530.22,703.78],[397.89,441.65,525.37,583.24,774.16],[497.36,552.08,656.71,729.06,967.70],[547.09,607.29,722.38,801.96,1064.48],[683.87,759.11,902.97,1002.46,1330.60],[1196.77,1328.45,1580.21,1754.30,2328.56]];
+const V_RJ_M=[[199.55,221.50,218.76,257.28],[233.48,259.15,255.95,301.02],[284.86,316.16,312.26,367.25],[341.84,379.40,374.71,440.70],[358.93,398.38,393.45,462.74],[394.82,438.22,432.80,509.02],[493.53,547.77,541.00,636.28],[542.88,602.55,595.10,699.91],[678.61,753.20,743.88,874.89],[1187.55,1318.08,1301.80,1531.06]];
+const V_RJ_RP=[[198.54,220.38,238.37,264.60,306.75],[232.29,257.84,278.89,309.57,358.90],[283.40,314.57,340.25,377.68,437.86],[340.08,377.49,408.31,453.23,525.42],[357.08,396.37,428.72,475.89,551.70],[392.79,436.00,471.59,523.47,606.87],[490.99,545.00,589.48,654.34,758.58],[540.09,599.50,648.43,719.78,834.44],[675.12,749.37,810.54,899.72,1043.05],[1181.44,1311.40,1418.46,1574.52,1825.34]];
+const V_RJ_RT=[[206.47,229.20,247.90,275.18,337.43],[241.57,268.16,290.04,321.95,394.80],[294.72,327.16,353.85,392.78,481.67],[353.67,392.59,424.63,471.35,577.99],[371.35,412.23,445.86,494.92,606.90],[408.49,453.44,490.45,544.40,667.60],[510.62,566.81,613.06,680.50,834.50],[561.68,623.49,674.36,748.56,917.96],[702.12,779.35,842.96,935.69,1147.46],[1228.69,1363.87,1475.20,1637.47,2008.06]];
+
+const RAW={
+ demais:{
+  A:{parcial:{m:D_A_P_M,rp:D_A_P_RP,rt:D_A_P_RT},total:{m:D_A_T_M,rp:D_A_T_RP,rt:D_A_T_RT}},
+  B:{parcial:{m:D_B_P_M,rp:D_B_P_RP,rt:D_B_P_RT},total:{m:D_B_T_M,rp:D_B_T_RP,rt:D_B_T_RT}},
+  RJ:{parcial:{m:D_RJ_P_M,rp:D_RJ_P_RP,rt:D_RJ_P_RT},total:{m:D_RJ_T_M,rp:D_RJ_T_RP,rt:D_RJ_T_RT}}
+ },
+ mei:{
+  A:{parcial:{m:M_A_P_M,rp:M_A_P_RP,rt:M_A_P_RT},total:{m:M_A_T_M,rp:M_A_T_RP,rt:M_A_T_RT}},
+  JUN:{parcial:{m:M_INT_P_M,rp:M_JUN_P_RP,rt:M_JUN_P_RT},total:{m:M_INT_T_M,rp:M_JUN_T_RP,rt:M_JUN_T_RT}},
+  SOR:{parcial:{m:M_INT_P_M,rp:M_SOR_P_RP,rt:M_SOR_P_RT},total:{m:M_INT_T_M,rp:M_SOR_T_RP,rt:M_SOR_T_RT}},
+  CAM:{parcial:{m:M_INT_P_M,rp:M_CAM_P_RP,rt:M_CAM_P_RT},total:{m:M_INT_T_M,rp:M_CAM_T_RP,rt:M_CAM_T_RT}},
+  RJ:{parcial:{m:M_RJ_P_M,rp:M_RJ_P_RP,rt:M_RJ_P_RT},total:{m:M_RJ_T_M,rp:M_RJ_T_RP,rt:M_RJ_T_RT}}
+ },
+ v1:{
+  A:{total:{m:V_A_M,rp:V_A_RP,rt:V_A_RT}},
+  B:{total:{m:V_B_M,rp:V_B_RP,rt:V_B_RT}},
+  RJ:{total:{m:V_RJ_M,rp:V_RJ_RP,rt:V_RJ_RT}}
+ }
+};
+function expand(sec){const o={};[["m",sec.m],["rp",sec.rp],["rt",sec.rt]].forEach(([c,rows])=>{const n=rows[0].length;K[c].slice(0,n).forEach((k,i)=>{o[k]=rows.map(r=>r[i]);});});return o;}
+const PRICES={};
+for(const t in RAW){PRICES[t]={};for(const g in RAW[t]){PRICES[t][g]={};for(const c in RAW[t][g]){PRICES[t][g][c]=expand(RAW[t][g][c]);}}}
+
+/* Logo oficial NotreDame Saúde (branco, PNG) */
+const LOGO_WHITE="data:image/png;base64,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";
+
+/* =====================================================================
+   APP
+   ===================================================================== */
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const fmt=v=>"R$ "+(Math.round(v*100)/100).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+const brDate=d=>String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
+
+const state={client:"",cnpj:"",consultor:"",city:"sp",mei:false,lives:Array(10).fill(0),copart:"total",reemb:"parcial",sel:{},result:null};
+PRODUCTS.forEach(p=>state.sel[p.id]={on:false,acom:[...p.acom]});
+let people=[]; // conversor
+
+function livesTotal(){return state.lives.reduce((a,b)=>a+b,0);}
+function cityObj(){return CITIES.find(c=>c.id===state.city)||CITIES[0];}
+function currentTable(){const n=livesTotal();if(n===0)return null;if(n===1)return"v1";if(n<=29)return state.mei?"mei":"demais";return"over";}
+function effCopart(t){return t==="v1"?"total":state.copart;}
+function getPrices(){const t=currentTable();if(!t||t==="over")return null;return PRICES[t][cityObj().g[t]][effCopart(t)];}
+function optionKeys(p){return p.acom.flatMap(a=>p.reemb.map(r=>p.id+"|"+a+"|"+r));}
+function reembsFor(p){const allow=state.reemb==="ambos"?["parcial","total"]:[state.reemb];return p.reemb.filter(r=>allow.includes(r));}
+/* tabela usada para filtrar a lista de produtos (mesmo antes de informar vidas) */
+function filterTable(){const t=currentTable();if(t==="v1"||t==="mei"||t==="demais")return t;return state.mei?"mei":"demais";}
+function filterPrices(){const t=filterTable();return PRICES[t][cityObj().g[t]][effCopart(t)];}
+function visibleAcoms(p){const P=filterPrices();return p.acom.filter(a=>reembsFor(p).some(r=>P[p.id+"|"+a+"|"+r]));}
+function isVisible(p){return visibleAcoms(p).length>0;}
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2600);}
+function save(){try{localStorage.setItem("nd_cotador_v1",JSON.stringify({client:state.client,cnpj:state.cnpj,consultor:state.consultor,city:state.city,mei:state.mei,lives:state.lives,copart:state.copart,reemb:state.reemb,sel:state.sel}));}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem("nd_cotador_v1")||"null");if(!s)return;Object.assign(state,{client:s.client||"",cnpj:s.cnpj||"",consultor:s.consultor||"",city:s.city||"sp",mei:!!s.mei,copart:s.copart||"total",reemb:s.reemb||"parcial"});if(Array.isArray(s.lives)&&s.lives.length===10)state.lives=s.lives.map(x=>Math.max(0,parseInt(x)||0));if(s.sel){PRODUCTS.forEach(p=>{if(s.sel[p.id]){state.sel[p.id].on=!!s.sel[p.id].on;const a=(s.sel[p.id].acom||[]).filter(x=>p.acom.includes(x));state.sel[p.id].acom=a.length?a:[...p.acom];}});}}catch(e){}}
+function maskCNPJ(v){v=(v||"").replace(/\D/g,"").slice(0,14);let o=v;if(v.length>12)o=v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2}).*/,"$1.$2.$3/$4-$5");else if(v.length>8)o=v.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4}).*/,"$1.$2.$3/$4");else if(v.length>5)o=v.replace(/^(\d{2})(\d{3})(\d{0,3}).*/,"$1.$2.$3");else if(v.length>2)o=v.replace(/^(\d{2})(\d{0,3}).*/,"$1.$2");return o;}
+
+/* ---------- Conversor de idades ---------- */
+function parseBirth(s){s=s.trim();if(!s)return null;let m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2}|\d{4})$/);if(m){let d=+m[1],mo=+m[2],y=+m[3];if(m[3].length===2){const yy=new Date().getFullYear()%100;y+=(y<=yy?2000:1900);}if(mo<1||mo>12||d<1||d>31)return null;const dt=new Date(y,mo-1,d);if(dt.getMonth()!==mo-1||dt.getDate()!==d)return null;return{date:dt};}
+ m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(m){const dt=new Date(+m[1],+m[2]-1,+m[3]);return isNaN(dt)?null:{date:dt};}
+ m=s.match(/^(\d{1,3})\s*(anos?)?$/i);if(m){const a=+m[1];if(a>=0&&a<=120)return{age:a};}
+ return null;}
+function ageAt(birth,ref){let a=ref.getFullYear()-birth.getFullYear();const md=ref.getMonth()-birth.getMonth();if(md<0||(md===0&&ref.getDate()<birth.getDate()))a--;return a;}
+function bandIdx(age){for(let i=BAND_MIN.length-1;i>=0;i--){if(age>=BAND_MIN[i])return i;}return 0;}
+function refDate(){const v=$("#refDate").value;if(v){const m=v.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);}return new Date();}
+function addPeople(text){const ref=refDate();const toks=text.split(/[\n,;]+|\s+(?=\d)/).map(x=>x.trim()).filter(Boolean);let added=0,bad=0;toks.forEach(tk=>{const p=parseBirth(tk);if(!p){people.push({raw:tk,bad:true});bad++;return;}const age=p.age!=null?p.age:ageAt(p.date,ref);people.push({raw:p.date?brDate(p.date):tk,age,band:bandIdx(age)});added++;});renderPeople();if(added)toast(added+" registro(s) convertido(s)"+(bad?" · "+bad+" inválido(s)":""));else if(bad)toast("Formato inválido. Use DD/MM/AAAA ou a idade.");}
+function renderPeople(){const box=$("#people");box.innerHTML=people.map((p,i)=>p.bad?'<span class="person bad">'+esc(p.raw)+' · inválido <span class="x" data-i="'+i+'">×</span></span>':'<span class="person">'+esc(p.raw)+' → '+p.age+' anos → <b>'+BANDS[p.band]+'</b><span class="x" data-i="'+i+'">×</span></span>').join("");const ok=people.filter(p=>!p.bad).length;$("#btnApply").disabled=!ok;$("#btnApplyAdd").disabled=!ok;$("#btnApply").textContent="✔ Aplicar à cotação (substituir)"+(ok?" · "+ok:"");}
+function peopleCounts(){const c=Array(10).fill(0);people.forEach(p=>{if(!p.bad)c[p.band]++;});return c;}
+
+/* ---------- Faixas ---------- */
+function renderBands(){const b=$("#bands");if(!b.children.length){b.innerHTML=BANDS.map((lb,i)=>'<div class="band" data-i="'+i+'"><div class="lb">'+lb+'</div><div class="stepper"><button class="minus" data-i="'+i+'" aria-label="menos">−</button><input type="number" min="0" max="999" inputmode="numeric" data-i="'+i+'" value="0"><button class="plus" data-i="'+i+'" aria-label="mais">+</button></div></div>').join("");}
+ $$("#bands .band").forEach((el,i)=>{const v=state.lives[i];el.classList.toggle("has",v>0);const inp=el.querySelector("input");if(document.activeElement!==inp)inp.value=v;});
+ const n=livesTotal();$("#totLives").textContent=n+(n===1?" vida":" vidas");const t=currentTable();
+ const msg=$("#livesMsg");if(n===0){msg.textContent="Informe pelo menos uma vida em alguma faixa etária";}else if(t==="over"){msg.innerHTML='<span class="pill warn">Acima de 29 vidas — fora do Porte I (tabelas deste cotador vão até 29 vidas)</span>';}else{msg.innerHTML='<span class="pill ok">Tabela: '+TABLE_SHORT[t]+'</span>';}
+ renderTableInfo();renderProducts();renderBar();refreshResults();save();}
+function renderTableInfo(){const t=currentTable();const el=$("#tableInfo"),h=$("#tableHint");const seg=$("#segCop");
+ if(!t){el.textContent="—";h.textContent="Informe as vidas por faixa etária.";h.className="hint";}
+ else if(t==="over"){el.textContent="Fora do Porte I";h.textContent="Acima de 29 vidas é necessária a tabela Porte II, não incluída neste cotador.";h.className="hint err";}
+ else{el.textContent=TABLE_LABEL[t]+" · "+cityObj().name;h.textContent=t==="v1"?"Tabela 1 vida: somente coparticipação total (o seletor de coparticipação fica travado).":(t==="mei"?"Tabela exclusiva para clientes MEI.":"Tabela para clientes que não são MEI.");h.className="hint";}
+ seg.querySelectorAll("button").forEach(b=>{b.disabled=(t==="v1");b.classList.toggle("on",(t==="v1"?"total":state.copart)===b.dataset.v);});
+ $("#copHint").textContent=t==="v1"?"Com 1 vida a tabela só possui coparticipação total.":"Parcial: coparticipação apenas em terapias. Total: coparticipação em consultas, exames, terapias e internação.";}
+
+/* ---------- Produtos ---------- */
+function renderProducts(){const t=filterTable();const box=$("#products");let html="";let shown=0;
+ const reembLabel=state.reemb==="ambos"?"reembolso parcial e total":"reembolso "+state.reemb;
+ html+='<div class="hint" style="margin:2px 0 4px">Exibindo produtos com <b style="color:var(--gold2)">'+reembLabel+'</b> · '+COPL[effCopart(t)].toLowerCase()+' · tabela '+TABLE_SHORT[t]+(livesTotal()===0?' (informe as vidas para confirmar a tabela)':'')+'</div>';
+ ["metais","tradicional"].forEach(line=>{const list=PRODUCTS.filter(p=>p.line===line&&isVisible(p));if(!list.length)return;
+  html+='<div class="lineh">'+LINE_LABEL[line]+'</div>';
+  list.forEach(p=>{shown++;const s=state.sel[p.id];const acs=visibleAcoms(p);const rs=reembsFor(p);
+   const chips=acs.map(a=>'<span class="chip '+(s.acom.includes(a)?"on":"")+'" data-p="'+p.id+'" data-a="'+a+'">'+ACOM[a]+'</span>').join("");
+   const rtxt=rs.length===2?"Reembolso parcial e total":REEMB[rs[0]];
+   const rchip='<span class="chip fixed">'+rtxt+(p.reemb.length===1?" (fixo)":"")+'</span>';
+   html+='<div class="prod '+(s.on?"on":"")+'" data-p="'+p.id+'"><span class="ck">'+(s.on?"✓":"")+'</span><div class="nm">'+p.name+'<small>'+(p.reemb.length===1?REEMB[p.reemb[0]]:"Reembolso parcial ou total")+'</small></div><div class="chips">'+chips+rchip+'</div></div>';});});
+ if(!shown)html+='<div class="hint warn" style="margin-top:10px">Nenhum produto disponível com esta modalidade nesta tabela.</div>';
+ box.innerHTML=html;renderBar();}
+/* recalcula automaticamente o resultado já exibido quando algo muda */
+function refreshResults(){if(!state.result)return;const t=currentTable();const opts=(t&&t!=="over")?buildOptions():[];
+ if(!opts.length){state.result=null;$("#results").style.display="none";return;}
+ const min=Math.min(...opts.map(o=>o.total));opts.forEach(o=>o.best=o.total===min);
+ state.result=Object.assign(state.result,{table:t,cop:effCopart(t),opts,N:livesTotal(),city:cityObj().name,group:cityObj().g[t],lives:[...state.lives],client:state.client,cnpj:state.cnpj,consultor:state.consultor});
+ renderResults();}
+function countOptions(){const prices=getPrices();if(!prices)return 0;let n=0;PRODUCTS.forEach(p=>{const s=state.sel[p.id];if(!s.on)return;p.acom.forEach(a=>{if(!s.acom.includes(a))return;reembsFor(p).forEach(r=>{if(prices[p.id+"|"+a+"|"+r])n++;});});});return n;}
+function renderBar(){const n=livesTotal();$("#barTitle").textContent=n+(n===1?" vida":" vidas")+(n?" · "+cityObj().name.replace(/ - (SP|RJ)$/,""):"");const o=countOptions();$("#barSub").textContent=o?o+" opção(ões) no comparativo · "+COPL[effCopart(currentTable())]:"Selecione produtos para comparar";}
+
+/* ---------- Cálculo ---------- */
+function buildOptions(){const prices=getPrices();const t=currentTable();const cop=effCopart(t);const out=[];
+ PRODUCTS.forEach(p=>{const s=state.sel[p.id];if(!s.on)return;p.acom.forEach(a=>{if(!s.acom.includes(a))return;reembsFor(p).forEach(r=>{const key=p.id+"|"+a+"|"+r;const unit=prices[key];if(!unit)return;
+  const lines=[];let cents=0;BANDS.forEach((b,i)=>{const q=state.lives[i];const uc=Math.round(unit[i]*100);const sub=q*uc;cents+=sub;lines.push({band:b,qty:q,unit:unit[i],sub:sub/100});});
+  const n=livesTotal();out.push({p,acom:a,reemb:r,cop,key,unit,lines,total:cents/100,avg:cents/100/n,ans:ANS[p.id+"|"+a]||"",cg:p.cg[cop]});});});});
+ return out;}
+function calc(){const t=currentTable();if(!t){toast("Informe as vidas por faixa etária.");window.scrollTo({top:$("#bands").offsetTop-120,behavior:"smooth"});return;}
+ if(t==="over"){toast("Acima de 29 vidas: fora das tabelas deste cotador.");return;}
+ const opts=buildOptions();if(!opts.length){toast("Selecione ao menos um produto disponível.");return;}
+ const min=Math.min(...opts.map(o=>o.total));opts.forEach(o=>o.best=o.total===min);
+ state.result={table:t,cop:effCopart(t),opts,N:livesTotal(),city:cityObj().name,group:cityObj().g[t],date:new Date(),lives:[...state.lives],client:state.client,cnpj:state.cnpj,consultor:state.consultor};
+ renderResults();setTimeout(()=>$("#results").scrollIntoView({behavior:"smooth",block:"start"}),50);}
+function optLabel(o){return o.p.name+" · "+ACOM[o.acom]+" · "+REEMB[o.reemb];}
+function renderResults(){const R=state.result;const box=$("#results");box.style.display="block";
+ const livesRows=BANDS.map((b,i)=>({b,q:R.lives[i]})).filter(x=>x.q>0);
+ let h='<h2><span class="n">5</span>Resultado · '+R.N+(R.N===1?" vida":" vidas")+'</h2><p class="sub">'+TABLE_LABEL[R.table]+' · '+esc(R.city)+' · <b style="color:var(--gold2)">'+COPL[R.cop]+'</b> · Vidas: '+livesRows.map(x=>x.b+": <b>"+x.q+"</b>").join(" · ")+'</p>';
+ h+='<div class="opts">'+R.opts.map(o=>'<div class="opt'+(o.best&&R.opts.length>1?" best":"")+'">'+(o.best&&R.opts.length>1?'<span class="best-tag">MENOR INVESTIMENTO</span>':"")+'<div class="nm">'+o.p.name+'</div><div class="meta">'+ACOM[o.acom]+' · '+REEMB[o.reemb]+' · '+COPL[o.cop]+'<br>ANS '+o.ans+'</div><div class="tot">'+fmt(o.total)+'<span style="font-size:12px;color:var(--muted);font-weight:600"> /mês</span></div><div class="avg">Média por vida: '+fmt(o.avg)+'</div><details><summary>Ver por faixa etária</summary><table class="t"><tr><th>Faixa</th><th>Qtd</th><th>Unitário</th><th>Subtotal</th></tr>'+o.lines.map(l=>'<tr'+(l.qty?"":' style="opacity:.45"')+'><td>'+l.band+'</td><td>'+l.qty+'</td><td>'+fmt(l.unit)+'</td><td>'+fmt(l.sub)+'</td></tr>').join("")+'<tr class="tot"><td colspan="3">Total mensal</td><td>'+fmt(o.total)+'</td></tr></table></details></div>').join("")+'</div>';
+ // comparativo
+ h+='<h3 class="sec">Comparativo por faixa etária (subtotal · unitário)</h3><div class="scroll"><table class="t"><tr><th>Faixa</th><th>Qtd</th>'+R.opts.map(o=>'<th>'+o.p.name+'<br><span style="font-weight:500;text-transform:none;letter-spacing:0">'+ACOM_S[o.acom]+' · Reemb. '+o.reemb+'</span></th>').join("")+'</tr>';
+ livesRows.forEach(x=>{const i=BANDS.indexOf(x.b);h+='<tr><td>'+x.b+'</td><td>'+x.q+'</td>'+R.opts.map(o=>'<td>'+fmt(o.lines[i].sub)+'<br><span class="mut" style="color:var(--muted);font-size:11px">'+fmt(o.lines[i].unit)+' un.</span></td>').join("")+'</tr>';});
+ h+='<tr class="tot"><td colspan="2">Total mensal</td>'+R.opts.map(o=>'<td>'+fmt(o.total)+'</td>').join("")+'</tr><tr><td colspan="2" class="mut">Média por vida</td>'+R.opts.map(o=>'<td class="mut">'+fmt(o.avg)+'</td>').join("")+'</tr></table></div>';
+ // tabela unitária completa
+ h+='<h3 class="sec">Tabela de valores por faixa etária (valor unitário)</h3><div class="scroll"><table class="t"><tr><th>Faixa</th>'+R.opts.map(o=>'<th>'+o.p.name+'<br><span style="font-weight:500;text-transform:none;letter-spacing:0">'+ACOM_S[o.acom]+' · Reemb. '+o.reemb+'</span></th>').join("")+'</tr>'+BANDS.map((b,i)=>'<tr><td>'+b+'</td>'+R.opts.map(o=>'<td>'+fmt(o.unit[i])+'</td>').join("")+'</tr>').join("")+'</table></div>';
+ // coparticipação
+ const groups=[...new Set(R.opts.map(o=>o.cg))];h+='<h3 class="sec">Coparticipação ('+(R.cop==="parcial"?"parcial":"total")+') — cobrada por procedimento realizado, somente quando há utilização</h3><div class="rules">'+groups.map(g=>{const rule=COPART[R.cop][g];const prods=[...new Set(R.opts.filter(o=>o.cg===g).map(o=>o.p.name))].join(", ");return '<div class="rule"><b>'+prods+'</b>'+COPART_ROWS.map((r,i)=>'<div><span>'+r+'</span><span>'+rule.v[i]+'</span></div>').join("")+'</div>';}).join("")+'</div>';
+ // observações
+ const hasInf=R.opts.some(o=>o.p.id==="infinity");const hasEnf=R.opts.some(o=>o.acom==="enf");
+ h+='<h3 class="sec">Observações</h3><ul class="obs"><li>Tabela de vendas promocional NotreDame Saúde válida para contratos assinados de '+VIGENCIA+'. Valores confirmados no momento da contratação.</li>'+(hasEnf?'<li>Enfermaria x Apartamento: a diferença está apenas na acomodação em caso de internação (quarto compartilhado x quarto privativo).</li>':"")+'<li>Reembolso (parcial ou total) segue conforme previsto em instrumento contratual.</li><li>Carência: 60 dias apenas para empresas com até 29 vidas; acima de 30 vidas há isenção de carências (conforme tabela).</li><li>Odontologia: Odonto Premium (ANS 495.614/23-1) com valor promocional R$ 0,00 quando o beneficiário adquire, no ato da contratação, o plano médico-hospitalar; contrato separado do médico; taxa de implantação R$ 25,00.</li><li>Reajuste por mudança de faixa etária: '+REAJUSTE.map(r=>r[0].replace(" → "," → ")+" "+r[1]).join(" · ")+'.</li><li>É possível mesclar planos diferentes na mesma contratação; apenas não é possível mesclar coparticipação parcial com total.</li>'+(hasInf?'<li>Infinity: apenas para contratos a partir de 2 vidas; elegibilidade para adesão apenas para sócios, cônjuges e descendentes.</li>':"")+'</ul>';
+ h+='<div class="actions"><button class="btn gold" id="btnPdf">📄 Gerar proposta em PDF</button><button class="btn" id="btnTxt">📝 Ver / copiar texto</button><button class="btn" id="btnWa">💬 Enviar no WhatsApp</button></div><div class="txtbox" id="txtbox"><textarea id="txtarea" readonly></textarea><div class="row" style="margin-top:8px"><button class="btn sm" id="btnCopy">📋 Copiar texto</button></div></div>';
+ box.innerHTML=h;
+ $("#btnPdf").onclick=openPrint;$("#btnTxt").onclick=()=>{const tb=$("#txtbox");tb.style.display=tb.style.display==="block"?"none":"block";$("#txtarea").value=buildText();};
+ $("#btnCopy").onclick=()=>copyText(buildText());$("#btnWa").onclick=()=>{window.open("https://wa.me/?text="+encodeURIComponent(buildText()),"_blank");};}
+function copyText(t){const done=()=>toast("Texto copiado!");if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done).catch(()=>fallbackCopy(t,done));}else fallbackCopy(t,done);}
+function fallbackCopy(t,done){const ta=$("#txtarea");$("#txtbox").style.display="block";ta.value=t;ta.focus();ta.select();try{document.execCommand("copy");done();}catch(e){toast("Selecione o texto e copie manualmente.");}}
+
+/* ---------- Texto da proposta (WhatsApp) ---------- */
+function buildText(){const R=state.result;if(!R)return"";const N=R.N;const vidas=N+(N===1?" vida":" vidas");const cli=R.client?"*"+R.client+"*":"sua empresa";const cons=R.consultor||"Consultor";
+ const livesRows=BANDS.map((b,i)=>({b,q:R.lives[i]})).filter(x=>x.q>0);
+ const groups=[...new Set(R.opts.map(o=>o.cg))];const best=R.opts.find(o=>o.best);
+ let t="Olá! Tudo bem?\n\nSegue a cotação de plano de saúde empresarial *NotreDame Saúde* para "+cli+", cotada para *"+vidas+"* em "+R.city+". Para facilitar a leitura, explico abaixo cada ponto:\n\n";
+ t+="📌 *PLANOS COTADOS*\nTabela "+TABLE_SHORT[R.table]+" · "+COPL[R.cop]+"\n"+R.opts.map(o=>"• "+optLabel(o)).join("\n")+"\n\n";
+ t+="💰 *INVESTIMENTO MENSAL ("+vidas+")*\n"+R.opts.map(o=>"• "+optLabel(o)+": *"+fmt(o.total)+"* (média "+fmt(o.avg)+" por vida)").join("\n")+"\n";
+ if(R.opts.length>1&&best)t+="💡 Menor investimento: "+optLabel(best)+"\n";
+ t+="_O valor individual depende da faixa etária de cada beneficiário — a tabela completa por faixa está na proposta em PDF._\n\n";
+ t+="👥 *DISTRIBUIÇÃO DAS VIDAS*\n"+livesRows.map(x=>"• "+x.b+" anos: "+x.q).join("\n")+"\n\n";
+ if(R.opts.some(o=>o.acom==="enf"))t+="🏥 *ENFERMARIA x APARTAMENTO*\nA diferença está apenas na acomodação em caso de internação: quarto compartilhado (enfermaria) x quarto privativo (apartamento).\n\n";
+ t+="💳 *REEMBOLSO*\nReembolso parcial ou total conforme previsto em instrumento contratual.\n\n";
+ t+="🧾 *O QUE É COPARTICIPAÇÃO ("+(R.cop==="parcial"?"PARCIAL":"TOTAL")+")*\nCobrada apenas quando o serviço é utilizado, por procedimento realizado:\n";
+ groups.forEach(g=>{const rule=COPART[R.cop][g];const prods=[...new Set(R.opts.filter(o=>o.cg===g).map(o=>o.p.name))].join(", ");t+="▪ "+prods+": "+COPART_ROWS.map((r,i)=>r+" — "+rule.v[i]).join("; ")+"\n";});
+ t+="\n✅ *CARÊNCIA*\n60 dias apenas para empresas com até 29 vidas; acima de 30 vidas há isenção de carências (conforme tabela).\n\n";
+ t+="🦷 *PLANO ODONTOLÓGICO*\nOdonto Premium com valor promocional R$ 0,00 quando contratado junto ao plano médico-hospitalar (contrato separado; taxa de implantação R$ 25,00).\n\n";
+ t+="🎁 *CLUBE DE VANTAGENS*\n+300 parceiros, até 35% de desconto em medicamentos e TotalPass sem nenhum custo para a empresa (o colaborador adere pelo app, a partir de R$ 69,90).\n\n";
+ t+="ℹ️ É possível mesclar planos diferentes na mesma contratação — apenas não é possível mesclar coparticipação parcial com total.\n";
+ if(R.opts.some(o=>o.p.id==="infinity"))t+="ℹ️ Infinity: apenas para contratos a partir de 2 vidas; adesão exclusiva para sócios, cônjuges e descendentes.\n";
+ t+="\n⚠️ Os valores seguem a tabela promocional vigente para contratos assinados de "+VIGENCIA+" e são confirmados no momento da contratação.\n\n";
+ t+="Fico à disposição para tirar qualquer dúvida ou fazer uma simulação com outra combinação. Qual das opções faz mais sentido para vocês?\n\nAbraço,\n*"+cons+"*\nConsultor Hapvida NotreDame Intermédica";
+ return t;}
+
+/* ---------- Proposta em PDF (impressão) ---------- */
+function chunk(a,n){const o=[];for(let i=0;i<a.length;i+=n)o.push(a.slice(i,i+n));return o;}
+function optHead(o){return '<b>'+esc(o.p.name)+'</b><br><span style="font-weight:600;text-transform:none;letter-spacing:0">'+ACOM_S[o.acom]+' · R'+(o.reemb==="parcial"?"P":"T")+'</span>';}
+function openPrint(){const R=state.result;if(!R)return;const pv=$("#printView");const cli=R.client||"Empresa";const groups=[...new Set(R.opts.map(o=>o.cg))];
+ const vid=n=>n+(n===1?" vida":" vidas");
+ const lines=[...new Set(R.opts.map(o=>LINE_LABEL[o.p.line]))];
+ const pills=[...lines.map(l=>'<span class="cv-pill hi">'+l+'</span>'),'<span class="cv-pill">'+COPL[R.cop]+'</span>','<span class="cv-pill">Odonto Premium incluso</span>','<span class="cv-pill">Clube de Vantagens + TotalPass</span>','<span class="cv-pill">'+R.opts.length+(R.opts.length===1?' opção cotada':' opções comparadas')+'</span>'].join("");
+ const ph='<header class="ph"><img src="'+LOGO_WHITE+'" alt="NotreDame Saúde"><div class="ph-t"><b>Proposta Comercial</b>'+esc(cli)+' · '+vid(R.N)+' · '+esc(R.city)+'</div></header>';
+ const pf=(n,t)=>'<div class="pf"><span>NotreDame Saúde · ANS nº 359017 · Tabela promocional para contratos assinados de '+VIGENCIA+'</span><span>'+esc(R.consultor?"Consultor: "+R.consultor+" · ":"")+'Página '+n+' de '+t+'</span></div>';
+ const cover='<section class="pg cover"><img class="cv-logo" src="'+LOGO_WHITE+'" alt="NotreDame Saúde"><div class="cv-body"><div class="kicker">Proposta Comercial</div><h1>Plano de Saúde<br>Empresarial</h1><div class="cv-sub">NotreDame Saúde · '+TABLE_LABEL[R.table]+' · '+esc(R.city)+'</div><div class="cv-client">'+esc(cli)+'</div><div class="cv-info">'+(R.cnpj?"CNPJ "+esc(R.cnpj)+" · ":"")+vid(R.N)+'</div><div class="cv-pills">'+pills+'</div></div><div class="cv-stripe"></div><div class="cv-block"></div><div class="cv-foot"><div><b>'+esc(R.consultor||"Consultor NotreDame")+'</b>Consultor responsável</div><div><b>'+brDate(R.date)+'</b>Data da proposta</div><div><b>Tabela promocional</b>Contratos assinados de '+VIGENCIA+'</div><div><b>'+COPL[R.cop]+'</b>Modalidade cotada</div></div></section>';
+ const B=[];const add=(html,br)=>B.push({html,br:!!br});
+ const livesIdx=BANDS.map((b,i)=>i).filter(i=>R.lives[i]>0);
+ // 1. resumo
+ const sumHead='<tr><th>Produto</th><th>Acomodação</th><th>Reembolso</th><th>Coparticipação</th><th>Registro ANS</th><th>Total mensal</th><th>Média / vida</th></tr>';
+ const sumRow=o=>'<tr'+(o.best&&R.opts.length>1?' class="best"':"")+'><td><b>'+esc(o.p.name)+'</b></td><td>'+ACOM[o.acom]+'</td><td>'+(o.reemb==="parcial"?"Parcial":"Total")+'</td><td>'+(o.cop==="parcial"?"Parcial":"Total")+'</td><td>'+o.ans+'</td><td><b>'+fmt(o.total)+'</b></td><td>'+fmt(o.avg)+'</td></tr>';
+ chunk(R.opts,14).forEach((c,i)=>add((i===0?'<h2>Resumo do investimento mensal</h2><p class="lead">Valores calculados a partir da distribuição de vidas informada, conforme a tabela promocional '+TABLE_LABEL[R.table]+' — '+esc(R.city)+'.'+(R.opts.length>1?' A opção de menor investimento está destacada em verde.':'')+'</p>':'')+'<table class="pt">'+sumHead+c.map(sumRow).join("")+'</table>'));
+ add('<h3>Dados da cotação</h3><div class="kv"><div><span>Empresa</span><span>'+esc(cli)+'</span></div><div><span>CNPJ</span><span>'+esc(R.cnpj||"—")+'</span></div><div><span>Cidade do contrato</span><span>'+esc(R.city)+'</span></div><div><span>Tabela</span><span>'+TABLE_SHORT[R.table]+'</span></div><div><span>Total de vidas</span><span>'+R.N+'</span></div><div><span>Consultor</span><span>'+esc(R.consultor||"—")+'</span></div></div>');
+ // 2. distribuição (só faixas com vidas)
+ chunk(R.opts,5).forEach((c,i)=>add((i===0?'<h3>Investimento por faixa etária (vidas informadas)</h3>':'')+'<table class="pt"><tr><th>Faixa etária</th><th>Vidas</th>'+c.map(o=>'<th>'+optHead(o)+'</th>').join("")+'</tr>'+livesIdx.map(i=>'<tr><td>'+BANDS[i]+' anos</td><td>'+R.lives[i]+'</td>'+c.map(o=>'<td>'+fmt(o.lines[i].sub)+'</td>').join("")+'</tr>').join("")+'<tr class="tot"><td>Total mensal</td><td>'+R.N+'</td>'+c.map(o=>'<td>'+fmt(o.total)+'</td>').join("")+'</tr></table>'));
+ add('<p class="lead">Enf. = Enfermaria · Apto. = Apartamento · RP = reembolso parcial · RT = reembolso total. A diferença entre Enfermaria e Apartamento está apenas na acomodação em caso de internação (quarto compartilhado x privativo).</p>');
+ // 3. tabela unitária completa
+ chunk(R.opts,5).forEach((c,i)=>add((i===0?'<h2>Tabela de valores por faixa etária</h2><p class="lead">Valor mensal por beneficiário em cada faixa etária, conforme tabela da operadora ('+COPL[R.cop].toLowerCase()+').</p>':'')+'<table class="pt"><tr><th>Faixa etária</th>'+c.map(o=>'<th>'+optHead(o)+'</th>').join("")+'</tr>'+BANDS.map((b,j)=>'<tr'+(R.lives[j]?' class="hl"':'')+'><td>'+b+' anos</td>'+c.map(o=>'<td>'+fmt(o.unit[j])+'</td>').join("")+'</tr>').join("")+'</table>',i===0));
+ add('<p class="lead">Faixas destacadas = faixas com vidas nesta cotação. Reajuste por mudança de faixa etária: '+REAJUSTE.map(r=>r[0]+" "+r[1]).join(" · ")+'.</p>');
+ // 4. coparticipação
+ groups.forEach((g,i)=>{const rule=COPART[R.cop][g];const prods=[...new Set(R.opts.filter(o=>o.cg===g).map(o=>o.p.name))].join(", ");add((i===0?'<h2>Coparticipação — '+(R.cop==="parcial"?"Parcial":"Total")+'</h2><p class="lead">Cobrança por procedimento realizado, apenas quando há utilização. Internação considerada na rede credenciada.</p>':'')+'<h3>'+esc(prods)+'</h3><table class="pt"><tr><th>Procedimento</th><th>Coparticipação</th></tr>'+COPART_ROWS.map((r,k)=>'<tr><td>'+r+'</td><td>'+rule.v[k]+'</td></tr>').join("")+'</table>',i===0);});
+ // 5. condições
+ const cond=['<b>Vigência da tabela:</b> tabela de vendas promocional NotreDame Saúde válida para contratos assinados de '+VIGENCIA+'. Os valores são confirmados no momento da contratação.','<b>Reembolso:</b> parcial ou total conforme previsto em instrumento contratual, para atendimentos fora da rede credenciada.','<b>Carência:</b> 60 dias apenas para empresas com até 29 vidas; acima de 30 vidas há isenção de carências (conforme tabela).','<b>Plano odontológico:</b> Odonto Premium (ANS 495.614/23-1) com valor promocional R$ 0,00 quando o beneficiário adquire, no ato da contratação, o plano médico-hospitalar. Contratação em contrato separado do médico; taxa de implantação R$ 25,00.','<b>Clube de Vantagens:</b> +300 parceiros em diversos segmentos, até 35% de desconto em medicamentos nas principais redes de farmácias e TotalPass sem nenhum custo para a empresa (o colaborador adere 100% digital pelo app, sem fidelidade, planos a partir de R$ 69,90/mês). Acesso em clube.hapvidandi.com.br.','<b>Mescla de planos:</b> é possível contratar planos diferentes na mesma empresa; apenas não é possível mesclar coparticipação parcial com total.'];
+ if(R.opts.some(o=>o.p.id==="infinity"))cond.push('<b>Infinity 1000.11:</b> apenas para contratos a partir de 2 vidas; elegibilidade para adesão apenas para sócios, cônjuges e descendentes.');
+ cond.push('<b>Área de atuação:</b> condições e valores destinados aos colaboradores da contratante e seus dependentes lotados e domiciliados em '+esc(R.city)+', conforme registro na ANS.');
+ add('<h2 style="margin-top:6px">Condições gerais</h2><ul>'+cond.map(c=>'<li>'+c+'</li>').join("")+'</ul>');
+ // ---- paginação por medição real ----
+ const MM=96/25.4;const meas=document.createElement("div");meas.className="pg";meas.style.cssText="position:absolute;left:-10000px;top:0;visibility:hidden;min-height:0";document.body.appendChild(meas);
+ meas.innerHTML=ph;const phH=meas.firstChild.getBoundingClientRect().height+10*MM;
+ const usable=(297-14-16-6)*MM-phH;
+ const hs=B.map(b=>{meas.innerHTML='<div style="display:flow-root">'+b.html+'</div>';return meas.firstChild.getBoundingClientRect().height*1.04+2;});
+ meas.remove();
+ const pages=[];let cur=[],h=0;
+ B.forEach((b,i)=>{if(cur.length&&(b.br||h+hs[i]>usable)){pages.push(cur);cur=[];h=0;}cur.push(b.html);h+=hs[i];});if(cur.length)pages.push(cur);
+ const T=pages.length+1;
+ let html='<div class="pv-tools"><button class="btn gold" onclick="window.print()">🖨️ Imprimir / Salvar em PDF</button><button class="btn" onclick="closePrint()">← Voltar ao cotador</button><span>No celular: Compartilhar/Imprimir → Salvar como PDF.</span></div><div class="pv-wrap">'+cover;
+ pages.forEach((p,i)=>{html+='<section class="pg">'+ph+p.join("")+pf(i+2,T)+'</section>';});
+ html+='</div>';
+ pv.innerHTML=html;document.body.classList.add("pv-open");window.scrollTo(0,0);setTimeout(()=>{try{window.print();}catch(e){}},600);}
+function closePrint(){document.body.classList.remove("pv-open");$("#printView").innerHTML="";}
+window.closePrint=closePrint;
+
+/* ---------- Eventos ---------- */
+function bind(){
+ $("#logoTop").src=LOGO_WHITE;
+ $("#city").innerHTML=CITIES.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join("");
+ $("#client").value=state.client;$("#cnpj").value=state.cnpj;$("#consultor").value=state.consultor;$("#city").value=state.city;$("#refDate").value=todayISO();
+ $("#client").oninput=e=>{state.client=e.target.value;save();};
+ $("#consultor").oninput=e=>{state.consultor=e.target.value;save();};
+ $("#cnpj").oninput=e=>{e.target.value=maskCNPJ(e.target.value);state.cnpj=e.target.value;save();};
+ $("#city").onchange=e=>{state.city=e.target.value;renderBands();};
+ $("#segMei").onclick=e=>{const b=e.target.closest("button");if(!b)return;state.mei=b.dataset.v==="1";$$("#segMei button").forEach(x=>x.classList.toggle("on",x===b));renderBands();};
+ $$("#segMei button").forEach(b=>b.classList.toggle("on",(b.dataset.v==="1")===state.mei));
+ $("#segCop").onclick=e=>{const b=e.target.closest("button");if(!b||b.disabled)return;state.copart=b.dataset.v;renderTableInfo();renderProducts();refreshResults();save();};
+ $("#segReemb").onclick=e=>{const b=e.target.closest("button");if(!b)return;state.reemb=b.dataset.v;$$("#segReemb button").forEach(x=>x.classList.toggle("on",x===b));renderProducts();refreshResults();save();};
+ $$("#segReemb button").forEach(b=>b.classList.toggle("on",b.dataset.v===state.reemb));
+ // conversor
+ $("#convH").onclick=()=>$("#conv").classList.toggle("open");
+ $$("#conv .tabs button").forEach(b=>b.onclick=()=>{$$("#conv .tabs button").forEach(x=>x.classList.toggle("on",x===b));$("#tabMulti").style.display=b.dataset.tab==="multi"?"block":"none";$("#tabOne").style.display=b.dataset.tab==="one"?"block":"none";});
+ $("#btnConvMulti").onclick=()=>{addPeople($("#multiDates").value);$("#multiDates").value="";};
+ const one=()=>{const v=$("#oneDate").value.trim();if(!v)return;addPeople(v);$("#oneDate").value="";$("#oneDate").focus();};
+ $("#btnConvOne").onclick=one;$("#oneDate").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();one();}};
+ $("#oneDate").oninput=e=>{let v=e.target.value.replace(/[^\d\/]/g,"");if(/^\d{3,}$/.test(v)&&v.length<=8&&v.length>2){v=v.replace(/^(\d{2})(\d{0,2})(\d{0,4}).*/,(m,a,b,c)=>a+(b?"/"+b:"")+(c?"/"+c:""));}e.target.value=v;};
+ $("#people").onclick=e=>{const x=e.target.closest(".x");if(!x)return;people.splice(+x.dataset.i,1);renderPeople();};
+ $("#btnClearPeople").onclick=()=>{people=[];renderPeople();};
+ $("#btnApply").onclick=()=>{state.lives=peopleCounts();renderBands();toast("Faixas etárias atualizadas");};
+ $("#btnApplyAdd").onclick=()=>{const c=peopleCounts();state.lives=state.lives.map((v,i)=>v+c[i]);renderBands();toast("Vidas somadas às faixas");};
+ // faixas
+ $("#bands").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const i=+b.dataset.i;state.lives[i]=Math.max(0,state.lives[i]+(b.classList.contains("plus")?1:-1));renderBands();});
+ $("#bands").addEventListener("input",e=>{const inp=e.target.closest("input");if(!inp)return;const i=+inp.dataset.i;state.lives[i]=Math.max(0,Math.min(999,parseInt(inp.value)||0));renderBands();});
+ $("#btnZero").onclick=()=>{state.lives=Array(10).fill(0);renderBands();};
+ // produtos
+ $("#products").addEventListener("click",e=>{const chip=e.target.closest(".chip");const prod=e.target.closest(".prod");if(!prod||prod.classList.contains("off"))return;const p=PRODUCTS.find(x=>x.id===prod.dataset.p);const s=state.sel[p.id];
+  if(chip&&chip.dataset.a){const a=chip.dataset.a;if(s.acom.includes(a)){if(s.acom.length>1)s.acom=s.acom.filter(x=>x!==a);else toast("Mantenha ao menos uma acomodação.");}else s.acom.push(a);if(!s.on)s.on=true;}
+  else if(chip&&chip.classList.contains("fixed")){return;}
+  else{s.on=!s.on;}
+  renderProducts();refreshResults();save();});
+ $("#btnAll").onclick=()=>{PRODUCTS.forEach(p=>{state.sel[p.id].on=isVisible(p);});renderProducts();refreshResults();save();};
+ $("#btnNone").onclick=()=>{PRODUCTS.forEach(p=>state.sel[p.id].on=false);renderProducts();refreshResults();save();};
+ $("#btnCalc").onclick=calc;
+ window.addEventListener("afterprint",()=>{});
+}
+
+/* ---------- Autoteste (diagnóstico) ---------- */
+function selfTest(){const T=[];const ok=(name,cond,detail)=>T.push({name,ok:!!cond,detail:detail||""});
+ const near=(a,b)=>Math.abs(a-b)<0.005;
+ // 1. estrutura
+ let series=0,bad=[];for(const t in PRICES)for(const g in PRICES[t])for(const c in PRICES[t][g])for(const k in PRICES[t][g][c]){series++;const v=PRICES[t][g][c][k];if(!Array.isArray(v)||v.length!==10||v.some(x=>typeof x!=="number"||!(x>0)))bad.push(t+"/"+g+"/"+c+"/"+k);}
+ ok("Estrutura das tabelas ("+series+" séries de 10 faixas)",bad.length===0&&series===(3*40+5*34+3*14),bad.join(", ")||"esperado "+(3*40+5*34+3*14)+" séries");
+ // 2. crescente por faixa
+ bad=[];for(const t in PRICES)for(const g in PRICES[t])for(const c in PRICES[t][g])for(const k in PRICES[t][g][c]){const v=PRICES[t][g][c][k];for(let i=1;i<10;i++)if(!(v[i]>v[i-1])){bad.push(t+"/"+g+"/"+c+"/"+k+"@"+i);break;}}
+ ok("Valores crescentes por faixa etária em todas as séries",bad.length===0,bad.join(", "));
+ // 2b. cada faixa deve seguir o reajuste da tabela (17/22/20/5/10/25/10/25/75%) — detecta erro de digitação em qualquer célula
+ const RATIO=[1.17,1.22,1.20,1.05,1.10,1.25,1.10,1.25,1.75];bad=[];let checked=0;
+ for(const t in PRICES)for(const g in PRICES[t])for(const c in PRICES[t][g])for(const k in PRICES[t][g][c]){const v=PRICES[t][g][c][k];for(let i=1;i<10;i++){checked++;const r=v[i]/v[i-1];if(Math.abs(r-RATIO[i-1])>0.003){bad.push(t+"/"+g+"/"+c+"/"+k+" faixa "+BANDS[i]+" ("+v[i-1]+" → "+v[i]+", razão "+r.toFixed(4)+")");}}}
+ ok("Progressão entre faixas conforme reajuste da tabela ("+checked+" transições conferidas)",bad.length===0,bad.join(" | "));
+ // 3. enfermaria < apartamento
+ bad=[];for(const t in PRICES)for(const g in PRICES[t])for(const c in PRICES[t][g]){const P=PRICES[t][g][c];for(const k in P){if(!k.includes("|enf|"))continue;const k2=k.replace("|enf|","|apt|");if(P[k2])for(let i=0;i<10;i++)if(!(P[k][i]<P[k2][i])){bad.push(t+"/"+g+"/"+c+"/"+k);break;}}}
+ ok("Enfermaria sempre mais barata que Apartamento (mesmo produto)",bad.length===0,bad.join(", "));
+ // 4. copart total < parcial
+ bad=[];for(const t of["demais","mei"])for(const g in PRICES[t]){const P1=PRICES[t][g].parcial,P2=PRICES[t][g].total;for(const k in P1){for(let i=0;i<10;i++)if(!(P2[k][i]<P1[k][i])){bad.push(t+"/"+g+"/"+k);break;}}}
+ ok("Coparticipação total sempre mais barata que parcial (mesmo produto)",bad.length===0,bad.join(", "));
+ // 5. reembolso parcial < total
+ bad=[];for(const t in PRICES)for(const g in PRICES[t])for(const c in PRICES[t][g]){const P=PRICES[t][g][c];for(const k in P){if(!k.endsWith("|parcial"))continue;const k2=k.replace(/\|parcial$/,"|total");if(P[k2])for(let i=0;i<10;i++)if(!(P[k][i]<P[k2][i])){bad.push(t+"/"+g+"/"+c+"/"+k);break;}}}
+ ok("Reembolso parcial sempre mais barato que reembolso total (mesmo produto)",bad.length===0,bad.join(", "));
+ // 6. hierarquia de produtos
+ bad=[];const pairs=[["prata","prata_max"],["ouro","ouro_max"],["diamante","diamante_max"],["adv600","adv700"]];for(const t in PRICES)for(const g in PRICES[t])for(const c in PRICES[t][g]){const P=PRICES[t][g][c];for(const k in P){const [pid,a,r]=k.split("|");const pr=pairs.find(x=>x[0]===pid);if(!pr)continue;const k2=pr[1]+"|"+a+"|"+r;if(P[k2])for(let i=0;i<10;i++)if(!(P[k][i]<P[k2][i])){bad.push(t+"/"+g+"/"+c+"/"+k);break;}}}
+ ok("Hierarquia: Prata < Prata Max, Ouro < Ouro Max, Diamante < Diamante Max, Advance 600 < Advance 700",bad.length===0,bad.join(", "));
+ // 7. verificação de células contra o PDF (amostras digitadas de forma independente)
+ const cells=[["demais","A","parcial","prata|enf|parcial",0,226.21],["demais","A","parcial","diamante_max|apt|total",9,5210.10],["demais","A","total","adv600|enf|parcial",0,185.42],["demais","A","total","infinity|apt|total",9,4741.63],["demais","B","parcial","ouro|apt|parcial",3,544.06],["demais","B","total","prata_max|apt|parcial",6,451.37],["demais","B","total","infinity|apt|total",8,2303.06],["demais","RJ","parcial","prata_max|enf|parcial",0,233.34],["demais","RJ","total","p900|apt|total",9,1979.43],["mei","A","parcial","ouro_max|apt|parcial",5,935.60],["mei","A","total","p900care|apt|total",0,434.05],["mei","JUN","parcial","p900care|apt|parcial",0,456.09],["mei","JUN","parcial","p900|apt|total",0,493.31],["mei","SOR","parcial","p900care|apt|parcial",0,410.68],["mei","SOR","total","adv600|apt|total",9,1295.99],["mei","CAM","parcial","adv600|apt|parcial",0,256.59],["mei","CAM","total","p900care|apt|total",0,382.68],["mei","RJ","parcial","prata|enf|parcial",0,245.85],["mei","RJ","total","p900|apt|total",0,397.50],["v1","A","total","prata|enf|parcial",0,212.08],["v1","A","total","p900care|apt|total",9,2739.47],["v1","B","total","prata|enf|parcial",0,180.26],["v1","B","total","adv700|apt|total",4,530.22],["v1","RJ","total","prata_max|apt|parcial",0,257.28],["v1","RJ","total","p900care|apt|total",6,834.50]];
+ bad=[];cells.forEach(([t,g,c,k,i,v])=>{const got=PRICES[t]&&PRICES[t][g]&&PRICES[t][g][c]&&PRICES[t][g][c][k]?PRICES[t][g][c][k][i]:null;if(got===null||!near(got,v))bad.push(k+"["+i+"] "+t+"/"+g+"/"+c+": "+got+" ≠ "+v);});
+ ok("Células-amostra conferidas com a tabela do PDF ("+cells.length+" valores)",bad.length===0,bad.join(" | "));
+ // 8. cálculos de referência
+ const calcKey=(t,g,c,k,lives)=>{const u=PRICES[t][g][c][k];let cents=0;lives.forEach((q,i)=>cents+=q*Math.round(u[i]*100));return cents/100;};
+ const C=[["demais","A","total","prata|enf|parcial",[0,0,2,0,1,0,0,0,0,0],789.48,"2×242,17 + 1×305,14"],["mei","CAM","parcial","adv700|apt|total",[0,0,0,1,0,0,0,0,0,1],2938.40,"656,76 + 2.281,64"],["v1","RJ","total","p900care|apt|total",[0,0,0,0,0,0,1,0,0,0],834.50,"834,50"],["demais","RJ","parcial","diamante_max|apt|total",[3,0,0,0,0,0,0,0,0,0],2058.21,"3×686,07"],["mei","A","parcial","ouro_max|apt|parcial",[0,1,0,0,0,2,0,0,0,0],2424.51,"553,31 + 2×935,60"],["demais","B","total","adv600|enf|parcial",[1,1,1,1,1,1,1,1,1,1],3724.68,"soma das 10 faixas"]];
+ bad=[];C.forEach(([t,g,c,k,l,exp,d])=>{const got=calcKey(t,g,c,k,l);if(!near(got,exp))bad.push(k+" ("+d+"): "+got+" ≠ "+exp);});
+ ok("Cálculos de referência (totais conferidos à mão)",bad.length===0,bad.join(" | "));
+ // 9. conversor de idades
+ const ref=new Date(2026,9,22);const A=[["10/05/1990",36,4],["22/10/2008",18,0],["23/10/2008",17,0],["22/10/2007",19,1],["01/01/1960",66,9],["15/06/1972",54,8],["31/12/1992",33,3],["01/01/1993",33,3]];
+ bad=[];A.forEach(([s,age,b])=>{const p=parseBirth(s);const a=p?ageAt(p.date,ref):null;if(a!==age||bandIdx(a)!==b)bad.push(s+" → "+a+"/"+(a==null?"?":BANDS[bandIdx(a)]));});
+ if(!(parseBirth("35")&&parseBirth("35").age===35&&bandIdx(35)===4))bad.push("idade direta 35");if(parseBirth("31/02/2000")!==null)bad.push("31/02/2000 deveria ser inválida");
+ ok("Conversor de idades (idade e faixa etária na data de referência 22/10/2026)",bad.length===0,bad.join(" | "));
+ // 10. mapeamento cidade → grupo
+ bad=[];CITIES.forEach(c=>{["demais","mei","v1"].forEach(t=>{if(!PRICES[t][c.g[t]])bad.push(c.id+"/"+t);});});ok("Todas as cidades mapeadas para as 3 tabelas",bad.length===0,bad.join(", "));
+ return T;}
+function renderDiag(){const T=selfTest();const allOk=T.every(x=>x.ok);$("#diag").innerHTML='<div class="diag-line '+(allOk?"ok":"fail")+'"><b>'+(allOk?"✅ Todos os testes passaram":"❌ Há testes com falha")+' — '+T.filter(x=>x.ok).length+"/"+T.length+'</b></div>'+T.map(x=>'<div class="diag-line '+(x.ok?"ok":"fail")+'">'+(x.ok?"✔":"✖")+" "+esc(x.name)+(x.ok?"":" — "+esc(x.detail))+'</div>').join("")+'<div class="diag-line">Nota da tabela: nas cidades de Jundiaí, Campinas e Americana (MEI, reembolso total) o Premium 900 Care consta na tabela da operadora com valor maior que o Premium 900 — os valores foram mantidos exatamente como publicados.</div>';}
+
+document.addEventListener("DOMContentLoaded",()=>{load();bind();renderBands();renderPeople();try{renderDiag();}catch(e){$("#diag").textContent="Erro ao executar os testes: "+e.message;}});
+</script>
+</body>
+</html>
