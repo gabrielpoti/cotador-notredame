@@ -213,7 +213,7 @@ table.pt th b{font-size:10px}
     <div><label class="f">NOME DO CLIENTE / EMPRESA</label><input id="client" placeholder="Ex.: Indústria Exemplo Ltda" autocomplete="organization"></div>
     <div><label class="f">CNPJ</label><input id="cnpj" placeholder="00.000.000/0000-00" inputmode="numeric"></div>
     <div><label class="f">NOME DO CONSULTOR</label><input id="consultor" placeholder="Ex.: Gabriel" autocomplete="name"></div>
-    <div><label class="f">CIDADE DO CONTRATO</label><select id="city"></select></div>
+    <div><label class="f">CIDADE DO CONTRATO</label><select id="city"></select><div class="hint" id="cityHint"></div></div>
   </div>
   <div class="grid g2" style="margin-top:12px">
     <div>
@@ -332,6 +332,20 @@ const CITIES=[
  {id:"americana",name:"Americana - SP",g:{demais:"B",mei:"CAM",v1:"B"}},
  {id:"rj",name:"Rio de Janeiro - RJ",g:{demais:"RJ",mei:"RJ",v1:"RJ"}}
 ];
+/* Municípios atendidos → tabela regional aplicada */
+const MUNIS={
+ americana:["Americana","Artur Nogueira","Cosmópolis","Nova Odessa","Santa Bárbara d'Oeste"],
+ campinas:["Amparo","Campinas","Elias Fausto","Holambra","Hortolândia","Indaiatuba","Jaguariúna","Monte Mor","Paulínia","Pedreira","Santo Antônio de Posse","Sumaré","Valinhos"],
+ jundiai:["Cajamar","Itatiba","Itupeva","Jundiaí","Louveira","Vinhedo","Várzea Paulista"],
+ mogi:["Arujá","Ferraz de Vasconcelos","Guararema","Itaquaquecetuba","Mogi das Cruzes","Poá","Santa Isabel","Suzano"],
+ santos:["Bertioga","Cubatão","Guarujá","Mongaguá","Praia Grande","Santos","São Vicente"],
+ sbc:["Diadema","Embu-Guaçu","Mauá","Ribeirão Pires","Rio Grande da Serra","Santo André","São Bernardo do Campo","São Caetano do Sul"],
+ sp:["Barueri","Caieiras","Carapicuíba","Cotia","Embu das Artes","Franco da Rocha","Guarulhos","Itapecerica da Serra","Itapevi","Jandira","Mairiporã","Osasco","São Paulo","Taboão da Serra"],
+ sorocaba:["Alumínio","Araçariguama","Araçoiaba da Serra","Cabreúva","Capela do Alto","Ibiúna","Iperó","Itu","Piedade","Porto Feliz","Salto de Pirapora","Sarapuí","São Roque","Sorocaba","Votorantim"],
+ rj:["Belford Roxo","Duque de Caxias","Itaboraí","Magé","Maricá","Mesquita","Nilópolis","Niterói","Nova Iguaçu","Queimados","Rio de Janeiro","São Gonçalo","São João do Meriti"]
+};
+const UF=id=>id==="rj"?"RJ":"SP";
+const baseMuni=id=>(CITIES.find(c=>c.id===id)||CITIES[0]).name.replace(/ - (SP|RJ)$/,"");
 const PRODUCTS=[
  {id:"prata",name:"Prata",line:"metais",acom:["enf","apt"],reemb:["parcial"],cg:{parcial:"g1",total:"g1"}},
  {id:"prata_max",name:"Prata Max",line:"metais",acom:["enf","apt"],reemb:["parcial"],cg:{parcial:"g1",total:"g1"}},
@@ -471,12 +485,14 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
 const brDate=d=>String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
 
-const state={client:"",cnpj:"",consultor:"",city:"sp",mei:false,lives:Array(10).fill(0),copart:"total",reemb:"parcial",acom:"ambos",sel:{},result:null};
+const state={client:"",cnpj:"",consultor:"",city:"sp",muni:"São Paulo",mei:false,lives:Array(10).fill(0),copart:"total",reemb:"parcial",acom:"ambos",sel:{},result:null};
 PRODUCTS.forEach(p=>state.sel[p.id]={on:false,acom:[...p.acom]});
 let people=[]; // conversor
 
 function livesTotal(){return state.lives.reduce((a,b)=>a+b,0);}
 function cityObj(){return CITIES.find(c=>c.id===state.city)||CITIES[0];}
+function muniLabel(){return state.muni+" - "+UF(state.city);}
+function tableCityShort(){return cityObj().name.replace(/ - (SP|RJ)$/,"");}
 function currentTable(){const n=livesTotal();if(n===0)return null;if(n===1)return"v1";if(n<=29)return state.mei?"mei":"demais";return"over";}
 function effCopart(t){return t==="v1"?"total":state.copart;}
 function getPrices(){const t=currentTable();if(!t||t==="over")return null;return PRICES[t][cityObj().g[t]][effCopart(t)];}
@@ -492,8 +508,8 @@ function quotedAcoms(p){const v=visibleAcoms(p);if(state.acom!=="ambos")return v
 function isVisible(p){return visibleAcoms(p).length>0;}
 
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2600);}
-function save(){try{localStorage.setItem("nd_cotador_v1",JSON.stringify({client:state.client,cnpj:state.cnpj,consultor:state.consultor,city:state.city,mei:state.mei,lives:state.lives,copart:state.copart,reemb:state.reemb,acom:state.acom,sel:state.sel}));}catch(e){}}
-function load(){try{const s=JSON.parse(localStorage.getItem("nd_cotador_v1")||"null");if(!s)return;Object.assign(state,{client:s.client||"",cnpj:s.cnpj||"",consultor:s.consultor||"",city:s.city||"sp",mei:!!s.mei,copart:s.copart||"total",reemb:s.reemb||"parcial",acom:["enf","apt","ambos"].includes(s.acom)?s.acom:"ambos"});if(Array.isArray(s.lives)&&s.lives.length===10)state.lives=s.lives.map(x=>Math.max(0,parseInt(x)||0));if(s.sel){PRODUCTS.forEach(p=>{if(s.sel[p.id]){state.sel[p.id].on=!!s.sel[p.id].on;const a=(s.sel[p.id].acom||[]).filter(x=>p.acom.includes(x));state.sel[p.id].acom=a.length?a:[...p.acom];}});}}catch(e){}}
+function save(){try{localStorage.setItem("nd_cotador_v1",JSON.stringify({client:state.client,cnpj:state.cnpj,consultor:state.consultor,city:state.city,muni:state.muni,mei:state.mei,lives:state.lives,copart:state.copart,reemb:state.reemb,acom:state.acom,sel:state.sel}));}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem("nd_cotador_v1")||"null");if(!s)return;Object.assign(state,{client:s.client||"",cnpj:s.cnpj||"",consultor:s.consultor||"",city:s.city||"sp",muni:s.muni||"",mei:!!s.mei,copart:s.copart||"total",reemb:s.reemb||"parcial",acom:["enf","apt","ambos"].includes(s.acom)?s.acom:"ambos"});if(Array.isArray(s.lives)&&s.lives.length===10)state.lives=s.lives.map(x=>Math.max(0,parseInt(x)||0));if(s.sel){PRODUCTS.forEach(p=>{if(s.sel[p.id]){state.sel[p.id].on=!!s.sel[p.id].on;const a=(s.sel[p.id].acom||[]).filter(x=>p.acom.includes(x));state.sel[p.id].acom=a.length?a:[...p.acom];}});}}catch(e){}}
 function maskCNPJ(v){v=(v||"").replace(/\D/g,"").slice(0,14);let o=v;if(v.length>12)o=v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2}).*/,"$1.$2.$3/$4-$5");else if(v.length>8)o=v.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4}).*/,"$1.$2.$3/$4");else if(v.length>5)o=v.replace(/^(\d{2})(\d{3})(\d{0,3}).*/,"$1.$2.$3");else if(v.length>2)o=v.replace(/^(\d{2})(\d{0,3}).*/,"$1.$2");return o;}
 
 /* ---------- Conversor de idades ---------- */
@@ -514,10 +530,11 @@ function renderBands(){const b=$("#bands");if(!b.children.length){b.innerHTML=BA
  const n=livesTotal();$("#totLives").textContent=n+(n===1?" vida":" vidas");const t=currentTable();
  const msg=$("#livesMsg");if(n===0){msg.textContent="Informe pelo menos uma vida em alguma faixa etária";}else if(t==="over"){msg.innerHTML='<span class="pill warn">Acima de 29 vidas — fora do Porte I (tabelas deste cotador vão até 29 vidas)</span>';}else{msg.innerHTML='<span class="pill ok">Tabela: '+TABLE_SHORT[t]+'</span>';}
  renderTableInfo();renderProducts();renderBar();refreshResults();save();}
+function renderCityHint(){const h=$("#cityHint");if(h)h.innerHTML="Tabela aplicada: <b style=\"color:var(--gold2)\">"+esc(cityObj().name)+"</b>";}
 function renderTableInfo(){const t=currentTable();const el=$("#tableInfo"),h=$("#tableHint");const seg=$("#segCop");
  if(!t){el.textContent="—";h.textContent="Informe as vidas por faixa etária.";h.className="hint";}
  else if(t==="over"){el.textContent="Fora do Porte I";h.textContent="Acima de 29 vidas é necessária a tabela Porte II, não incluída neste cotador.";h.className="hint err";}
- else{el.textContent=TABLE_LABEL[t]+" · "+cityObj().name;h.textContent=t==="v1"?"Tabela 1 vida: somente coparticipação total (o seletor de coparticipação fica travado).":(t==="mei"?"Tabela exclusiva para clientes MEI.":"Tabela para clientes que não são MEI.");h.className="hint";}
+ else{el.textContent=TABLE_LABEL[t]+" · tabela "+cityObj().name;h.textContent=t==="v1"?"Tabela 1 vida: somente coparticipação total (o seletor de coparticipação fica travado).":(t==="mei"?"Tabela exclusiva para clientes MEI.":"Tabela para clientes que não são MEI.");h.className="hint";}
  seg.querySelectorAll("button").forEach(b=>{b.disabled=(t==="v1");b.classList.toggle("on",(t==="v1"?"total":state.copart)===b.dataset.v);});
  $("#copHint").textContent=t==="v1"?"Com 1 vida a tabela só possui coparticipação total.":"Parcial: coparticipação apenas em terapias. Total: coparticipação em consultas, exames, terapias e internação.";}
 
@@ -539,10 +556,10 @@ function renderProducts(){const t=filterTable();const box=$("#products");let htm
 function refreshResults(){if(!state.result)return;const t=currentTable();const opts=(t&&t!=="over")?buildOptions():[];
  if(!opts.length){state.result=null;$("#results").style.display="none";return;}
  const min=Math.min(...opts.map(o=>o.total));opts.forEach(o=>o.best=o.total===min);
- state.result=Object.assign(state.result,{table:t,cop:effCopart(t),opts,N:livesTotal(),city:cityObj().name,group:cityObj().g[t],lives:[...state.lives],client:state.client,cnpj:state.cnpj,consultor:state.consultor});
+ state.result=Object.assign(state.result,{table:t,cop:effCopart(t),opts,N:livesTotal(),city:muniLabel(),tableCity:cityObj().name,group:cityObj().g[t],lives:[...state.lives],client:state.client,cnpj:state.cnpj,consultor:state.consultor});
  renderResults();}
 function countOptions(){const prices=getPrices();if(!prices)return 0;let n=0;PRODUCTS.forEach(p=>{const s=state.sel[p.id];if(!s.on)return;quotedAcoms(p).forEach(a=>{reembsFor(p).forEach(r=>{if(prices[p.id+"|"+a+"|"+r])n++;});});});return n;}
-function renderBar(){const n=livesTotal();$("#barTitle").textContent=n+(n===1?" vida":" vidas")+(n?" · "+cityObj().name.replace(/ - (SP|RJ)$/,""):"");const o=countOptions();$("#barSub").textContent=o?o+" opção(ões) no comparativo · "+COPL[effCopart(currentTable())]:"Selecione produtos para comparar";}
+function renderBar(){const n=livesTotal();$("#barTitle").textContent=n+(n===1?" vida":" vidas")+(n?" · "+state.muni:"");const o=countOptions();$("#barSub").textContent=o?o+" opção(ões) no comparativo · "+COPL[effCopart(currentTable())]:"Selecione produtos para comparar";}
 
 /* ---------- Cálculo ---------- */
 function buildOptions(){const prices=getPrices();const t=currentTable();const cop=effCopart(t);const out=[];
@@ -554,12 +571,13 @@ function calc(){const t=currentTable();if(!t){toast("Informe as vidas por faixa 
  if(t==="over"){toast("Acima de 29 vidas: fora das tabelas deste cotador.");return;}
  const opts=buildOptions();if(!opts.length){toast("Selecione ao menos um produto disponível.");return;}
  const min=Math.min(...opts.map(o=>o.total));opts.forEach(o=>o.best=o.total===min);
- state.result={table:t,cop:effCopart(t),opts,N:livesTotal(),city:cityObj().name,group:cityObj().g[t],date:new Date(),lives:[...state.lives],client:state.client,cnpj:state.cnpj,consultor:state.consultor};
+ state.result={table:t,cop:effCopart(t),opts,N:livesTotal(),city:muniLabel(),tableCity:cityObj().name,group:cityObj().g[t],date:new Date(),lives:[...state.lives],client:state.client,cnpj:state.cnpj,consultor:state.consultor};
  renderResults();setTimeout(()=>$("#results").scrollIntoView({behavior:"smooth",block:"start"}),50);}
+function cityFull(R){const tc=R.tableCity||R.city;return R.city===tc?R.city:R.city+" (tabela "+tc.replace(/ - (SP|RJ)$/,"")+")";}
 function optLabel(o){return o.p.name+" · "+ACOM[o.acom]+" · "+REEMB[o.reemb];}
 function renderResults(){const R=state.result;const box=$("#results");box.style.display="block";
  const livesRows=BANDS.map((b,i)=>({b,q:R.lives[i]})).filter(x=>x.q>0);
- let h='<h2><span class="n">5</span>Resultado · '+R.N+(R.N===1?" vida":" vidas")+'</h2><p class="sub">'+TABLE_LABEL[R.table]+' · '+esc(R.city)+' · <b style="color:var(--gold2)">'+COPL[R.cop]+'</b> · Vidas: '+livesRows.map(x=>x.b+": <b>"+x.q+"</b>").join(" · ")+'</p>';
+ let h='<h2><span class="n">5</span>Resultado · '+R.N+(R.N===1?" vida":" vidas")+'</h2><p class="sub">'+TABLE_LABEL[R.table]+' · '+esc(cityFull(R))+' · <b style="color:var(--gold2)">'+COPL[R.cop]+'</b> · Vidas: '+livesRows.map(x=>x.b+": <b>"+x.q+"</b>").join(" · ")+'</p>';
  h+='<div class="opts">'+R.opts.map(o=>'<div class="opt'+(o.best&&R.opts.length>1?" best":"")+'">'+(o.best&&R.opts.length>1?'<span class="best-tag">MENOR INVESTIMENTO</span>':"")+'<div class="nm">'+o.p.name+'</div><div class="meta">'+ACOM[o.acom]+' · '+REEMB[o.reemb]+' · '+COPL[o.cop]+'<br>ANS '+o.ans+'</div><div class="tot">'+fmt(o.total)+'<span style="font-size:12px;color:var(--muted);font-weight:600"> /mês</span></div><div class="avg">Média por vida: '+fmt(o.avg)+'</div><details><summary>Ver por faixa etária</summary><table class="t"><tr><th>Faixa</th><th>Qtd</th><th>Unitário</th><th>Subtotal</th></tr>'+o.lines.map(l=>'<tr'+(l.qty?"":' style="opacity:.45"')+'><td>'+l.band+'</td><td>'+l.qty+'</td><td>'+fmt(l.unit)+'</td><td>'+fmt(l.sub)+'</td></tr>').join("")+'<tr class="tot"><td colspan="3">Total mensal</td><td>'+fmt(o.total)+'</td></tr></table></details></div>').join("")+'</div>';
  // comparativo
  h+='<h3 class="sec">Comparativo por faixa etária (subtotal · unitário)</h3><div class="scroll"><table class="t"><tr><th>Faixa</th><th>Qtd</th>'+R.opts.map(o=>'<th>'+o.p.name+'<br><span style="font-weight:500;text-transform:none;letter-spacing:0">'+ACOM_S[o.acom]+' · Reemb. '+o.reemb+'</span></th>').join("")+'</tr>';
@@ -611,14 +629,14 @@ function openPrint(){const R=state.result;if(!R)return;const pv=$("#printView");
  const pills=[...lines.map(l=>'<span class="cv-pill hi">'+l+'</span>'),'<span class="cv-pill">'+COPL[R.cop]+'</span>','<span class="cv-pill">Odonto Premium incluso</span>','<span class="cv-pill">Clube de Vantagens + TotalPass</span>','<span class="cv-pill">'+R.opts.length+(R.opts.length===1?' opção cotada':' opções comparadas')+'</span>'].join("");
  const ph='<header class="ph"><img src="'+LOGO_WHITE+'" alt="NotreDame Saúde"><div class="ph-t"><b>Proposta Comercial</b>'+esc(cli)+' · '+vid(R.N)+' · '+esc(R.city)+'</div></header>';
  const pf=(n,t)=>'<div class="pf"><span>NotreDame Saúde · ANS nº 359017 · Tabela promocional para contratos assinados de '+VIGENCIA+'</span><span>'+esc(R.consultor?"Consultor: "+R.consultor+" · ":"")+'Página '+n+' de '+t+'</span></div>';
- const cover='<section class="pg cover"><img class="cv-logo" src="'+LOGO_WHITE+'" alt="NotreDame Saúde"><div class="cv-body"><div class="kicker">Proposta Comercial</div><h1>Plano de Saúde<br>Empresarial</h1><div class="cv-sub">NotreDame Saúde · '+TABLE_LABEL[R.table]+' · '+esc(R.city)+'</div><div class="cv-client">'+esc(cli)+'</div><div class="cv-info">'+(R.cnpj?"CNPJ "+esc(R.cnpj)+" · ":"")+vid(R.N)+'</div><div class="cv-pills">'+pills+'</div></div><div class="cv-stripe"></div><div class="cv-block"></div><div class="cv-foot"><div><b>'+esc(R.consultor||"Consultor NotreDame")+'</b>Consultor responsável</div><div><b>'+brDate(R.date)+'</b>Data da proposta</div><div><b>Tabela promocional</b>Contratos assinados de '+VIGENCIA+'</div><div><b>'+COPL[R.cop]+'</b>Modalidade cotada</div></div></section>';
+ const cover='<section class="pg cover"><img class="cv-logo" src="'+LOGO_WHITE+'" alt="NotreDame Saúde"><div class="cv-body"><div class="kicker">Proposta Comercial</div><h1>Plano de Saúde<br>Empresarial</h1><div class="cv-sub">NotreDame Saúde · '+TABLE_LABEL[R.table]+' · '+esc(cityFull(R))+'</div><div class="cv-client">'+esc(cli)+'</div><div class="cv-info">'+(R.cnpj?"CNPJ "+esc(R.cnpj)+" · ":"")+vid(R.N)+'</div><div class="cv-pills">'+pills+'</div></div><div class="cv-stripe"></div><div class="cv-block"></div><div class="cv-foot"><div><b>'+esc(R.consultor||"Consultor NotreDame")+'</b>Consultor responsável</div><div><b>'+brDate(R.date)+'</b>Data da proposta</div><div><b>Tabela promocional</b>Contratos assinados de '+VIGENCIA+'</div><div><b>'+COPL[R.cop]+'</b>Modalidade cotada</div></div></section>';
  const B=[];const add=(html,br)=>B.push({html,br:!!br});
  const livesIdx=BANDS.map((b,i)=>i).filter(i=>R.lives[i]>0);
  // 1. resumo
  const sumHead='<tr><th>Produto</th><th>Acomodação</th><th>Reembolso</th><th>Coparticipação</th><th>Registro ANS</th><th>Total mensal</th><th>Média / vida</th></tr>';
  const sumRow=o=>'<tr'+(o.best&&R.opts.length>1?' class="best"':"")+'><td><b>'+esc(o.p.name)+'</b></td><td>'+ACOM[o.acom]+'</td><td>'+(o.reemb==="parcial"?"Parcial":"Total")+'</td><td>'+(o.cop==="parcial"?"Parcial":"Total")+'</td><td>'+o.ans+'</td><td><b>'+fmt(o.total)+'</b></td><td>'+fmt(o.avg)+'</td></tr>';
- chunk(R.opts,14).forEach((c,i)=>add((i===0?'<h2>Resumo do investimento mensal</h2><p class="lead">Valores calculados a partir da distribuição de vidas informada, conforme a tabela promocional '+TABLE_LABEL[R.table]+' — '+esc(R.city)+'.'+(R.opts.length>1?' A opção de menor investimento está destacada em verde.':'')+'</p>':'')+'<table class="pt">'+sumHead+c.map(sumRow).join("")+'</table>'));
- add('<h3>Dados da cotação</h3><div class="kv"><div><span>Empresa</span><span>'+esc(cli)+'</span></div><div><span>CNPJ</span><span>'+esc(R.cnpj||"—")+'</span></div><div><span>Cidade do contrato</span><span>'+esc(R.city)+'</span></div><div><span>Tabela</span><span>'+TABLE_SHORT[R.table]+'</span></div><div><span>Total de vidas</span><span>'+R.N+'</span></div><div><span>Consultor</span><span>'+esc(R.consultor||"—")+'</span></div></div>');
+ chunk(R.opts,14).forEach((c,i)=>add((i===0?'<h2>Resumo do investimento mensal</h2><p class="lead">Valores calculados a partir da distribuição de vidas informada, conforme a tabela promocional '+TABLE_LABEL[R.table]+' — '+esc(cityFull(R))+'.'+(R.opts.length>1?' A opção de menor investimento está destacada em verde.':'')+'</p>':'')+'<table class="pt">'+sumHead+c.map(sumRow).join("")+'</table>'));
+ add('<h3>Dados da cotação</h3><div class="kv"><div><span>Empresa</span><span>'+esc(cli)+'</span></div><div><span>CNPJ</span><span>'+esc(R.cnpj||"—")+'</span></div><div><span>Cidade do contrato</span><span>'+esc(R.city)+'</span></div><div><span>Tabela</span><span>'+TABLE_SHORT[R.table]+' · '+esc(R.tableCity.replace(/ - (SP|RJ)$/,""))+'</span></div><div><span>Total de vidas</span><span>'+R.N+'</span></div><div><span>Consultor</span><span>'+esc(R.consultor||"—")+'</span></div></div>');
  // 2. distribuição (só faixas com vidas)
  chunk(R.opts,5).forEach((c,i)=>add((i===0?'<h3>Investimento por faixa etária (vidas informadas)</h3>':'')+'<table class="pt"><tr><th>Faixa etária</th><th>Vidas</th>'+c.map(o=>'<th>'+optHead(o)+'</th>').join("")+'</tr>'+livesIdx.map(i=>'<tr><td>'+BANDS[i]+' anos</td><td>'+R.lives[i]+'</td>'+c.map(o=>'<td>'+fmt(o.lines[i].sub)+'</td>').join("")+'</tr>').join("")+'<tr class="tot"><td>Total mensal</td><td>'+R.N+'</td>'+c.map(o=>'<td>'+fmt(o.total)+'</td>').join("")+'</tr></table>'));
  add('<p class="lead">Enf. = Enfermaria · Apto. = Apartamento · RP = reembolso parcial · RT = reembolso total. A diferença entre Enfermaria e Apartamento está apenas na acomodação em caso de internação (quarto compartilhado x privativo).</p>');
@@ -630,7 +648,7 @@ function openPrint(){const R=state.result;if(!R)return;const pv=$("#printView");
  // 5. condições
  const cond=['<b>Vigência da tabela:</b> tabela de vendas promocional NotreDame Saúde válida para contratos assinados de '+VIGENCIA+'. Os valores são confirmados no momento da contratação.','<b>Reembolso:</b> parcial ou total conforme previsto em instrumento contratual, para atendimentos fora da rede credenciada.','<b>Carência:</b> 60 dias apenas para empresas com até 29 vidas; acima de 30 vidas há isenção de carências (conforme tabela).','<b>Plano odontológico:</b> Odonto Premium (ANS 495.614/23-1) com valor promocional R$ 0,00 quando o beneficiário adquire, no ato da contratação, o plano médico-hospitalar. Contratação em contrato separado do médico; taxa de implantação R$ 25,00.','<b>Clube de Vantagens:</b> +300 parceiros em diversos segmentos, até 35% de desconto em medicamentos nas principais redes de farmácias e TotalPass sem nenhum custo para a empresa (o colaborador adere 100% digital pelo app, sem fidelidade, planos a partir de R$ 69,90/mês). Acesso em clube.hapvidandi.com.br.','<b>Mescla de planos:</b> é possível contratar planos diferentes na mesma empresa; apenas não é possível mesclar coparticipação parcial com total.'];
  if(R.opts.some(o=>o.p.id==="infinity"))cond.push('<b>Infinity 1000.11:</b> apenas para contratos a partir de 2 vidas; elegibilidade para adesão apenas para sócios, cônjuges e descendentes.');
- cond.push('<b>Área de atuação:</b> condições e valores destinados aos colaboradores da contratante e seus dependentes lotados e domiciliados em '+esc(R.city)+', conforme registro na ANS.');
+ cond.push('<b>Área de atuação:</b> condições e valores destinados aos colaboradores da contratante e seus dependentes lotados e domiciliados em '+esc(R.city)+' (área de atuação da tabela '+esc(R.tableCity)+'), conforme registro na ANS.');
  add('<h2 style="margin-top:6px">Condições gerais</h2><ul>'+cond.map(c=>'<li>'+c+'</li>').join("")+'</ul>');
  // ---- paginação por medição real ----
  const MM=96/25.4;const meas=document.createElement("div");meas.className="pg";meas.style.cssText="position:absolute;left:-10000px;top:0;visibility:hidden;min-height:0";document.body.appendChild(meas);
@@ -651,12 +669,13 @@ window.closePrint=closePrint;
 /* ---------- Eventos ---------- */
 function bind(){
  $("#logoTop").src=LOGO_WHITE;
- $("#city").innerHTML=CITIES.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join("");
- $("#client").value=state.client;$("#cnpj").value=state.cnpj;$("#consultor").value=state.consultor;$("#city").value=state.city;$("#refDate").value=todayISO();
+ const coll=new Intl.Collator("pt-BR");$("#city").innerHTML=[...CITIES].sort((a,b)=>a.id==="rj"?1:b.id==="rj"?-1:coll.compare(a.name,b.name)).map(c=>'<optgroup label="Tabela '+esc(c.name)+'">'+[...MUNIS[c.id]].sort(coll.compare).map(m=>'<option value="'+c.id+'|'+esc(m)+'">'+esc(m)+' - '+UF(c.id)+'</option>').join("")+'</optgroup>').join("");
+ if(!(MUNIS[state.city]||[]).includes(state.muni))state.muni=baseMuni(state.city);
+ $("#client").value=state.client;$("#cnpj").value=state.cnpj;$("#consultor").value=state.consultor;$("#city").value=state.city+"|"+state.muni;renderCityHint();$("#refDate").value=todayISO();
  $("#client").oninput=e=>{state.client=e.target.value;save();};
  $("#consultor").oninput=e=>{state.consultor=e.target.value;save();};
  $("#cnpj").oninput=e=>{e.target.value=maskCNPJ(e.target.value);state.cnpj=e.target.value;save();};
- $("#city").onchange=e=>{state.city=e.target.value;renderBands();};
+ $("#city").onchange=e=>{const [id,m]=e.target.value.split("|");state.city=id;state.muni=m;renderCityHint();renderBands();};
  $("#segMei").onclick=e=>{const b=e.target.closest("button");if(!b)return;state.mei=b.dataset.v==="1";$$("#segMei button").forEach(x=>x.classList.toggle("on",x===b));renderBands();};
  $$("#segMei button").forEach(b=>b.classList.toggle("on",(b.dataset.v==="1")===state.mei));
  $("#segCop").onclick=e=>{const b=e.target.closest("button");if(!b||b.disabled)return;state.copart=b.dataset.v;renderTableInfo();renderProducts();refreshResults();save();};
@@ -732,6 +751,8 @@ function selfTest(){const T=[];const ok=(name,cond,detail)=>T.push({name,ok:!!co
  ok("Conversor de idades (idade e faixa etária na data de referência 22/10/2026)",bad.length===0,bad.join(" | "));
  // 10. mapeamento cidade → grupo
  bad=[];CITIES.forEach(c=>{["demais","mei","v1"].forEach(t=>{if(!PRICES[t][c.g[t]])bad.push(c.id+"/"+t);});});ok("Todas as cidades mapeadas para as 3 tabelas",bad.length===0,bad.join(", "));
+ bad=[];let nm=0;const seen={};for(const id in MUNIS){if(!CITIES.find(c=>c.id===id))bad.push("região "+id);MUNIS[id].forEach(m=>{nm++;if(seen[m])bad.push(m+" duplicado");seen[m]=1;});if(!MUNIS[id].includes(baseMuni(id)))bad.push("falta sede "+id);}if(CITIES.some(c=>!MUNIS[c.id]))bad.push("região sem municípios");
+ ok("Municípios ligados às tabelas regionais ("+nm+" municípios em "+Object.keys(MUNIS).length+" regiões)",bad.length===0,bad.join(", "));
  return T;}
 function renderDiag(){const T=selfTest();const allOk=T.every(x=>x.ok);$("#diag").innerHTML='<div class="diag-line '+(allOk?"ok":"fail")+'"><b>'+(allOk?"✅ Todos os testes passaram":"❌ Há testes com falha")+' — '+T.filter(x=>x.ok).length+"/"+T.length+'</b></div>'+T.map(x=>'<div class="diag-line '+(x.ok?"ok":"fail")+'">'+(x.ok?"✔":"✖")+" "+esc(x.name)+(x.ok?"":" — "+esc(x.detail))+'</div>').join("")+'<div class="diag-line">Nota da tabela: nas cidades de Jundiaí, Campinas e Americana (MEI, reembolso total) o Premium 900 Care consta na tabela da operadora com valor maior que o Premium 900 — os valores foram mantidos exatamente como publicados.</div>';}
 
