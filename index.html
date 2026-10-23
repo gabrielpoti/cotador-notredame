@@ -327,7 +327,12 @@ table.pt.sm th,table.pt.sm td{text-align:left}
   <div style="margin-top:12px">
     <label class="f">ACOMODAÇÃO NA PROPOSTA</label>
     <div class="seg" id="segAcom"><button data-v="enf">Enfermaria</button><button data-v="apt">Apartamento</button><button data-v="ambos" class="on">Ambas</button></div>
-    <div class="hint"><b>Enfermaria e Apartamento</b> disponíveis em Prata, Prata Max, Advance 600 e Advance 700. Os demais produtos têm <b>somente Apartamento</b> — por isso não aparecem quando a acomodação é Enfermaria.</div>
+    <div class="hint"><b>NotreDame:</b> Enfermaria e Apartamento em Prata, Prata Max, Advance 600 e 700; os demais só Apartamento. <b>Hapvida:</b> Nosso Médico, Smart 200 e Smart 300 só Enfermaria; Smart UP, Flex, Prime e 500 com as duas.</div>
+  </div>
+  <div style="margin-top:12px">
+    <label class="f">DESCONTO PROMOCIONAL</label>
+    <div class="seg" id="segDesc"><button data-v="0" class="on">Não informar</button><button data-v="1">Informar 75% off na 1ª mensalidade</button></div>
+    <div class="hint" id="descHint">Oferta NotreDame e Hapvida: 75% de desconto na primeira mensalidade, válida até 31/10/2026.</div>
   </div>
 </section>
 
@@ -577,7 +582,7 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
 const brDate=d=>String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
 
-const state={client:"",cnpj:"",consultor:"",city:"sp",muni:"São Paulo",mei:false,lives:Array(10).fill(0),copart:"total",reemb:"parcial",acom:"ambos",netPdf:"muni",ops:"nd",sel:{},result:null};
+const state={client:"",cnpj:"",consultor:"",city:"sp",muni:"São Paulo",mei:false,lives:Array(10).fill(0),copart:"total",reemb:"parcial",acom:"ambos",netPdf:"muni",ops:"nd",desc:false,sel:{},result:null};
 PRODUCTS.forEach(p=>state.sel[p.id]={on:false,acom:[...p.acom]});
 let people=[]; // conversor
 
@@ -588,6 +593,11 @@ function tableCityShort(){return cityObj().name.replace(/ - (SP|RJ)$/,"");}
 function currentTable(){const n=livesTotal();if(n===0)return null;if(n===1)return"v1";if(n<=29)return state.mei?"mei":"demais";return"over";}
 function effCopart(t){return (t==="v1"&&state.ops==="nd")?"total":state.copart;}
 /* coparticipação efetiva por operadora: NotreDame 1 vida só tem total; Hapvida 1 vida tem parcial e total */
+/* Desconto promocional: 75% na 1ª mensalidade, NotreDame e Hapvida, válido até 31/10/2026 */
+const DESC={pct:75,ate:"31/10/2026",fim:new Date(2026,9,31,23,59,59)};
+function descValid(){return new Date()<=DESC.fim;}
+function descOn(){return state.desc&&descValid();}
+function firstMonth(total){return Math.round(Math.round(total*100)*(100-DESC.pct)/100)/100;}
 function copFor(op,t){return (op==="nd"&&t==="v1")?"total":state.copart;}
 function tableFor(op,t){if(!t||t==="over")return{};return op==="nd"?PRICES[t][cityObj().g[t]][copFor(op,t)]:(((HP[t]||{})[state.city]||{})[copFor(op,t)]||{});}
 function unitOf(p,a,r,t){const T=tableFor(p.op,t);return p.op==="nd"?T[p.id+"|"+a+"|"+r]:T[p.key+"|"+a];}
@@ -608,8 +618,8 @@ function quotedAcoms(p){const v=visibleAcoms(p);if(state.acom!=="ambos")return v
 function isVisible(p){return visibleAcoms(p).length>0;}
 
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2600);}
-function save(){try{localStorage.setItem("nd_cotador_v1",JSON.stringify({client:state.client,cnpj:state.cnpj,consultor:state.consultor,city:state.city,muni:state.muni,mei:state.mei,lives:state.lives,copart:state.copart,reemb:state.reemb,acom:state.acom,netPdf:state.netPdf,ops:state.ops,sel:state.sel}));}catch(e){}}
-function load(){try{const s=JSON.parse(localStorage.getItem("nd_cotador_v1")||"null");if(!s)return;Object.assign(state,{client:s.client||"",cnpj:s.cnpj||"",consultor:s.consultor||"",city:s.city||"sp",muni:s.muni||"",mei:!!s.mei,copart:s.copart||"total",reemb:s.reemb||"parcial",acom:["enf","apt","ambos"].includes(s.acom)?s.acom:"ambos",netPdf:["muni","sede","off"].includes(s.netPdf)?s.netPdf:"muni",ops:["nd","hap","ambos"].includes(s.ops)?s.ops:"nd"});if(Array.isArray(s.lives)&&s.lives.length===10)state.lives=s.lives.map(x=>Math.max(0,parseInt(x)||0));if(s.sel){PRODUCTS.forEach(p=>{if(s.sel[p.id]){state.sel[p.id].on=!!s.sel[p.id].on;const a=(s.sel[p.id].acom||[]).filter(x=>p.acom.includes(x));state.sel[p.id].acom=a.length?a:[...p.acom];}});}}catch(e){}}
+function save(){try{localStorage.setItem("nd_cotador_v1",JSON.stringify({client:state.client,cnpj:state.cnpj,consultor:state.consultor,city:state.city,muni:state.muni,mei:state.mei,lives:state.lives,copart:state.copart,reemb:state.reemb,acom:state.acom,netPdf:state.netPdf,ops:state.ops,desc:state.desc,sel:state.sel}));}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem("nd_cotador_v1")||"null");if(!s)return;Object.assign(state,{client:s.client||"",cnpj:s.cnpj||"",consultor:s.consultor||"",city:s.city||"sp",muni:s.muni||"",mei:!!s.mei,copart:s.copart||"total",reemb:s.reemb||"parcial",acom:["enf","apt","ambos"].includes(s.acom)?s.acom:"ambos",netPdf:["muni","sede","off"].includes(s.netPdf)?s.netPdf:"muni",ops:["nd","hap","ambos"].includes(s.ops)?s.ops:"nd",desc:!!s.desc});if(Array.isArray(s.lives)&&s.lives.length===10)state.lives=s.lives.map(x=>Math.max(0,parseInt(x)||0));if(s.sel){PRODUCTS.forEach(p=>{if(s.sel[p.id]){state.sel[p.id].on=!!s.sel[p.id].on;const a=(s.sel[p.id].acom||[]).filter(x=>p.acom.includes(x));state.sel[p.id].acom=a.length?a:[...p.acom];}});}}catch(e){}}
 function maskCNPJ(v){v=(v||"").replace(/\D/g,"").slice(0,14);let o=v;if(v.length>12)o=v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2}).*/,"$1.$2.$3/$4-$5");else if(v.length>8)o=v.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4}).*/,"$1.$2.$3/$4");else if(v.length>5)o=v.replace(/^(\d{2})(\d{3})(\d{0,3}).*/,"$1.$2.$3");else if(v.length>2)o=v.replace(/^(\d{2})(\d{0,3}).*/,"$1.$2");return o;}
 
 /* ---------- Conversor de idades ---------- */
@@ -639,6 +649,8 @@ function renderTableInfo(){const t=currentTable();const el=$("#tableInfo"),h=$("
  seg.querySelectorAll("button").forEach(b=>{b.disabled=lock;b.classList.toggle("on",(lock?"total":state.copart)===b.dataset.v);});
  $("#copHint").textContent=lock?"Com 1 vida a tabela NotreDame só possui coparticipação total.":(t==="v1"&&state.ops==="ambos"&&state.copart==="parcial"?"Atenção: com 1 vida os planos NotreDame só existem com coparticipação total e serão cotados assim; os Hapvida seguem a coparticipação parcial.":"Parcial: coparticipação apenas em terapias. Total: coparticipação em consultas, exames, terapias e internação.");
  $("#reembBox").style.display=state.ops==="hap"?"none":"";
+ const dv=descValid();$$("#segDesc button").forEach(b=>{b.disabled=!dv&&b.dataset.v==="1";b.classList.toggle("on",(descOn()?"1":"0")===b.dataset.v);});
+ $("#descHint").innerHTML=dv?"Oferta NotreDame e Hapvida: "+DESC.pct+"% de desconto na primeira mensalidade, válida até "+DESC.ate+".":"<span style='color:#ffd166'>Oferta encerrada em "+DESC.ate+".</span>";
  $$("#segOps button").forEach(b=>b.classList.toggle("on",b.dataset.v===state.ops));
  const oh=$("#opsHint");if(oh){const r=nmRegion();oh.innerHTML=state.ops==="nd"?"Planos NotreDame: Linha Metais e Linha Tradicional.":("Hapvida: Linha Smart"+(r?(nmAvailable()?" · Nosso Médico disponível em "+esc(state.muni)+" ("+NM_NAME[r]+")":" · <span style='color:#ffd166'>Nosso Médico não atende "+esc(state.muni)+"</span>"):"")+(state.ops==="ambos"?" · comparando com NotreDame.":"."));}}
 
@@ -698,11 +710,11 @@ const REAJ_STEPS=REAJUSTE.map(r=>r[0]);
 function renderResults(){const R=state.result;const box=$("#results");box.style.display="block";
  const livesRows=BANDS.map((b,i)=>({b,q:R.lives[i]})).filter(x=>x.q>0);
  let h='<h2><span class="n">5</span>Resultado · '+R.N+(R.N===1?" vida":" vidas")+'</h2><p class="sub">'+opsName(R)+' · '+TABLE_LABEL[R.table]+' · '+esc(cityFull(R))+' · <b style="color:var(--gold2)">'+copSummary(R)+'</b> · Vidas: '+livesRows.map(x=>x.b+": <b>"+x.q+"</b>").join(" · ")+'</p>';
- h+='<div class="opts">'+R.opts.map(o=>'<div class="opt'+(o.best&&R.opts.length>1?" best":"")+'">'+(o.best&&R.opts.length>1?'<span class="best-tag">MENOR INVESTIMENTO</span>':"")+'<div class="nm">'+(multiOp(R)?'<span style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold2);display:block">'+OPS[o.op].short+'</span>':'')+esc(o.p.name)+'</div><div class="meta">'+ACOM[o.acom]+(o.op==="nd"?' · '+REEMB[o.reemb]:'')+' · '+COPL[o.cop]+'<br>ANS '+o.ans+'</div><div class="tot">'+fmt(o.total)+'<span style="font-size:12px;color:var(--muted);font-weight:600"> /mês</span></div><div class="avg">Média por vida: '+fmt(o.avg)+'</div><details><summary>Ver por faixa etária</summary><table class="t"><tr><th>Faixa</th><th>Qtd</th><th>Unitário</th><th>Subtotal</th></tr>'+o.lines.map(l=>'<tr'+(l.qty?"":' style="opacity:.45"')+'><td>'+l.band+'</td><td>'+l.qty+'</td><td>'+fmt(l.unit)+'</td><td>'+fmt(l.sub)+'</td></tr>').join("")+'<tr class="tot"><td colspan="3">Total mensal</td><td>'+fmt(o.total)+'</td></tr></table></details></div>').join("")+'</div>';
+ h+='<div class="opts">'+R.opts.map(o=>'<div class="opt'+(o.best&&R.opts.length>1?" best":"")+'">'+(o.best&&R.opts.length>1?'<span class="best-tag">MENOR INVESTIMENTO</span>':"")+'<div class="nm">'+(multiOp(R)?'<span style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold2);display:block">'+OPS[o.op].short+'</span>':'')+esc(o.p.name)+'</div><div class="meta">'+ACOM[o.acom]+(o.op==="nd"?' · '+REEMB[o.reemb]:'')+' · '+COPL[o.cop]+'<br>ANS '+o.ans+'</div><div class="tot">'+fmt(o.total)+'<span style="font-size:12px;color:var(--muted);font-weight:600"> /mês</span></div><div class="avg">Média por vida: '+fmt(o.avg)+'</div>'+(descOn()?'<div class="avg" style="color:var(--green);font-weight:700;margin-top:4px">1ª mensalidade com '+DESC.pct+'% off: '+fmt(firstMonth(o.total))+'</div>':'')+'<details><summary>Ver por faixa etária</summary><table class="t"><tr><th>Faixa</th><th>Qtd</th><th>Unitário</th><th>Subtotal</th></tr>'+o.lines.map(l=>'<tr'+(l.qty?"":' style="opacity:.45"')+'><td>'+l.band+'</td><td>'+l.qty+'</td><td>'+fmt(l.unit)+'</td><td>'+fmt(l.sub)+'</td></tr>').join("")+'<tr class="tot"><td colspan="3">Total mensal</td><td>'+fmt(o.total)+'</td></tr></table></details></div>').join("")+'</div>';
  // comparativo
  h+='<h3 class="sec">Comparativo por faixa etária (subtotal · unitário)</h3><div class="scroll"><table class="t"><tr><th>Faixa</th><th>Qtd</th>'+R.opts.map(o=>'<th>'+esc(o.p.name)+'<br><span style="font-weight:500;text-transform:none;letter-spacing:0">'+optSub(o)+'</span></th>').join("")+'</tr>';
  livesRows.forEach(x=>{const i=BANDS.indexOf(x.b);h+='<tr><td>'+x.b+'</td><td>'+x.q+'</td>'+R.opts.map(o=>'<td>'+fmt(o.lines[i].sub)+'<br><span class="mut" style="color:var(--muted);font-size:11px">'+fmt(o.lines[i].unit)+' un.</span></td>').join("")+'</tr>';});
- h+='<tr class="tot"><td colspan="2">Total mensal</td>'+R.opts.map(o=>'<td>'+fmt(o.total)+'</td>').join("")+'</tr><tr><td colspan="2" class="mut">Média por vida</td>'+R.opts.map(o=>'<td class="mut">'+fmt(o.avg)+'</td>').join("")+'</tr></table></div>';
+ h+='<tr class="tot"><td colspan="2">Total mensal</td>'+R.opts.map(o=>'<td>'+fmt(o.total)+'</td>').join("")+'</tr><tr><td colspan="2" class="mut">Média por vida</td>'+R.opts.map(o=>'<td class="mut">'+fmt(o.avg)+'</td>').join("")+'</tr>'+(descOn()?'<tr><td colspan="2" style="color:var(--green);font-weight:700">1ª mensalidade ('+DESC.pct+'% off)</td>'+R.opts.map(o=>'<td style="color:var(--green);font-weight:700">'+fmt(firstMonth(o.total))+'</td>').join("")+'</tr>':'')+'</table></div>';
  // tabela unitária completa
  h+='<h3 class="sec">Tabela de valores por faixa etária (valor unitário)</h3><div class="scroll"><table class="t"><tr><th>Faixa</th>'+R.opts.map(o=>'<th>'+esc(o.p.name)+'<br><span style="font-weight:500;text-transform:none;letter-spacing:0">'+optSub(o)+'</span></th>').join("")+'</tr>'+BANDS.map((b,i)=>'<tr><td>'+b+'</td>'+R.opts.map(o=>'<td>'+fmt(o.unit[i])+'</td>').join("")+'</tr>').join("")+'</table></div>';
  // coparticipação
@@ -726,7 +738,8 @@ function buildText(){const R=state.result;if(!R)return"";const N=R.N;const vidas
  const best=R.opts.find(o=>o.best);
  let t="Olá! Tudo bem?\n\nSegue a cotação de plano de saúde empresarial *"+opsName(R)+"* para "+cli+", cotada para *"+vidas+"* em "+R.city+". Para facilitar a leitura, explico abaixo cada ponto:\n\n";
  t+="📌 *PLANOS COTADOS*\nTabela "+TABLE_SHORT[R.table]+" · "+copSummary(R)+"\n"+R.opts.map(o=>"• "+optLabel(o)).join("\n")+"\n\n";
- t+="💰 *INVESTIMENTO MENSAL ("+vidas+")*\n"+R.opts.map(o=>"• "+optLabel(o)+": *"+fmt(o.total)+"* (média "+fmt(o.avg)+" por vida)").join("\n")+"\n";
+ t+="💰 *INVESTIMENTO MENSAL ("+vidas+")*\n"+R.opts.map(o=>"• "+optLabel(o)+": *"+fmt(o.total)+"*"+(descOn()?"\n   1ª mensalidade com "+DESC.pct+"% de desconto: *"+fmt(firstMonth(o.total))+"*":"")).join("\n")+"\n";
+ if(descOn())t+="🔥 *OFERTA ESPECIAL:* "+DESC.pct+"% de desconto na primeira mensalidade — válida somente até "+DESC.ate+".\n";
  if(R.opts.length>1&&best)t+="💡 Menor investimento: "+optLabel(best)+"\n";
  t+="_O valor individual depende da faixa etária de cada beneficiário — a tabela completa por faixa está na proposta em PDF._\n\n";
  t+="👥 *DISTRIBUIÇÃO DAS VIDAS*\n"+livesRows.map(x=>"• "+x.b+" anos: "+x.q).join("\n")+"\n\n";
@@ -757,7 +770,7 @@ function openPrint(){const R=state.result;if(!R)return;const pv=$("#printView");
  const vid=n=>n+(n===1?" vida":" vidas");
  const BR=brandOf(R);Object.entries(THEMES[BR]).forEach(([k,v])=>pv.style.setProperty(k,v));
  const lines=[...new Set(R.opts.map(o=>(multiOp(R)?OPS[o.op].short+" · ":"")+LINE_LABEL[o.p.line]))];
- const pills=[...lines.map(l=>'<span class="cv-pill hi">'+l+'</span>'),'<span class="cv-pill">'+copSummary(R)+'</span>','<span class="cv-pill">Odonto Premium incluso</span>','<span class="cv-pill">Clube de Vantagens + TotalPass</span>','<span class="cv-pill">'+R.opts.length+(R.opts.length===1?' opção cotada':' opções comparadas')+'</span>'].join("");
+ const pills=[...lines.map(l=>'<span class="cv-pill hi">'+l+'</span>'),'<span class="cv-pill">'+copSummary(R)+'</span>',(descOn()?'<span class="cv-pill hi">'+DESC.pct+'% OFF na 1ª mensalidade</span>':'')+'<span class="cv-pill">Odonto Premium incluso</span>','<span class="cv-pill">Clube de Vantagens + TotalPass</span>','<span class="cv-pill">'+R.opts.length+(R.opts.length===1?' opção cotada':' opções comparadas')+'</span>'].join("");
  const ph='<header class="ph">'+brandLogos(BR,"lgs")+'<div class="ph-t"><b>Proposta Comercial</b>'+esc(cli)+' · '+vid(R.N)+' · '+esc(R.city)+'</div></header>';
  const pf=(n,t)=>'<div class="pf"><span>'+(BR==="nd"?"NotreDame Saúde":BR==="hap"?"Hapvida":"Hapvida NotreDame Intermédica")+' · ANS nº 359017 · Tabela promocional para contratos assinados de '+VIGENCIA+'</span><span>'+esc(R.consultor?"Consultor: "+R.consultor+" · ":"")+'Página '+n+' de '+t+'</span></div>';
  const cover='<section class="pg cover">'+brandLogos(BR,"cv-logos")+'<div class="cv-body"><div class="kicker">Proposta Comercial</div><h1>Plano de Saúde<br>Empresarial</h1><div class="cv-sub">'+opsName(R)+' · '+TABLE_LABEL[R.table]+' · '+esc(cityFull(R))+'</div><div class="cv-client">'+esc(cli)+'</div><div class="cv-info">'+(R.cnpj?"CNPJ "+esc(R.cnpj)+" · ":"")+vid(R.N)+'</div><div class="cv-pills">'+pills+'</div></div><div class="cv-stripe"></div><div class="cv-block"></div><div class="cv-foot"><div><b>'+esc(R.consultor||"Consultor")+'</b>Consultor responsável</div><div><b>'+brDate(R.date)+'</b>Data da proposta</div><div><b>Tabela promocional</b>Contratos assinados de '+VIGENCIA+'</div><div><b>'+copSummary(R)+'</b>Modalidade cotada</div></div></section>';
@@ -765,8 +778,8 @@ function openPrint(){const R=state.result;if(!R)return;const pv=$("#printView");
  const livesIdx=BANDS.map((b,i)=>i).filter(i=>R.lives[i]>0);
  // 1. resumo
  const MO=multiOp(R);
- const sumHead='<tr>'+(MO?'<th>Operadora</th>':'')+'<th>Produto</th><th>Acomodação</th><th>Reembolso</th><th>Coparticipação</th><th>Registro ANS</th><th>Total mensal</th><th>Média / vida</th></tr>';
- const sumRow=o=>'<tr'+(o.best&&R.opts.length>1?' class="best"':"")+'>'+(MO?'<td>'+OPS[o.op].short+'</td>':'')+'<td><b>'+esc(o.p.name)+'</b></td><td>'+ACOM[o.acom]+'</td><td>'+(o.op==="hap"?"—":o.reemb==="parcial"?"Parcial":"Total")+'</td><td>'+(o.cop==="parcial"?"Parcial":"Total")+'</td><td>'+o.ans+'</td><td><b>'+fmt(o.total)+'</b></td><td>'+fmt(o.avg)+'</td></tr>';
+ const sumHead='<tr>'+(MO?'<th>Operadora</th>':'')+'<th>Produto</th><th>Acomodação</th><th>Reembolso</th><th>Coparticipação</th><th>Total mensal</th>'+(descOn()?'<th>1ª mensalidade ('+DESC.pct+'% off)</th>':'')+'</tr>';
+ const sumRow=o=>'<tr'+(o.best&&R.opts.length>1?' class="best"':"")+'>'+(MO?'<td>'+OPS[o.op].short+'</td>':'')+'<td><b>'+esc(o.p.name)+'</b></td><td>'+ACOM[o.acom]+'</td><td>'+(o.op==="hap"?"—":o.reemb==="parcial"?"Parcial":"Total")+'</td><td>'+(o.cop==="parcial"?"Parcial":"Total")+'</td><td><b>'+fmt(o.total)+'</b></td>'+(descOn()?'<td><b style="color:#1C7A4E">'+fmt(firstMonth(o.total))+'</b></td>':'')+'</tr>';
  chunk(R.opts,14).forEach((c,i)=>add((i===0?'<h2>Resumo do investimento mensal</h2><p class="lead">Valores calculados a partir da distribuição de vidas informada, conforme a tabela promocional '+TABLE_LABEL[R.table]+' — '+esc(cityFull(R))+'.'+(R.opts.length>1?' A opção de menor investimento está destacada em verde.':'')+'</p>':'')+'<table class="pt">'+sumHead+c.map(sumRow).join("")+'</table>'));
  add('<h3>Dados da cotação</h3><div class="kv"><div><span>Empresa</span><span>'+esc(cli)+'</span></div><div><span>CNPJ</span><span>'+esc(R.cnpj||"—")+'</span></div><div><span>Cidade do contrato</span><span>'+esc(R.city)+'</span></div><div><span>Tabela</span><span>'+TABLE_SHORT[R.table]+' · '+esc(R.tableCity.replace(/ - (SP|RJ)$/,""))+'</span></div><div><span>Total de vidas</span><span>'+R.N+'</span></div><div><span>Consultor</span><span>'+esc(R.consultor||"—")+'</span></div></div>');
  // 2. distribuição (só faixas com vidas)
@@ -780,6 +793,7 @@ function openPrint(){const R=state.result;if(!R)return;const pv=$("#printView");
  // 5. condições
  const cond=['<b>Vigência da tabela:</b> tabela de vendas promocional '+opsName(R)+' válida para contratos assinados de '+VIGENCIA+'. Os valores são confirmados no momento da contratação.'];
  if(R.opts.some(o=>o.op==="nd"))cond.push('<b>Reembolso'+(MO?' (NotreDame)':'')+':</b> parcial ou total conforme previsto em instrumento contratual, para atendimentos fora da rede credenciada.');
+ if(descOn())cond.push('<b>Desconto promocional:</b> '+DESC.pct+'% de desconto na primeira mensalidade, válido somente até '+DESC.ate+'. Da segunda mensalidade em diante, aplicam-se os valores integrais desta proposta.');
  if(R.opts.some(o=>o.op==="hap"))cond.push('<b>Planos Hapvida:</b> sem reembolso; atendimento na rede própria e credenciada do plano contratado.');
  cond.push('<b>Carência:</b> 60 dias apenas para empresas com até 29 vidas; acima de 30 vidas há isenção de carências (conforme tabela).','<b>Plano odontológico:</b> Odonto Premium (ANS 495.614/23-1) com valor promocional R$ 0,00 quando o beneficiário adquire, no ato da contratação, o plano médico-hospitalar. Contratação em contrato separado do médico; taxa de implantação R$ 25,00.');cond.push('<b>Clube de Vantagens:</b> +300 parceiros em diversos segmentos, até 35% de desconto em medicamentos nas principais redes de farmácias e TotalPass sem nenhum custo para a empresa (o colaborador adere 100% digital pelo app, sem fidelidade, planos a partir de R$ 69,90/mês). Acesso em clube.hapvidandi.com.br.');cond.push('<b>Mescla de planos:</b> é possível contratar planos diferentes na mesma empresa; apenas não é possível mesclar coparticipação parcial com total.');
  if(R.opts.some(o=>o.p.id==="infinity"))cond.push('<b>Infinity 1000.11:</b> apenas para contratos a partir de 2 vidas; elegibilidade para adesão apenas para sócios, cônjuges e descendentes.');
@@ -815,6 +829,7 @@ function bind(){
  $("#segMei").onclick=e=>{const b=e.target.closest("button");if(!b)return;state.mei=b.dataset.v==="1";$$("#segMei button").forEach(x=>x.classList.toggle("on",x===b));renderBands();};
  $$("#segMei button").forEach(b=>b.classList.toggle("on",(b.dataset.v==="1")===state.mei));
  $("#segCop").onclick=e=>{const b=e.target.closest("button");if(!b||b.disabled)return;state.copart=b.dataset.v;renderTableInfo();renderProducts();refreshResults();save();};
+ $("#segDesc").onclick=e=>{const b=e.target.closest("button");if(!b||b.disabled)return;state.desc=b.dataset.v==="1";renderTableInfo();refreshResults();save();};
  $("#segOps").onclick=e=>{const b=e.target.closest("button");if(!b)return;state.ops=b.dataset.v;renderTableInfo();renderProducts();refreshResults();save();};
  $("#segReemb").onclick=e=>{const b=e.target.closest("button");if(!b)return;state.reemb=b.dataset.v;$$("#segReemb button").forEach(x=>x.classList.toggle("on",x===b));renderProducts();refreshResults();save();};
  $$("#segReemb button").forEach(b=>b.classList.toggle("on",b.dataset.v===state.reemb));
