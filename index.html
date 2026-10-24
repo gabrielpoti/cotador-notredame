@@ -409,19 +409,22 @@ table.pt.sm th,table.pt.sm td{text-align:left}
 
 <!-- 1. Dados -->
 <section class="card step" id="s1">
-  <h2><span class="n">1</span>Operadora e dados</h2>
+  <h2><span class="n">1</span>Tipo de cotação e dados</h2>
+  <label class="f">TIPO DE COTAÇÃO</label>
+  <div class="seg big" id="segSeg"><button data-v="pme" class="on">Empresa (PME)</button><button data-v="pf">Pessoa Física</button></div>
+  <div class="hint" id="segHint" style="margin-bottom:14px"></div>
   <label class="f">OPERADORA</label>
   <div class="seg big" id="segOps"><button data-v="nd" class="on">NotreDame</button><button data-v="hap">Hapvida</button><button data-v="ambos">Comparar as duas</button></div>
   <div class="hint" id="opsHint" style="margin-bottom:14px"></div>
-  <p class="sub">Nome, CNPJ e consultor são opcionais — aparecem na proposta.</p>
+  <p class="sub" id="subDados">Nome, CNPJ e consultor são opcionais — aparecem na proposta.</p>
   <div class="grid g2">
-    <div><label class="f">NOME DO CLIENTE / EMPRESA</label><input id="client" placeholder="Ex.: Indústria Exemplo Ltda" autocomplete="organization"></div>
-    <div><label class="f">CNPJ</label><input id="cnpj" placeholder="00.000.000/0000-00" inputmode="numeric"></div>
+    <div><label class="f" id="clientLbl">NOME DO CLIENTE / EMPRESA</label><input id="client" placeholder="Ex.: Indústria Exemplo Ltda" autocomplete="organization"></div>
+    <div id="cnpjBox"><label class="f">CNPJ</label><input id="cnpj" placeholder="00.000.000/0000-00" inputmode="numeric"></div>
     <div><label class="f">NOME DO CONSULTOR</label><input id="consultor" placeholder="Ex.: Gabriel" autocomplete="name"></div>
     <div><label class="f">CIDADE</label><div class="citybox"><input id="cityInput" placeholder="Digite o nome da cidade" autocomplete="off" autocapitalize="words"><div id="cityList" class="netlist" hidden></div></div><div class="hint" id="cityHint"></div></div>
   </div>
   <div class="grid g2" style="margin-top:12px">
-    <div>
+    <div id="meiBox">
       <label class="f">TIPO DE EMPRESA (tabela 2 a 29 vidas)</label>
       <div class="seg" id="segMei"><button data-v="0" class="on">Demais empresas</button><button data-v="1">MEI</button></div>
       <div class="hint">Com 1 vida é usada a tabela "1 vida" e, de 30 a 99 vidas, a tabela Porte II — nos dois casos independentemente do tipo.</div>
@@ -484,9 +487,14 @@ table.pt.sm th,table.pt.sm td{text-align:left}
   <div style="margin-top:12px">
     <label class="f">ACOMODAÇÃO NA PROPOSTA</label>
     <div class="seg" id="segAcom"><button data-v="enf">Enfermaria</button><button data-v="apt">Apartamento</button><button data-v="ambos" class="on">Ambas</button></div>
-    <div class="hint"><b>NotreDame:</b> Enfermaria e Apartamento em Prata, Prata Max, Advance 600 e 700; os demais só Apartamento. <b>Hapvida:</b> Nosso Médico, Smart 200 e Smart 300 só Enfermaria; Smart UP, Flex, Prime e 500 com as duas.</div>
+    <div class="hint" id="acomHint"><b>NotreDame:</b> Enfermaria e Apartamento em Prata, Prata Max, Advance 600 e 700; os demais só Apartamento. <b>Hapvida:</b> Nosso Médico, Smart 200 e Smart 300 só Enfermaria; Smart UP, Flex, Prime e 500 com as duas.</div>
   </div>
-  <div style="margin-top:12px">
+  <div style="margin-top:12px" id="odoBox" hidden>
+    <label class="f">PLANO ODONTOLÓGICO</label>
+    <div class="seg" id="segOdo"><button data-v="1" class="on">Com odonto (valor promocional)</button><button data-v="0">Sem odonto</button></div>
+    <div class="hint" id="odoHint"></div>
+  </div>
+  <div style="margin-top:12px" id="descBox">
     <label class="f">DESCONTO PROMOCIONAL</label>
     <div class="seg" id="segDesc"><button data-v="0" class="on">Não informar</button><button data-v="1">Informar 75% off na 1ª mensalidade</button></div>
     <div class="hint" id="descHint">Oferta NotreDame e Hapvida: 75% de desconto na primeira mensalidade, válida até 31/10/2026.</div>
@@ -551,7 +559,7 @@ table.pt.sm th,table.pt.sm td{text-align:left}
 </section>
 <section class="card" id="netRes" style="display:none"></section>
 </div>
-<p class="foot">Valores conforme tabelas promocionais NotreDame Saúde e Hapvida (ANS nº 359017) · Reembolso dos planos NotreDame conforme previsto em instrumento contratual · Os valores são confirmados no momento da contratação.</p>
+<p class="foot">Valores conforme tabelas promocionais NotreDame Saúde e Hapvida · Reembolso dos planos NotreDame conforme previsto em instrumento contratual · Os valores são confirmados no momento da contratação.</p>
 </div></div>
 
 <div class="bar">
@@ -575,13 +583,13 @@ table.pt.sm th,table.pt.sm td{text-align:left}
 const VIGENCIA="21/10/2026 a 31/12/2026";
 const BANDS=["00 a 18","19 a 23","24 a 28","29 a 33","34 a 38","39 a 43","44 a 48","49 a 53","54 a 58","59 ou mais"];
 const BAND_MIN=[0,19,24,29,34,39,44,49,54,59];
-const TABLE_LABEL={v1:"PME Porte I · 1 vida",mei:"PME Porte I · 2 a 29 vidas · MEI",demais:"PME Porte I · 2 a 29 vidas · Demais Empresas",p2:"PME Porte II · 30 a 99 vidas"};
-const TABLE_SHORT={v1:"1 vida",mei:"2 a 29 vidas (MEI)",demais:"2 a 29 vidas (Demais Empresas)",p2:"30 a 99 vidas (Porte II)"};
+const TABLE_LABEL={v1:"PME Porte I · 1 vida",mei:"PME Porte I · 2 a 29 vidas · MEI",demais:"PME Porte I · 2 a 29 vidas · Demais Empresas",p2:"PME Porte II · 30 a 99 vidas",pf:"Pessoa Física · Individual / Familiar"};
+const TABLE_SHORT={v1:"1 vida",mei:"2 a 29 vidas (MEI)",demais:"2 a 29 vidas (Demais Empresas)",p2:"30 a 99 vidas (Porte II)",pf:"Pessoa Física (individual / familiar)"};
 const MAX_LIVES=99;
 /* carência: 60 dias até 29 vidas; isenção a partir de 30 vidas (conforme tabelas) */
-function carenciaTxt(t){return t==="p2"?"Isenção de carências para empresas com 30 vidas ou mais (conforme tabela).":"60 dias apenas para empresas com até 29 vidas; acima de 30 vidas há isenção de carências (conforme tabela).";}
-const ACOM={enf:"Enfermaria",apt:"Apartamento"};
-const ACOM_S={enf:"Enf.",apt:"Apto."};
+function carenciaTxt(t){if(t==="pf")return"Carências conforme contrato, dentro dos prazos máximos previstos na Lei 9.656/98.";return t==="p2"?"Isenção de carências para empresas com 30 vidas ou mais (conforme tabela).":"60 dias apenas para empresas com até 29 vidas; acima de 30 vidas há isenção de carências (conforme tabela).";}
+const ACOM={enf:"Enfermaria",apt:"Apartamento",sa:"Ambulatorial (sem internação)"};
+const ACOM_S={enf:"Enf.",apt:"Apto.",sa:"Amb."};
 const REEMB={parcial:"Reembolso parcial",total:"Reembolso total"};
 const COPL={parcial:"Coparticipação parcial",total:"Coparticipação total"};
 const CITIES=[
@@ -593,7 +601,12 @@ const CITIES=[
  {id:"sorocaba",name:"Sorocaba - SP",g:{demais:"B",mei:"SOR",v1:"B"}},
  {id:"campinas",name:"Campinas - SP",g:{demais:"B",mei:"CAM",v1:"B"}},
  {id:"americana",name:"Americana - SP",g:{demais:"B",mei:"CAM",v1:"B"}},
- {id:"rj",name:"Rio de Janeiro - RJ",g:{demais:"RJ",mei:"RJ",v1:"RJ"}}
+ {id:"rj",name:"Rio de Janeiro - RJ",g:{demais:"RJ",mei:"RJ",v1:"RJ"}},
+ {id:"fortaleza",name:"Fortaleza - CE",g:{}},
+ {id:"goiania",name:"Goiânia - GO",g:{}},
+ {id:"anapolis",name:"Anápolis - GO",g:{}},
+ {id:"quirinopolis",name:"Quirinópolis - GO",g:{}},
+ {id:"rioverde",name:"Rio Verde - GO",g:{}}
 ];
 /* Municípios atendidos → tabela regional aplicada */
 const MUNIS={
@@ -605,10 +618,26 @@ const MUNIS={
  sbc:["Diadema","Embu-Guaçu","Mauá","Ribeirão Pires","Rio Grande da Serra","Santo André","São Bernardo do Campo","São Caetano do Sul"],
  sp:["Barueri","Caieiras","Carapicuíba","Cotia","Embu das Artes","Franco da Rocha","Guarulhos","Itapecerica da Serra","Itapevi","Jandira","Mairiporã","Osasco","São Paulo","Taboão da Serra"],
  sorocaba:["Alumínio","Araçariguama","Araçoiaba da Serra","Cabreúva","Capela do Alto","Ibiúna","Iperó","Itu","Piedade","Porto Feliz","Salto de Pirapora","Sarapuí","São Roque","Sorocaba","Votorantim"],
- rj:["Belford Roxo","Duque de Caxias","Itaboraí","Magé","Maricá","Mesquita","Nilópolis","Niterói","Nova Iguaçu","Queimados","Rio de Janeiro","São Gonçalo","São João do Meriti"]
+ rj:["Belford Roxo","Duque de Caxias","Itaboraí","Magé","Maricá","Mesquita","Nilópolis","Niterói","Nova Iguaçu","Queimados","Rio de Janeiro","São Gonçalo","São João do Meriti"],
+ fortaleza:["Fortaleza"],goiania:["Goiânia"],anapolis:["Anápolis"],quirinopolis:["Quirinópolis"],rioverde:["Rio Verde"]
 };
-const UF=id=>id==="rj"?"RJ":"SP";
-const baseMuni=id=>(CITIES.find(c=>c.id===id)||CITIES[0]).name.replace(/ - (SP|RJ)$/,"");
+/* Regiões: operadoras disponíveis, vigência de cada tabela, taxa de adesão, odonto e ANS da operadora */
+const ODO_SPRJ_PME="Odonto Premium (ANS 495.614/23-1) com valor promocional R$ 0,00 quando o beneficiário adquire, no ato da contratação, o plano médico-hospitalar; contrato separado do médico; taxa de implantação R$ 25,00.";
+const ODO_SPRJ_PF="Odonto Premium (ANS 495.617/23-6) com valor promocional R$ 0,00 quando contratado junto com o plano médico (valor normal R$ 51,82).";
+const ODO_HAP_SS="Odonto Premium Nacional por R$ 23,25 (promocional; valor normal R$ 78,87) ou Odonto Proteção por R$ 0,00, quando o beneficiário adquire o plano médico-hospitalar Hapvida; contrato separado do médico.";
+const RG_SPRJ={ops:["nd","hap"],ans:"359017",desc:true,vig:{pf:"21/10/2026 a 31/12/2026"},taxa:{},odonto:{pme:ODO_SPRJ_PME,pf:ODO_SPRJ_PF},sign:"Consultor Hapvida NotreDame Intermédica"};
+const RG_GO={uf:"GO",ops:["hap"],ans:"36.825-3",desc:false,vig:{v1:"",mei:"17/08/2026 a 30/09/2026",demais:"17/08/2026 a 30/09/2026",p2:"01/07/2026 a 30/09/2026",pf:"01/07/2026 a 30/09/2026"},taxa:{pme:"R$ 20,00 por usuário",pf:"R$ 35,00"},
+ odonto:{pme:ODO_HAP_SS,p2:"Plano odontológico Premium Nacional por R$ 14,87 por beneficiário (promocional; valor normal R$ 75,84). Contratando o odonto junto, o plano médico tem valor promocional.",pf:"Promoção Saúde Integral: plano odontológico por R$ 24,50 por beneficiário (R$ 3,85 no plano ambulatorial), com desconto na mensalidade do plano médico quando contratados juntos."},
+ odoPrice:{p2:{_:14.87},pf:{pfnpamb:3.85,_:24.50}},sign:"Consultor Hapvida"};
+const REGION={sp:Object.assign({uf:"SP"},RG_SPRJ),mogi:Object.assign({uf:"SP"},RG_SPRJ),santos:Object.assign({uf:"SP"},RG_SPRJ),sbc:Object.assign({uf:"SP"},RG_SPRJ),jundiai:Object.assign({uf:"SP"},RG_SPRJ),sorocaba:Object.assign({uf:"SP"},RG_SPRJ),campinas:Object.assign({uf:"SP"},RG_SPRJ),americana:Object.assign({uf:"SP"},RG_SPRJ),rj:Object.assign({uf:"RJ"},RG_SPRJ),
+ fortaleza:{uf:"CE",ops:["hap"],ans:"36.825-3",desc:false,vig:{mei:"28/09/2026 a 31/12/2026",demais:"28/09/2026 a 31/12/2026",pf:"julho/2026 até a próxima atualização da operadora"},taxa:{pme:"R$ 20,00 por usuário",pf:"R$ 35,00 por contrato"},odonto:{pme:ODO_HAP_SS},sign:"Consultor Hapvida"},
+ goiania:RG_GO,anapolis:RG_GO,quirinopolis:RG_GO,rioverde:RG_GO};
+function regionOf(id){return REGION[id||state.city]||REGION.sp;}
+function vigOf(R){const g=regionOf(R&&R.cityId);return (g.vig&&g.vig[R?R.table:currentTable()])||VIGENCIA;}
+function odontoOf(R){const g=regionOf(R.cityId);const o=g.odonto||{};return R.table==="pf"?(o.pf||""):(R.table==="p2"&&o.p2?o.p2:(o.pme||""));}
+function taxaOf(R){const g=regionOf(R.cityId);return (g.taxa||{})[R.table==="pf"?"pf":"pme"]||"";}
+const UF=id=>(REGION[id]||REGION.sp).uf;
+const baseMuni=id=>(CITIES.find(c=>c.id===id)||CITIES[0]).name.replace(/ - [A-Z]{2}$/,"");
 const PRODUCTS=[
  {id:"prata",name:"Prata",line:"metais",acom:["enf","apt"],reemb:["parcial"],cg:{parcial:"g1",total:"g1"}},
  {id:"prata_max",name:"Prata Max",line:"metais",acom:["enf","apt"],reemb:["parcial"],cg:{parcial:"g1",total:"g1"}},
@@ -622,22 +651,40 @@ const PRODUCTS=[
  {id:"p900",name:"Premium 900",line:"tradicional",acom:["apt"],reemb:["total"],cg:{parcial:"g2",total:"g2"}},
  {id:"infinity",name:"Infinity 1000.11",line:"tradicional",acom:["apt"],reemb:["total"],cg:{parcial:"g2",total:"g3"}}
 ];
-PRODUCTS.forEach(p=>{p.op="nd";});
+PRODUCTS.forEach(p=>{p.op="nd";p.seg="pme";});
 PRODUCTS.push(
- {id:"h_nm",key:"nm",op:"hap",name:"Nosso Médico",line:"smart",acom:["enf"],reemb:["sem"],cg:{parcial:"hp",total:"ha"}},
+ {id:"h_nm",key:"nm",op:"hap",name:"Nosso Médico",line:"smart",acom:["enf","apt"],reemb:["sem"],cg:{parcial:"hp",total:"ha"},nm:true},
  {id:"h_up",key:"smartup",op:"hap",name:"Smart UP",line:"smart",acom:["enf","apt"],reemb:["sem"],cg:{parcial:"hp",total:"ha"}},
  {id:"h_flex",key:"flex",op:"hap",name:"Smart Flex",line:"smart",acom:["enf","apt"],reemb:["sem"],cg:{parcial:"hp",total:"hb"}},
  {id:"h_prime",key:"prime",op:"hap",name:"Smart Prime",line:"smart",acom:["enf","apt"],reemb:["sem"],cg:{parcial:"hp",total:"hb"}},
  {id:"h_s200",key:"s200",op:"hap",name:"Smart 200 RIO",line:"smart",acom:["enf"],reemb:["sem"],cg:{parcial:"hp",total:"ha"}},
  {id:"h_s300",key:"s300",op:"hap",name:"Smart 300",line:"smart",acom:["enf"],reemb:["sem"],cg:{parcial:"hp",total:"hb"}},
- {id:"h_s500",key:"s500",op:"hap",name:"Smart 500",line:"smart",acom:["enf","apt"],reemb:["sem"],cg:{parcial:"hp",total:"hb"}}
+ {id:"h_s500",key:"s500",op:"hap",name:"Smart 500",line:"smart",acom:["enf","apt"],reemb:["sem"],cg:{parcial:"hp",total:"hb"}},
+ {id:"h_np",key:"np",op:"hap",name:"Nosso Plano",line:"hapv",acom:["enf","apt"],reemb:["sem"],cg:{parcial:"hfp",total:"hft"}},
+ {id:"h_npamb",key:"npamb",op:"hap",name:"Nosso Plano Ambulatorial",line:"hapv",acom:["sa"],reemb:["sem"],cg:{parcial:"hfp",total:"hft"}},
+ {id:"h_int",key:"int",op:"hap",name:"Integrado",line:"hapv",acom:["enf"],reemb:["sem"],cg:{parcial:"hint",total:"hintt"}},
+ {id:"h_pleno",key:"pleno",op:"hap",name:"Pleno",line:"hapv",acom:["enf","apt"],reemb:["sem"],cg:{parcial:"hint",total:"hintt"}}
+);
+PRODUCTS.forEach(p=>{if(!p.seg)p.seg="pme";});
+/* Pessoa Física (individual / familiar) — somente Hapvida */
+PRODUCTS.push(
+ {id:"pf_up",key:"pfup",op:"hap",seg:"pf",name:"Smart UP",line:"pf",acom:["enf"],reemb:["sem"],cg:{parcial:"hp",total:"ha"},own:true},
+ {id:"pf_up50",key:"pfup50",op:"hap",seg:"pf",name:"Smart UP 50+",line:"pf",acom:["apt"],reemb:["sem"],cg:{parcial:"hp",total:"ha"},own:true,age50:true},
+ {id:"pf_upamb",key:"pfupamb",op:"hap",seg:"pf",name:"Smart UP Ambulatorial",line:"pf",acom:["sa"],reemb:["sem"],cg:{parcial:"hp",total:"ha"},own:true},
+ {id:"pf_rio",key:"pfrio",op:"hap",seg:"pf",name:"Smart Rio",line:"pf",acom:["enf"],reemb:["sem"],cg:{parcial:"hp",total:"ha"},own:true},
+ {id:"pf_rio50",key:"pfrio50",op:"hap",seg:"pf",name:"Smart Rio 50+",line:"pf",acom:["apt"],reemb:["sem"],cg:{parcial:"hp",total:"ha"},own:true,age50:true},
+ {id:"pf_rioamb",key:"pfrioamb",op:"hap",seg:"pf",name:"Smart Rio Ambulatorial",line:"pf",acom:["sa"],reemb:["sem"],cg:{parcial:"hp",total:"ha"},own:true},
+ {id:"pf_nm",key:"pfnm",op:"hap",seg:"pf",name:"Nosso Médico",line:"pf",acom:["enf","apt"],reemb:["sem"],cg:{parcial:"hp",total:"ha"},nm:true},
+ {id:"pf_np",key:"pfnp",op:"hap",seg:"pf",name:"Nosso Plano",line:"pf",acom:["enf","apt"],reemb:["sem"],cg:{parcial:"hfp",total:"hft"}},
+ {id:"pf_mix",key:"pfmix",op:"hap",seg:"pf",name:"Plano Mix",line:"pf",acom:["enf","apt"],reemb:["sem"],cg:{parcial:"hfp",total:"hft"}},
+ {id:"pf_npamb",key:"pfnpamb",op:"hap",seg:"pf",name:"Nosso Plano Ambulatorial",line:"pf",acom:["sa"],reemb:["sem"],cg:{parcial:"hfp",total:"hft"}}
 );
 const OPS={nd:{name:"NotreDame Saúde",short:"NotreDame"},hap:{name:"Hapvida",short:"Hapvida"}};
-const LINE_LABEL={metais:"Linha Metais",tradicional:"Linha Tradicional",smart:"Linha Smart"};
+const LINE_LABEL={metais:"Linha Metais",tradicional:"Linha Tradicional",smart:"Linha Smart",hapv:"Planos Hapvida",pf:"Pessoa Física"};
 /* Nosso Médico: disponível só nos municípios atendidos por cada versão do produto */
-const NM_REGION={sp:"rmsp",mogi:"rmsp",sbc:"rmsp",santos:"rmsp",campinas:"campinas",jundiai:"jundiai",americana:"americana",sorocaba:"sorocaba"};
-const NM_NAME={rmsp:"Nosso Médico RMSP",campinas:"Nosso Médico Campinas",jundiai:"Nosso Médico Jundiaí",americana:"Nosso Médico Americana",sorocaba:"Nosso Médico Sorocaba"};
-const NM_MUNIS={rmsp:["Arujá","Barueri","Caieiras","Carapicuíba","Cotia","Diadema","Guarulhos","Itapevi","Jandira","Mauá","Mogi das Cruzes","Osasco","Ribeirão Pires","Santo André","Santos","São Bernardo do Campo","São Paulo","São Vicente","Taboão da Serra"],campinas:["Campinas"],jundiai:["Jundiaí"],americana:["Americana"],sorocaba:["Sorocaba"]};
+const NM_REGION={sp:"rmsp",mogi:"rmsp",sbc:"rmsp",santos:"rmsp",campinas:"campinas",jundiai:"jundiai",americana:"americana",sorocaba:"sorocaba",goiania:"goiania",anapolis:"anapolis"};
+const NM_NAME={rmsp:"Nosso Médico RMSP",campinas:"Nosso Médico Campinas",jundiai:"Nosso Médico Jundiaí",americana:"Nosso Médico Americana",sorocaba:"Nosso Médico Sorocaba",goiania:"Nosso Médico Goiânia",anapolis:"Nosso Médico Anápolis"};
+const NM_MUNIS={rmsp:["Arujá","Barueri","Caieiras","Carapicuíba","Cotia","Diadema","Guarulhos","Itapevi","Jandira","Mauá","Mogi das Cruzes","Osasco","Ribeirão Pires","Santo André","Santos","São Bernardo do Campo","São Paulo","São Vicente","Taboão da Serra"],campinas:["Campinas"],jundiai:["Jundiaí"],americana:["Americana"],sorocaba:["Sorocaba"],goiania:["Goiânia"],anapolis:["Anápolis"]};
 /* Reajuste por mudança de faixa etária — Hapvida (conforme tabelas Super Simples) */
 const HREAJ={nm:["34,98%","18,18%","0,00%","0,00%","18,77%","30,00%","30,00%","30,00%","44,13%"],smartup:["34,98%","18,18%","0,00%","0,00%","18,77%","30,00%","30,00%","30,00%","44,13%"],flex:["34,98%","18,18%","0,00%","0,00%","18,77%","30,00%","30,00%","30,00%","44,13%"],prime:["17,00%","22,00%","20,00%","5,00%","10,00%","25,00%","20,91%","25,08%","59,10%"],s300:["34,98%","18,18%","4,48%","3,34%","10,00%","30,00%","30,00%","30,00%","44,13%"],s500:["34,98%","18,18%","4,48%","3,34%","10,00%","30,00%","30,00%","30,00%","44,13%"],s200:["35,80%","10,00%","9,00%","1,50%","5,00%","41,70%","35,00%","20,00%","50,60%"]};
 const ANS={"prata|enf":"509.293/26-1","prata|apt":"509.291/26-4","prata_max|enf":"509.273/26-6","prata_max|apt":"509.271/26-0","ouro|apt":"509.333/26-3","ouro_max|apt":"509.323/26-6","diamante|apt":"509.310/26-4","diamante_max|apt":"509.298/26-1","adv600|enf":"474.439/15-0","adv600|apt":"474.438/15-1","adv700|enf":"474.341/15-5","adv700|apt":"474.340/15-7","p900care|apt":"476.795/16-1","p900|apt":"474.424/15-1","infinity|apt":"482.848/19-8"};
@@ -646,13 +693,20 @@ const COPART={
  parcial:{
   g1:{label:"Prata | Prata Max | Ouro | Advance 600 / 700",v:["Sem coparticipação","Sem coparticipação","Sem coparticipação","Sem coparticipação","Valor fixo R$ 79,00","Valor fixo R$ 42,00","Sem coparticipação"]},
   g2:{label:"Ouro Max | Diamante | Diamante Max | Premium 900 / Care | Infinity",v:["Sem coparticipação","Sem coparticipação","Sem coparticipação","Sem coparticipação","Valor fixo R$ 129,00","Valor fixo R$ 66,00","Sem coparticipação"]},
-  hp:{label:"Hapvida · Nosso Médico | Smart",v:["Sem coparticipação","Sem coparticipação","Sem coparticipação","Sem coparticipação","Valor fixo R$ 79,00","Valor fixo R$ 42,00","Sem coparticipação"]}
+  hp:{label:"Hapvida · Nosso Médico | Smart",v:["Sem coparticipação","Sem coparticipação","Sem coparticipação","Sem coparticipação","Valor fixo R$ 79,00","Valor fixo R$ 42,00","Sem coparticipação"]},
+  hfp:{label:"Hapvida · Nosso Plano | Mix | Ambulatorial",v:["Sem coparticipação","Sem coparticipação","Sem coparticipação","Sem coparticipação","Valor fixo R$ 78,87","Valor fixo R$ 24,27","Sem coparticipação"]},
+  hfp42:{label:"Hapvida · Nosso Plano (30 a 99 vidas)",v:["Sem coparticipação","Sem coparticipação","Sem coparticipação","Sem coparticipação","Valor fixo R$ 78,87","Valor fixo R$ 42,47","Sem coparticipação"]},
+  hnmgo:{label:"Hapvida · Nosso Médico (Goiás)",v:["Sem coparticipação","Sem coparticipação","Sem coparticipação","Sem coparticipação","Valor fixo R$ 78,87","40% limitado a R$ 60,00","Sem coparticipação"]},
+  hint:{label:"Hapvida · Integrado | Pleno",v:["Sem coparticipação","Sem coparticipação","Sem coparticipação","Sem coparticipação","Valor fixo R$ 78,87","Valor fixo R$ 42,47","Sem coparticipação"]}
  },
  total:{
   g1:{label:"Prata | Prata Max | Ouro | Advance 600 / 700",v:["30% limitado a R$ 30,00","30% limitado a R$ 90,00","30% limitado a R$ 25,00","30% limitado a R$ 110,00","Valor fixo R$ 79,00","Valor fixo R$ 42,00","Valor fixo R$ 220,00"]},
   g2:{label:"Ouro Max | Diamante | Premium 900 / Care",v:["30% limitado a R$ 55,00","30% limitado a R$ 165,00","30% limitado a R$ 35,00","30% limitado a R$ 130,00","Valor fixo R$ 129,00","Valor fixo R$ 66,00","Valor fixo R$ 400,00"]},
   ha:{label:"Hapvida · Nosso Médico | Smart UP | Smart 200",v:["30% limitado a R$ 20,00","30% limitado a R$ 55,00","30% limitado a R$ 15,00","30% limitado a R$ 55,00","Valor fixo R$ 79,00","Valor fixo R$ 42,00","Isento"]},
   hb:{label:"Hapvida · Smart Flex | Smart Prime | Smart 300 | Smart 500",v:["30% limitado a R$ 30,00","30% limitado a R$ 80,00","30% limitado a R$ 20,00","30% limitado a R$ 100,00","Valor fixo R$ 79,00","Valor fixo R$ 42,00","Valor fixo R$ 180,00"]},
+  hft:{label:"Hapvida · Nosso Plano | Mix | Ambulatorial",v:["Valor fixo R$ 25,42","Valor fixo R$ 43,63","40% limitado a R$ 45,79","40% limitado a R$ 114,48","Valor fixo R$ 78,87","Valor fixo R$ 24,27","Sem coparticipação"]},
+  hnmgot:{label:"Hapvida · Nosso Médico (Goiás)",v:["40% limitado a R$ 40,00","40% limitado a R$ 80,00","40% limitado a R$ 29,00","40% limitado a R$ 120,00","Valor fixo R$ 78,87","40% limitado a R$ 60,00","Sem coparticipação"]},
+  hintt:{label:"Hapvida · Integrado | Pleno",v:["Valor fixo R$ 43,63","Valor fixo R$ 61,82","40% limitado a R$ 51,52","40% limitado a R$ 125,93","Valor fixo R$ 78,87","Valor fixo R$ 42,47","Sem coparticipação"]},
   g3:{label:"Diamante Max | Infinity",v:["30% limitado a R$ 166,00","30% limitado a R$ 355,00","30% limitado a R$ 84,00","30% limitado a R$ 150,00","Valor fixo R$ 129,00","Valor fixo R$ 66,00","Valor fixo R$ 570,00"]}
  }
 };
@@ -677,44 +731,56 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
 const brDate=d=>String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
 
-const state={client:"",cnpj:"",consultor:"",city:"sp",muni:"São Paulo",mei:false,lives:Array(10).fill(0),copart:"total",reemb:"parcial",acom:"ambos",netPdf:"filial",ops:"nd",desc:false,txtMode:"full",view:{sort:"preco",op:"all",acom:"all",cards:false},sel:{},result:null};
+const state={client:"",cnpj:"",consultor:"",city:"sp",muni:"São Paulo",mei:false,lives:Array(10).fill(0),copart:"total",reemb:"parcial",acom:"ambos",netPdf:"filial",ops:"nd",seg:"pme",odo:true,ages:null,desc:false,txtMode:"full",view:{sort:"preco",op:"all",acom:"all",cards:false},sel:{},result:null};
 PRODUCTS.forEach(p=>state.sel[p.id]={on:false,acom:[...p.acom]});
 let people=[]; // conversor
 
 function livesTotal(){return state.lives.reduce((a,b)=>a+b,0);}
 function cityObj(){return CITIES.find(c=>c.id===state.city)||CITIES[0];}
 function muniLabel(){return state.muni+" - "+UF(state.city);}
-function tableCityShort(){return cityObj().name.replace(/ - (SP|RJ)$/,"");}
-function currentTable(){const n=livesTotal();if(n===0)return null;if(n===1)return"v1";if(n<=29)return state.mei?"mei":"demais";if(n<=MAX_LIVES)return"p2";return"over";}
-function effCopart(t){return (t==="v1"&&state.ops==="nd")?"total":state.copart;}
+function tableCityShort(){return cityObj().name.replace(/ - [A-Z]{2}$/,"");}
+function currentTable(){const n=livesTotal();if(n===0)return null;if(state.seg==="pf")return"pf";if(n===1)return"v1";if(n<=29)return state.mei?"mei":"demais";if(n<=MAX_LIVES)return"p2";return"over";}
+function effCopart(t){return (t==="v1"&&opsEff()==="nd")?"total":state.copart;}
+/* operadora efetiva: Pessoa Física e regiões só Hapvida forçam Hapvida */
+function ndAvail(){return state.seg!=="pf"&&regionOf().ops.includes("nd");}
+function opsEff(){return ndAvail()?state.ops:"hap";}
+/* variante "com plano odontológico" (Goiás: PF e 30 a 99 vidas) */
+function odoAvail(t){t=t||currentTable()||filterTable();return !!((t==="pf"&&HP.pfodo&&HP.pfodo[state.city])||(t==="p2"&&HP.p2odo&&HP.p2odo[state.city]));}
+function odoOn(t){return state.odo&&odoAvail(t);}
+function odoPriceOf(p,t){const op=(regionOf().odoPrice||{})[t];if(!op)return 0;return op[p.key]!=null?op[p.key]:op._;}
+/* idades exatas (quando vieram do conversor e batem com as faixas) */
+function exactAges(){const a=state.ages;if(!Array.isArray(a)||!a.length)return null;const c=Array(10).fill(0);a.forEach(x=>c[bandIdx(x)]++);return c.every((v,i)=>v===state.lives[i])?a:null;}
+/* planos 50+: só quando todos têm 50 anos ou mais */
+function age50State(){const L=state.lives;if(L.slice(0,7).some(v=>v>0))return"no";if(!L[7])return"ok";const a=exactAges();if(a)return a.some(x=>x<50)?"no":"ok";return"warn";}
 /* coparticipação efetiva por operadora: NotreDame 1 vida só tem total; Hapvida 1 vida tem parcial e total */
 /* Desconto promocional: 75% na 1ª mensalidade, NotreDame e Hapvida, válido até 31/10/2026 */
 const DESC={pct:75,ate:"31/10/2026",fim:new Date(2026,9,31,23,59,59)};
 function descValid(){return new Date()<=DESC.fim;}
-function descOn(){return state.desc&&descValid();}
+function descOn(){return state.desc&&descValid()&&state.seg==="pme"&&regionOf().desc!==false;}
 function firstMonth(total){return Math.round(Math.round(total*100)*(100-DESC.pct)/100)/100;}
 function copFor(op,t){return (op==="nd"&&t==="v1")?"total":state.copart;}
-function tableFor(op,t){if(!t||t==="over")return{};return op==="nd"?PRICES[t][cityObj().g[t]][copFor(op,t)]:(((HP[t]||{})[state.city]||{})[copFor(op,t)]||{});}
+function cgFor(p,cop,t){if(p.op!=="hap")return p.cg[cop];const go=["goiania","anapolis","quirinopolis","rioverde"].includes(state.city);if(go&&(p.key==="nm"||p.key==="pfnm"))return cop==="parcial"?"hnmgo":"hnmgot";if(go&&p.key==="np"&&t==="p2"&&cop==="parcial")return"hfp42";return p.cg[cop];}
+function tableFor(op,t){if(!t||t==="over")return{};if(op==="nd"){if(!ndAvail()||t==="pf"||!cityObj().g[t])return{};return ((PRICES[t]||{})[cityObj().g[t]]||{})[copFor(op,t)]||{};}const T=odoOn(t)?t+"odo":t;return (((HP[T]||{})[state.city]||{})[copFor(op,t)]||{});}
 function unitOf(p,a,r,t){const T=tableFor(p.op,t);return p.op==="nd"?T[p.id+"|"+a+"|"+r]:T[p.key+"|"+a];}
-function opAllowed(p){return state.ops==="ambos"||state.ops===p.op;}
+function opAllowed(p){const o=opsEff();return (o==="ambos"||o===p.op)&&(p.seg||"pme")===state.seg;}
 function nmRegion(){return NM_REGION[state.city];}
 function nmAvailable(){const r=nmRegion();return !!r&&NM_MUNIS[r].includes(state.muni);}
-function pname(p){return (p.op==="hap"&&p.key==="nm")?(NM_NAME[nmRegion()]||"Nosso Médico"):p.name;}
+function pname(p){return (p.op==="hap"&&p.nm)?(NM_NAME[nmRegion()]||"Nosso Médico"):p.name;}
 function ansOf(p,a){return p.op==="nd"?(ANS[p.id+"|"+a]||""):(HAPD.ans[(p.key==="nm"?state.city:"*")+"|"+p.key+"|"+a]||"");}
 function optionKeys(p){return p.acom.flatMap(a=>p.reemb.map(r=>p.id+"|"+a+"|"+r));}
 function reembsFor(p){if(p.op==="hap")return["sem"];const allow=state.reemb==="ambos"?["parcial","total"]:[state.reemb];return p.reemb.filter(r=>allow.includes(r));}
 /* tabela usada para filtrar a lista de produtos (mesmo antes de informar vidas) */
-function filterTable(){const t=currentTable();if(t==="v1"||t==="mei"||t==="demais"||t==="p2")return t;if(t==="over")return"p2";return state.mei?"mei":"demais";}
+function filterTable(){if(state.seg==="pf")return"pf";const t=currentTable();if(t==="v1"||t==="mei"||t==="demais"||t==="p2")return t;if(t==="over")return"p2";return state.mei?"mei":"demais";}
 
 function acomAllowed(){return state.acom==="ambos"?["enf","apt"]:[state.acom];}
-function visibleAcoms(p){if(!opAllowed(p))return[];if(p.op==="hap"&&p.key==="nm"&&!nmAvailable())return[];const t=filterTable();const al=acomAllowed();return p.acom.filter(a=>al.includes(a)&&reembsFor(p).some(r=>unitOf(p,a,r,t)));}
+function visibleAcoms(p){if(!opAllowed(p))return[];if(p.op==="hap"&&p.nm&&!nmAvailable())return[];if(p.age50&&age50State()==="no")return[];const t=filterTable();const al=acomAllowed();return p.acom.filter(a=>(a==="sa"||al.includes(a))&&reembsFor(p).some(r=>unitOf(p,a,r,t)));}
 /* acomodações efetivamente cotadas: no modo "ambos" respeita os chips do produto */
 function quotedAcoms(p){const v=visibleAcoms(p);if(state.acom!=="ambos")return v;const q=v.filter(a=>state.sel[p.id].acom.includes(a));return q.length?q:v;}
 function isVisible(p){return visibleAcoms(p).length>0;}
 
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2600);}
-function save(){try{localStorage.setItem("nd_cotador_v1",JSON.stringify({client:state.client,cnpj:state.cnpj,consultor:state.consultor,city:state.city,muni:state.muni,mei:state.mei,lives:state.lives,copart:state.copart,reemb:state.reemb,acom:state.acom,netPdf:state.netPdf,ops:state.ops,desc:state.desc,txtMode:state.txtMode,sel:state.sel}));}catch(e){}}
-function load(){try{const s=JSON.parse(localStorage.getItem("nd_cotador_v1")||"null");if(!s)return;Object.assign(state,{client:s.client||"",cnpj:s.cnpj||"",consultor:s.consultor||"",city:s.city||"sp",muni:s.muni||"",mei:!!s.mei,copart:s.copart||"total",reemb:s.reemb||"parcial",acom:["enf","apt","ambos"].includes(s.acom)?s.acom:"ambos",netPdf:s.netPdf==="muni"||s.netPdf==="off"?s.netPdf:"filial",ops:["nd","hap","ambos"].includes(s.ops)?s.ops:"nd",desc:!!s.desc,txtMode:s.txtMode==="short"?"short":"full"});if(Array.isArray(s.lives)&&s.lives.length===10)state.lives=s.lives.map(x=>Math.max(0,parseInt(x)||0));if(s.sel){PRODUCTS.forEach(p=>{if(s.sel[p.id]){state.sel[p.id].on=!!s.sel[p.id].on;const a=(s.sel[p.id].acom||[]).filter(x=>p.acom.includes(x));state.sel[p.id].acom=a.length?a:[...p.acom];}});}}catch(e){}}
+function save(){try{localStorage.setItem("nd_cotador_v1",JSON.stringify({client:state.client,cnpj:state.cnpj,consultor:state.consultor,city:state.city,muni:state.muni,mei:state.mei,lives:state.lives,copart:state.copart,reemb:state.reemb,acom:state.acom,netPdf:state.netPdf,ops:state.ops,seg:state.seg,odo:state.odo,ages:state.ages,desc:state.desc,txtMode:state.txtMode,sel:state.sel}));}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem("nd_cotador_v1")||"null");if(!s)return;Object.assign(state,{client:s.client||"",cnpj:s.cnpj||"",consultor:s.consultor||"",city:s.city||"sp",muni:s.muni||"",mei:!!s.mei,copart:s.copart||"total",reemb:s.reemb||"parcial",acom:["enf","apt","ambos"].includes(s.acom)?s.acom:"ambos",netPdf:s.netPdf==="muni"||s.netPdf==="off"?s.netPdf:"filial",ops:["nd","hap","ambos"].includes(s.ops)?s.ops:"nd",seg:s.seg==="pf"?"pf":"pme",odo:s.odo!==false,ages:Array.isArray(s.ages)?s.ages:null,desc:!!s.desc,txtMode:s.txtMode==="short"?"short":"full"});if(Array.isArray(s.lives)&&s.lives.length===10)state.lives=s.lives.map(x=>Math.max(0,parseInt(x)||0));if(s.sel){PRODUCTS.forEach(p=>{if(s.sel[p.id]){state.sel[p.id].on=!!s.sel[p.id].on;const a=(s.sel[p.id].acom||[]).filter(x=>p.acom.includes(x));state.sel[p.id].acom=a.length?a:[...p.acom];}});}}catch(e){}}
 function maskCNPJ(v){v=(v||"").replace(/\D/g,"").slice(0,14);let o=v;if(v.length>12)o=v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2}).*/,"$1.$2.$3/$4-$5");else if(v.length>8)o=v.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4}).*/,"$1.$2.$3/$4");else if(v.length>5)o=v.replace(/^(\d{2})(\d{3})(\d{0,3}).*/,"$1.$2.$3");else if(v.length>2)o=v.replace(/^(\d{2})(\d{0,3}).*/,"$1.$2");return o;}
 
 /* ---------- Conversor de idades ---------- */
@@ -733,42 +799,56 @@ function peopleCounts(){const c=Array(10).fill(0);people.forEach(p=>{if(!p.bad)c
 function renderBands(){const b=$("#bands");if(!b.children.length){b.innerHTML=BANDS.map((lb,i)=>'<div class="band" data-i="'+i+'"><div class="lb">'+lb+'</div><div class="stepper"><button class="minus" data-i="'+i+'" aria-label="menos">−</button><input type="number" min="0" max="999" inputmode="numeric" data-i="'+i+'" value="0"><button class="plus" data-i="'+i+'" aria-label="mais">+</button></div></div>').join("");}
  $$("#bands .band").forEach((el,i)=>{const v=state.lives[i];el.classList.toggle("has",v>0);const inp=el.querySelector("input");if(document.activeElement!==inp)inp.value=v;});
  const n=livesTotal();$("#totLives").textContent=n+(n===1?" vida":" vidas");const t=currentTable();
- const msg=$("#livesMsg");if(n===0){msg.textContent="Informe pelo menos uma vida em alguma faixa etária";}else if(t==="over"){msg.innerHTML='<span class="pill warn">Acima de 99 vidas — as tabelas deste cotador vão até 99 vidas</span>';}else{msg.innerHTML='<span class="pill ok">Tabela: '+TABLE_SHORT[t]+'</span>';}
+ const msg=$("#livesMsg");if(n===0){msg.textContent="Informe pelo menos uma vida em alguma faixa etária";}else if(t==="over"){msg.innerHTML='<span class="pill warn">Acima de 99 vidas — as tabelas deste cotador vão até 99 vidas</span>';}else if(state.seg!=="pf"&&noHapTable(t)&&!ndAvail()){msg.innerHTML='<span class="pill warn">'+esc(noTableMsg(t))+'</span>';}else{msg.innerHTML='<span class="pill ok">Tabela: '+TABLE_SHORT[t]+'</span>';}
  renderTableInfo();renderProducts();renderBar();refreshResults();save();}
 function renderCityHint(){const h=$("#cityHint");if(h)h.innerHTML="Tabela aplicada: <b style=\"color:var(--gold2)\">"+esc(cityObj().name)+"</b>";}
 function renderTableInfo(){const t=currentTable();const el=$("#tableInfo"),h=$("#tableHint");const seg=$("#segCop");
  if(!t){el.textContent="—";h.textContent="Informe as vidas por faixa etária.";h.className="hint";}
  else if(t==="over"){el.textContent="Acima de 99 vidas";h.textContent="Para 100 vidas ou mais é necessária cotação especial com a operadora; este cotador vai até 99 vidas.";h.className="hint err";}
+ else if(state.seg!=="pf"&&noHapTable(t)&&!ndAvail()){el.textContent="Sem tabela";h.textContent=noTableMsg(t);h.className="hint err";}
+ else if(t==="pf"){el.textContent=TABLE_LABEL.pf+" · tabela "+cityObj().name;h.textContent="Planos Hapvida individuais / familiares. Vigência: "+(regionOf().vig.pf||VIGENCIA)+".";h.className="hint";}
  else{el.textContent=TABLE_LABEL[t]+" · tabela "+cityObj().name;h.textContent=t==="v1"?(state.ops==="nd"?"Tabela 1 vida NotreDame: somente coparticipação total (o seletor fica travado).":state.ops==="hap"?"Tabela 1 vida Hapvida: coparticipação parcial ou total.":"Tabela 1 vida: Hapvida com parcial ou total; NotreDame somente total."):(t==="p2"?"Tabela PME Porte II (30 a 99 vidas), válida para qualquer tipo de empresa · isenção de carências.":t==="mei"?"Tabela exclusiva para clientes MEI.":"Tabela para clientes que não são MEI.");h.className="hint";}
- const lock=t==="v1"&&state.ops==="nd";
+ const lock=t==="v1"&&opsEff()==="nd";
  seg.querySelectorAll("button").forEach(b=>{b.disabled=lock;b.classList.toggle("on",(lock?"total":state.copart)===b.dataset.v);});
  $("#copHint").textContent=lock?"Com 1 vida a tabela NotreDame só possui coparticipação total.":(t==="v1"&&state.ops==="ambos"&&state.copart==="parcial"?"Atenção: com 1 vida os planos NotreDame só existem com coparticipação total e serão cotados assim; os Hapvida seguem a coparticipação parcial.":"Parcial: coparticipação apenas em terapias. Total: coparticipação em consultas, exames, terapias e internação.");
- $("#reembBox").style.display=state.ops==="hap"?"none":"";
+ $("#reembBox").style.display=opsEff()==="hap"?"none":"";syncSegUI();
  const dv=descValid();$$("#segDesc button").forEach(b=>{b.disabled=!dv&&b.dataset.v==="1";b.classList.toggle("on",(descOn()?"1":"0")===b.dataset.v);});
  $("#descHint").innerHTML=dv?"Oferta NotreDame e Hapvida: "+DESC.pct+"% de desconto na primeira mensalidade, válida até "+DESC.ate+".":"<span style='color:#ffd166'>Oferta encerrada em "+DESC.ate+".</span>";
- $$("#segOps button").forEach(b=>b.classList.toggle("on",b.dataset.v===state.ops));
- const oh=$("#opsHint");if(oh){const r=nmRegion();oh.innerHTML=state.ops==="nd"?"Planos NotreDame: Linha Metais e Linha Tradicional.":("Hapvida: Linha Smart"+(r?(nmAvailable()?" · Nosso Médico disponível em "+esc(state.muni)+" ("+NM_NAME[r]+")":" · <span style='color:#ffd166'>Nosso Médico não atende "+esc(state.muni)+"</span>"):"")+(state.ops==="ambos"?" · comparando com NotreDame.":"."));}}
+ $$("#segOps button").forEach(b=>{b.classList.toggle("on",b.dataset.v===opsEff());b.disabled=!ndAvail()&&b.dataset.v!=="hap";});
+ const oh=$("#opsHint");if(oh&&!ndAvail()){oh.innerHTML=state.seg==="pf"?"Pessoa Física: somente planos Hapvida.":"Em "+esc(cityObj().name)+" o cotador tem somente planos Hapvida."+(state.ops!=="hap"?" <span style='color:#ffd166'>NotreDame não disponível nesta região.</span>":"");}
+ else if(oh){const r=nmRegion();oh.innerHTML=state.ops==="nd"?"Planos NotreDame: Linha Metais e Linha Tradicional.":("Hapvida: Linha Smart"+(r?(nmAvailable()?" · Nosso Médico disponível em "+esc(state.muni)+" ("+NM_NAME[r]+")":" · <span style='color:#ffd166'>Nosso Médico não atende "+esc(state.muni)+"</span>"):"")+(state.ops==="ambos"?" · comparando com NotreDame.":"."));}}
 
+function noHapTable(t){if(!t||t==="over")return false;const T=HP[t]&&HP[t][state.city];return !T;}
+function noTableMsg(t){const c=cityObj().name;return t==="v1"?"Não há tabela de 1 vida em "+c+". Informe 2 vidas ou mais.":t==="p2"?"A tabela de 30 a 99 vidas de "+c+" ainda não foi cadastrada.":"Não há tabela para esta faixa de vidas em "+c+".";}
+/* interface conforme o tipo de cotação (Empresa / Pessoa Física) e a região */
+function syncSegUI(){const pf=state.seg==="pf";const ah=$("#acomHint");if(!ah.dataset.orig)ah.dataset.orig=ah.innerHTML;$$("#segSeg button").forEach(b=>b.classList.toggle("on",b.dataset.v===state.seg));
+ const sh=$("#segHint");if(sh)sh.textContent=pf?"Plano individual ou familiar: titular e dependentes, somente Hapvida.":"Plano empresarial PME (1 a 99 vidas).";
+ $("#cnpjBox").hidden=pf;$("#meiBox").hidden=pf;$("#clientLbl").textContent=pf?"NOME DO CLIENTE (TITULAR)":"NOME DO CLIENTE / EMPRESA";$("#subDados").textContent=pf?"Nome do cliente e consultor são opcionais — aparecem na proposta.":"Nome, CNPJ e consultor são opcionais — aparecem na proposta.";
+ const t=currentTable()||filterTable();const oa=odoAvail(t);$("#odoBox").hidden=!oa;
+ if(oa){$$("#segOdo button").forEach(b=>b.classList.toggle("on",(state.odo?"1":"0")===b.dataset.v));$("#odoHint").textContent=t==="pf"?"Promoção Saúde Integral: com o plano odontológico (R$ 24,50 por pessoa; R$ 3,85 no ambulatorial) o plano médico tem desconto. Os valores da cotação já incluem o odonto.":"Contratando o odonto (R$ 14,87 por pessoa), o plano médico tem valor promocional. Os valores da cotação já incluem o odonto.";}
+ $("#descBox").hidden=!(state.seg==="pme"&&regionOf().desc!==false);
+ $("#acomHint").innerHTML=pf?"<b>Pessoa Física:</b> Smart UP e Smart Rio só Enfermaria; Smart UP 50+ e Smart Rio 50+ só Apartamento; Nosso Plano, Nosso Médico e Mix com as duas. Os planos ambulatoriais não têm internação e aparecem em qualquer opção.":(ndAvail()?ah.dataset.orig:"<b>Hapvida:</b> Integrado só Enfermaria; Nosso Plano, Nosso Médico e Pleno com as duas. O Nosso Plano Ambulatorial não tem internação e aparece em qualquer opção.");}
 /* ---------- Produtos ---------- */
 function renderProducts(){const t=filterTable();const box=$("#products");let html="";let shown=0;
- const reembLabel=(state.ops==="hap"?"":(state.reemb==="ambos"?"reembolso parcial e total":"reembolso "+state.reemb)+" · ")+(state.acom==="ambos"?"enfermaria e apartamento":ACOM[state.acom].toLowerCase());
- html+='<div class="hint" style="margin:2px 0 4px">Exibindo '+(state.ops==="ambos"?"NotreDame e Hapvida":OPS[state.ops].short)+' com <b style="color:var(--gold2)">'+reembLabel+'</b> · '+COPL[effCopart(t)].toLowerCase()+' · tabela '+TABLE_SHORT[t]+(livesTotal()===0?' (informe as vidas para confirmar a tabela)':'')+'</div>';
- [["nd","metais"],["nd","tradicional"],["hap","smart"]].forEach(([op,line])=>{const list=PRODUCTS.filter(p=>p.op===op&&p.line===line&&isVisible(p));if(!list.length)return;
-  html+='<div class="lineh">'+(state.ops==="ambos"||op==="hap"?OPS[op].short+' · ':'')+LINE_LABEL[line]+'</div>';
+ const reembLabel=(opsEff()==="hap"?"":(state.reemb==="ambos"?"reembolso parcial e total":"reembolso "+state.reemb)+" · ")+(state.acom==="ambos"?"enfermaria e apartamento":ACOM[state.acom].toLowerCase());
+ html+='<div class="hint" style="margin:2px 0 4px">Exibindo '+(state.seg==="pf"?"Hapvida Pessoa Física":opsEff()==="ambos"?"NotreDame e Hapvida":OPS[opsEff()].short)+' com <b style="color:var(--gold2)">'+reembLabel+'</b> · '+COPL[effCopart(t)].toLowerCase()+' · tabela '+TABLE_SHORT[t]+(livesTotal()===0?' (informe as vidas para confirmar a tabela)':'')+'</div>';
+ [["nd","metais"],["nd","tradicional"],["hap","smart"],["hap","hapv"],["hap","pf"]].forEach(([op,line])=>{const list=PRODUCTS.filter(p=>p.op===op&&p.line===line&&isVisible(p));if(!list.length)return;
+  html+='<div class="lineh">'+(opsEff()==="ambos"||op==="hap"?OPS[op].short+' · ':'')+LINE_LABEL[line]+'</div>';
   list.forEach(p=>{shown++;const s=state.sel[p.id];const acs=visibleAcoms(p);const rs=reembsFor(p);
    const qa=quotedAcoms(p);const toggle=state.acom==="ambos"&&acs.length>1;
    const chips=acs.map(a=>toggle?'<span class="chip '+(qa.includes(a)?"on":"")+'" data-p="'+p.id+'" data-a="'+a+'">'+ACOM[a]+'</span>':'<span class="chip on" style="cursor:default">'+ACOM[a]+(p.acom.length===1&&p.op==="nd"?' (somente)':'')+'</span>').join("");
    const rtxt=p.op==="hap"?"Sem reembolso":(rs.length===2?"Reembolso parcial e total":REEMB[rs[0]]);
    const rchip='<span class="chip fixed">'+rtxt+(p.op==="nd"&&p.reemb.length===1?" (fixo)":"")+'</span>';
-   const acomTxt=p.acom.length>1?"Enfermaria ou Apartamento":(p.acom[0]==="enf"?"Somente Enfermaria":"Somente Apartamento");
-   html+='<div class="prod '+(s.on?"on":"")+'" data-p="'+p.id+'"><span class="ck">'+(s.on?"✓":"")+'</span><div class="nm">'+esc(pname(p))+'<small>'+acomTxt+' · '+(p.op==="hap"?"Sem reembolso":(p.reemb.length===1?REEMB[p.reemb[0]]:"Reembolso parcial ou total"))+'</small></div><div class="chips">'+chips+rchip+'</div></div>';});});
- if(!shown)html+='<div class="hint warn" style="margin-top:10px">Nenhum produto disponível com esta modalidade nesta tabela.</div>';
+   const acomTxt=p.acom[0]==="sa"?"Ambulatorial (sem internação)":acs.length>1?"Enfermaria ou Apartamento":(acs[0]==="enf"?"Somente Enfermaria":"Somente Apartamento");
+   const extra=(p.own?'<span class="chip fixed">Só rede própria</span>':'')+(p.age50?'<span class="chip fixed"'+(age50State()==="warn"?' style="color:#ffd166;border-color:rgba(255,209,102,.5)"':'')+'>'+(age50State()==="warn"?"50 anos ou mais: confirme a faixa 49 a 53":"Só para 50 anos ou mais")+'</span>':'')+(p.op==="hap"&&odoOn(t)?'<span class="chip fixed">Com odonto</span>':'');
+   html+='<div class="prod '+(s.on?"on":"")+'" data-p="'+p.id+'"><span class="ck">'+(s.on?"✓":"")+'</span><div class="nm">'+esc(pname(p))+'<small>'+acomTxt+' · '+(p.op==="hap"?"Sem reembolso":(p.reemb.length===1?REEMB[p.reemb[0]]:"Reembolso parcial ou total"))+'</small></div><div class="chips">'+chips+rchip+extra+'</div></div>';});});
+ if(!shown)html+='<div class="hint warn" style="margin-top:10px">'+(state.seg!=="pf"&&noHapTable(t)&&!ndAvail()?noTableMsg(t):"Nenhum produto disponível com esta modalidade nesta tabela.")+'</div>';
  box.innerHTML=html;renderBar();}
 /* recalcula automaticamente o resultado já exibido quando algo muda */
 function refreshResults(){if(!state.result)return;const t=currentTable();const opts=(t&&t!=="over")?buildOptions():[];
  if(!opts.length){state.result=null;$("#results").style.display="none";renderBar();return;}
  const min=Math.min(...opts.map(o=>o.total));opts.forEach(o=>o.best=o.total===min);
- state.result=Object.assign(state.result,{table:t,cop:effCopart(t),opts,N:livesTotal(),city:muniLabel(),muni:state.muni,tableCity:cityObj().name,group:cityObj().g[t],lives:[...state.lives],client:state.client,cnpj:state.cnpj,consultor:state.consultor});
+ state.result=Object.assign(state.result,{table:t,cityId:state.city,seg:state.seg,age50:age50State(),cop:effCopart(t),opts,N:livesTotal(),city:muniLabel(),muni:state.muni,tableCity:cityObj().name,group:cityObj().g[t],lives:[...state.lives],client:state.client,cnpj:state.cnpj,consultor:state.consultor});
  renderResults();}
 function countOptions(){const t=currentTable();if(!t||t==="over")return 0;let n=0;PRODUCTS.forEach(p=>{const s=state.sel[p.id];if(!s.on)return;quotedAcoms(p).forEach(a=>{reembsFor(p).forEach(r=>{if(unitOf(p,a,r,t))n++;});});});return n;}
 function renderBar(){const n=livesTotal();$("#barTitle").textContent=n+(n===1?" vida":" vidas")+(n?" · "+state.muni:"");const o=countOptions();
@@ -781,18 +861,19 @@ function renderBar(){const n=livesTotal();$("#barTitle").textContent=n+(n===1?" 
 function buildOptions(){const t=currentTable();const out=[];
  PRODUCTS.forEach(p0=>{const s=state.sel[p0.id];if(!s.on)return;const p=Object.assign({},p0,{name:pname(p0)});const cop=copFor(p.op,t);quotedAcoms(p0).forEach(a=>{reembsFor(p).forEach(r=>{const key=p.id+"|"+a+"|"+r;const unit=unitOf(p,a,r,t);if(!unit)return;
   const lines=[];let cents=0;BANDS.forEach((b,i)=>{const q=state.lives[i];const uc=Math.round(unit[i]*100);const sub=q*uc;cents+=sub;lines.push({band:b,qty:q,unit:unit[i],sub:sub/100});});
-  const n=livesTotal();out.push({p,op:p.op,acom:a,reemb:r,cop,key,unit,lines,total:cents/100,avg:cents/100/n,ans:ansOf(p,a),cg:p.cg[cop]});});});});
+  const n=livesTotal();out.push({p,op:p.op,acom:a,reemb:r,cop,key,unit,lines,total:cents/100,avg:cents/100/n,ans:ansOf(p,a),cg:cgFor(p0,cop,t),odo:p.op==="hap"&&odoOn(t)?odoPriceOf(p0,t):0});});});});
  return out;}
 function calc(){const t=currentTable();if(!t){markNeed("s2","Informe pelo menos uma vida em alguma faixa etária para calcular.");return;}
  if(t==="over"){markNeed("s2","Acima de 99 vidas: fora das tabelas deste cotador (para 100 vidas ou mais, cotação especial com a operadora).");return;}
+ if(state.seg!=="pf"&&noHapTable(t)&&!ndAvail()){markNeed("s2",noTableMsg(t));return;}
  const opts=buildOptions();if(!opts.length){markNeed("s4","Selecione ao menos um produto disponível para calcular.");return;}
  state.view.op="all";state.view.acom="all";
  const min=Math.min(...opts.map(o=>o.total));opts.forEach(o=>o.best=o.total===min);
- state.result={table:t,cop:effCopart(t),opts,N:livesTotal(),city:muniLabel(),muni:state.muni,tableCity:cityObj().name,group:cityObj().g[t],date:new Date(),lives:[...state.lives],client:state.client,cnpj:state.cnpj,consultor:state.consultor};
+ state.result={table:t,cityId:state.city,seg:state.seg,age50:age50State(),cop:effCopart(t),opts,N:livesTotal(),city:muniLabel(),muni:state.muni,tableCity:cityObj().name,group:cityObj().g[t],date:new Date(),lives:[...state.lives],client:state.client,cnpj:state.cnpj,consultor:state.consultor};
  histAdd(state.result);goStep(5);}
-function cityFull(R){const tc=R.tableCity||R.city;return R.city===tc?R.city:R.city+" (tabela "+tc.replace(/ - (SP|RJ)$/,"")+")";}
+function cityFull(R){const tc=R.tableCity||R.city;return R.city===tc?R.city:R.city+" (tabela "+tc.replace(/ - [A-Z]{2}$/,"")+")";}
 
-function netResultHtml(R){const L=netLinesOfResult(R);if(!L.length)return"";const N=netForProposal(R);
+function netResultHtml(R){const L=netLinesOfResult(R);if(!L.length)return isSPRJ(R.cityId)?"":'<h3 class="sec">Rede de atendimento</h3><div class="hint">A rede de '+esc(R.city)+' está em atualização e estará disponível em breve no cotador.</div>';const N=netForProposal(R);
  const info=N.map(x=>{const pl=x.plans.map(p=>NETSHORT[p]).join(", ");if(!x.places.length)return NETL[x.line].label+" ("+pl+"): sem rede cadastrada na filial "+esc(filialName(R));const T=netTotals(x);const inMuni=x.places.find(P=>P.city===R.muni);return NETL[x.line].label+" ("+pl+"): <b>"+T.total+"</b> "+(T.total===1?"unidade":"unidades")+" em "+T.cities+(T.cities===1?" cidade":" cidades")+(inMuni?" ("+inMuni.data.total+" em "+esc(R.muni)+")":" <span style='color:#ffd166'>(nenhuma em "+esc(R.muni)+")</span>");}).join("<br>");
  return '<h3 class="sec">Rede de atendimento</h3><label class="f">INCLUIR NO PDF</label><div class="seg" id="segNetPdf"><button data-v="filial"'+(state.netPdf!=="muni"&&state.netPdf!=="off"?' class="on"':'')+'>Filial completa ('+esc(filialName(R))+')</button><button data-v="muni"'+(state.netPdf==="muni"?' class="on"':'')+'>Só '+esc(R.muni)+'</button><button data-v="off"'+(state.netPdf==="off"?' class="on"':'')+'>Não incluir</button></div>'+
   '<div class="hint">'+(state.netPdf==="off"?"A proposta sairá sem a lista de rede.":info)+'</div><div class="row" style="margin-top:10px">'+L.map(x=>'<button class="btn sm" data-netline="'+x.line+'">Ver rede '+NETL[x.line].label.replace("Linha ","")+'</button>').join("")+'</div>';}
@@ -805,7 +886,14 @@ function optLabel(o){return (state.result&&multiOp(state.result)?OPS[o.op].short
 function optSub(o){return ACOM_S[o.acom]+(o.op==="nd"?" · Reemb. "+o.reemb:" · Hapvida");}
 function copSummary(R){const c=[...new Set(R.opts.map(o=>o.cop))];if(c.length===1)return COPL[c[0]];return R.opts.filter((o,i,a)=>a.findIndex(x=>x.op===o.op)===i).map(o=>OPS[o.op].short+": "+COPL[o.cop].toLowerCase()).join(" · ");}
 function copGroups(R){const out=[],seen={};R.opts.forEach(o=>{const k=o.cop+"|"+o.cg;if(!seen[k]){seen[k]={cop:o.cop,cg:o.cg,op:o.op,rule:COPART[o.cop][o.cg],prods:[]};out.push(seen[k]);}if(!seen[k].prods.includes(o.p.name))seen[k].prods.push(o.p.name);});return out;}
-function reajProfiles(R){const out=[],seen={};R.opts.forEach(o=>{const v=o.op==="nd"?REAJUSTE.map(r=>r[1].replace("%",",00%")):HREAJ[o.p.key];const k=v.join("|");if(!seen[k]){seen[k]={vals:v,prods:[]};out.push(seen[k]);}const nm=(multiOp(R)?OPS[o.op].short+" ":"")+o.p.name;if(!seen[k].prods.includes(nm))seen[k].prods.push(nm);});return out;}
+function isSPRJ(id){return ["sp","mogi","santos","sbc","jundiai","sorocaba","campinas","americana","rj"].includes(id||state.city);}
+function hreajOf(R,o){if(o.op==="nd")return REAJUSTE.map(r=>r[1].replace("%",",00%"));const RJ=(HAPD.reaj||{})[R.table];const v=RJ&&RJ[R.cityId]&&RJ[R.cityId][o.p.key];if(v)return v;return (R.table!=="pf"&&isSPRJ(R.cityId)&&HREAJ[o.p.key])||null;}
+function segWord(R){return R.seg==="pf"?"individual / familiar":"empresarial";}
+function hapNote(R){const H=R.opts.filter(o=>o.op==="hap");if(!H.length)return"";const own=[...new Set(H.filter(o=>o.p.own).map(o=>o.p.name))];const oth=H.some(o=>!o.p.own);return (oth?"Planos Hapvida: sem reembolso; atendimento na rede própria e credenciada do plano.":"Planos Hapvida: sem reembolso.")+(own.length?" "+own.join(", ")+": atendimento exclusivo na rede própria Hapvida.":"");}
+function odoNote(R){const O=R.opts.filter(o=>o.odo);if(!O.length)return"";const pr=[...new Set(O.map(o=>fmt(o.odo)))].join(" ou ");return "Valores com o plano odontológico incluso ("+pr+" por pessoa), condição promocional da operadora para contratação conjunta do plano médico e do odonto.";}
+function age50Note(R){const A=[...new Set(R.opts.filter(o=>o.p.age50).map(o=>o.p.name))];if(!A.length)return"";return A.join(" e ")+": exclusivo para beneficiários com 50 anos ou mais."+(R.age50==="warn"?" Confirme a idade de quem está na faixa 49 a 53.":"");}
+function clubeOn(R){return R.seg==="pme"&&isSPRJ(R.cityId);}
+function reajProfiles(R){const out=[],seen={};R.opts.forEach(o=>{const v=hreajOf(R,o)||Array(9).fill("Conforme contrato");const k=v.join("|");if(!seen[k]){seen[k]={vals:v,prods:[]};out.push(seen[k]);}const nm=(multiOp(R)?OPS[o.op].short+" ":"")+o.p.name;if(!seen[k].prods.includes(nm))seen[k].prods.push(nm);});return out;}
 const REAJ_STEPS=REAJUSTE.map(r=>r[0]);
 function renderResults(){const R0=state.result;const R=viewResult();const box=$("#results");box.style.display="block";
  const livesRows=BANDS.map((b,i)=>({b,q:R.lives[i]})).filter(x=>x.q>0);
@@ -824,7 +912,7 @@ function renderResults(){const R0=state.result;const R=viewResult();const box=$(
  // observações
  const hasInf=R.opts.some(o=>o.p.id==="infinity");const hasEnf=R.opts.some(o=>o.acom==="enf");
  const hasND=R.opts.some(o=>o.op==="nd");
- h+='<h3 class="sec">Observações</h3><ul class="obs"><li>Tabela de vendas promocional '+opsName(R)+' válida para contratos assinados de '+VIGENCIA+'. Valores confirmados no momento da contratação.</li>'+(hasEnf?'<li>Enfermaria x Apartamento: a diferença está apenas na acomodação em caso de internação (quarto compartilhado x quarto privativo).</li>':"")+(hasND?'<li>Reembolso (parcial ou total) dos planos NotreDame segue conforme previsto em instrumento contratual.</li>':'')+(R.opts.some(o=>o.op==="hap")?'<li>Planos Hapvida: sem reembolso; atendimento na rede própria e credenciada do plano.</li>':'')+'<li>Carência: '+carenciaTxt(R.table)+'</li><li>Odontologia: Odonto Premium (ANS 495.614/23-1) com valor promocional R$ 0,00 quando o beneficiário adquire, no ato da contratação, o plano médico-hospitalar; contrato separado do médico; taxa de implantação R$ 25,00.</li><li>Reajuste por mudança de faixa etária: '+reajProfiles(R).map(x=>'<b>'+esc(x.prods.join(", "))+'</b>: '+REAJ_STEPS.map((st,i)=>st+" "+x.vals[i]).join(" · ")).join("<br>")+'.</li><li>É possível mesclar planos diferentes na mesma contratação; apenas não é possível mesclar coparticipação parcial com total.</li>'+(hasInf?'<li>Infinity: apenas para contratos a partir de 2 vidas; elegibilidade para adesão apenas para sócios, cônjuges e descendentes.</li>':"")+'</ul>';
+ h+='<h3 class="sec">Observações</h3><ul class="obs"><li>Tabela de vendas promocional '+opsName(R)+' válida para contratos assinados de '+vigOf(R)+'. Valores confirmados no momento da contratação.</li>'+(hasEnf?'<li>Enfermaria x Apartamento: a diferença está apenas na acomodação em caso de internação (quarto compartilhado x quarto privativo).</li>':"")+(hasND?'<li>Reembolso (parcial ou total) dos planos NotreDame segue conforme previsto em instrumento contratual.</li>':'')+(hapNote(R)?'<li>'+hapNote(R)+'</li>':'')+'<li>Carência: '+carenciaTxt(R.table)+'</li>'+(odontoOf(R)?'<li>Odontologia: '+odontoOf(R)+'</li>':'')+(odoNote(R)?'<li>'+odoNote(R)+'</li>':'')+(taxaOf(R)?'<li>Taxa de adesão: '+taxaOf(R)+'.</li>':'')+(age50Note(R)?'<li>'+age50Note(R)+'</li>':'')+'<li>Reajuste por mudança de faixa etária: '+reajProfiles(R).map(x=>'<b>'+esc(x.prods.join(", "))+'</b>: '+REAJ_STEPS.map((st,i)=>st+" "+x.vals[i]).join(" · ")).join("<br>")+'.</li>'+(R.seg==="pme"?'<li>É possível mesclar planos diferentes na mesma contratação; apenas não é possível mesclar coparticipação parcial com total.</li>':'')+(hasInf?'<li>Infinity: apenas para contratos a partir de 2 vidas; elegibilidade para adesão apenas para sócios, cônjuges e descendentes.</li>':"")+'</ul>';
  h+=netResultHtml(R);
  h+='<h3 class="sec">Enviar proposta</h3><div class="actions" id="sendBox" style="margin-top:6px"><button class="btn gold js-pdffile" id="btnPdfFile">Baixar / compartilhar PDF</button><button class="btn" id="btnWa">Enviar texto no WhatsApp</button><button class="btn" id="btnTxt">Ver / copiar texto</button><button class="btn ghost" id="btnPdf">Visualizar e imprimir</button></div><div class="txtbox" id="txtbox"><div class="seg" id="txtMode" style="margin-bottom:8px"><button data-v="short"'+(state.txtMode==="short"?' class="on"':'')+'>Texto resumido</button><button data-v="full"'+(state.txtMode!=="short"?' class="on"':'')+'>Texto completo</button></div><textarea id="txtarea" readonly></textarea><div class="row" style="margin-top:8px"><button class="btn sm" id="btnCopy">Copiar texto</button></div></div>';
  box.innerHTML=h;
@@ -836,28 +924,31 @@ function copyText(t){const done=()=>toast("Texto copiado!");if(navigator.clipboa
 function fallbackCopy(t,done){const ta=$("#txtarea");$("#txtbox").style.display="block";ta.value=t;ta.focus();ta.select();try{document.execCommand("copy");done();}catch(e){toast("Selecione o texto e copie manualmente.");}}
 
 /* ---------- Texto da proposta (WhatsApp) ---------- */
-function buildText(){const R=viewResult();if(!R||!R.opts.length)return"";if(state.txtMode==="short")return buildTextShort(R);const N=R.N;const vidas=N+(N===1?" vida":" vidas");const cli=R.client?"*"+R.client+"*":"sua empresa";const cons=R.consultor||"Consultor";
+function buildText(){const R=viewResult();if(!R||!R.opts.length)return"";if(state.txtMode==="short")return buildTextShort(R);const N=R.N;const PF=R.seg==="pf";const vidas=N+(PF?(N===1?" beneficiário":" beneficiários"):(N===1?" vida":" vidas"));const cli=R.client?"*"+R.client+"*":(PF?"você":"sua empresa");const cons=R.consultor||"Consultor";
  const livesRows=BANDS.map((b,i)=>({b,q:R.lives[i]})).filter(x=>x.q>0);
  const best=R.opts.find(o=>o.best);
- let t="Olá! Tudo bem?\n\nSegue a cotação de plano de saúde empresarial *"+opsName(R)+"* para "+cli+", cotada para *"+vidas+"* em "+R.city+". Para facilitar a leitura, explico abaixo cada ponto:\n\n";
+ let t="Olá! Tudo bem?\n\nSegue a cotação de plano de saúde "+segWord(R)+" *"+opsName(R)+"* para "+cli+", cotada para *"+vidas+"* em "+R.city+". Para facilitar a leitura, explico abaixo cada ponto:\n\n";
  t+="📌 *PLANOS COTADOS*\nTabela "+TABLE_SHORT[R.table]+" · "+copSummary(R)+"\n"+R.opts.map(o=>"• "+optLabel(o)).join("\n")+"\n\n";
  t+="💰 *INVESTIMENTO MENSAL ("+vidas+")*\n"+R.opts.map(o=>"• "+optLabel(o)+": *"+fmt(o.total)+"*"+(descOn()?"\n   1ª mensalidade com "+DESC.pct+"% de desconto: *"+fmt(firstMonth(o.total))+"*":"")).join("\n")+"\n";
  if(descOn())t+="🔥 *OFERTA ESPECIAL:* "+DESC.pct+"% de desconto na primeira mensalidade — válida somente até "+DESC.ate+".\n";
  if(R.opts.length>1&&best)t+="💡 Menor investimento: "+optLabel(best)+"\n";
  t+="_O valor individual depende da faixa etária de cada beneficiário — a tabela completa por faixa está na proposta em PDF._\n\n";
- t+="👥 *DISTRIBUIÇÃO DAS VIDAS*\n"+livesRows.map(x=>"• "+x.b+" anos: "+x.q).join("\n")+"\n\n";
+ t+=(PF?"👥 *BENEFICIÁRIOS POR FAIXA ETÁRIA*\n":"👥 *DISTRIBUIÇÃO DAS VIDAS*\n")+livesRows.map(x=>"• "+x.b+" anos: "+x.q).join("\n")+"\n\n";
  if(R.opts.some(o=>o.acom==="enf"))t+="🏥 *ENFERMARIA x APARTAMENTO*\nA diferença está apenas na acomodação em caso de internação: quarto compartilhado (enfermaria) x quarto privativo (apartamento).\n\n";
  if(R.opts.some(o=>o.op==="nd"))t+="💳 *REEMBOLSO*\n"+(multiOp(R)?"Planos NotreDame: r":"R")+"eembolso parcial ou total conforme previsto em instrumento contratual."+(multiOp(R)?" Planos Hapvida: sem reembolso.":"")+"\n\n";
+ if(hapNote(R))t+="🏥 *ATENDIMENTO HAPVIDA*\n"+hapNote(R)+"\n\n";
+ if(age50Note(R))t+="👴 *PLANOS 50+*\n"+age50Note(R)+"\n\n";
  t+="🧾 *O QUE É COPARTICIPAÇÃO*\nCobrada apenas quando o serviço é utilizado, por procedimento realizado:\n";
  copGroups(R).forEach(g=>{t+="▪ "+(multiOp(R)?OPS[g.op].short+" ":"")+g.prods.join(", ")+" ("+COPL[g.cop].toLowerCase()+"): "+COPART_ROWS.map((r,i)=>r+" — "+g.rule.v[i]).join("; ")+"\n";});
  t+="\n✅ *CARÊNCIA*\n"+carenciaTxt(R.table)+"\n\n";
- t+="🦷 *PLANO ODONTOLÓGICO*\nOdonto Premium com valor promocional R$ 0,00 quando contratado junto ao plano médico-hospitalar (contrato separado; taxa de implantação R$ 25,00).\n\n";
- t+=netSummaryText(R);
- t+="🎁 *CLUBE DE VANTAGENS*\n+300 parceiros, até 35% de desconto em medicamentos e TotalPass sem nenhum custo para a empresa (o colaborador adere pelo app, a partir de R$ 69,90).\n\n";
- t+="ℹ️ É possível mesclar planos diferentes na mesma contratação — apenas não é possível mesclar coparticipação parcial com total.\n";
+ if(odontoOf(R)||odoNote(R))t+="🦷 *PLANO ODONTOLÓGICO*\n"+[odoNote(R),odontoOf(R)].filter(Boolean).join("\n")+"\n\n";
+ if(taxaOf(R))t+="🧾 *TAXA DE ADESÃO*\n"+taxaOf(R)+".\n\n";
+ t+=netSummaryText(R);if(!isSPRJ(R.cityId))t+="📍 *REDE DE ATENDIMENTO*\nA rede de "+R.city+" está em atualização no cotador; consulte o guia médico da operadora.\n\n";
+ if(clubeOn(R))t+="🎁 *CLUBE DE VANTAGENS*\n+300 parceiros, até 35% de desconto em medicamentos e TotalPass sem nenhum custo para a empresa (o colaborador adere pelo app, a partir de R$ 69,90).\n\n";
+ if(!PF)t+="ℹ️ É possível mesclar planos diferentes na mesma contratação — apenas não é possível mesclar coparticipação parcial com total.\n";
  if(R.opts.some(o=>o.p.id==="infinity"))t+="ℹ️ Infinity: apenas para contratos a partir de 2 vidas; adesão exclusiva para sócios, cônjuges e descendentes.\n";
- t+="\n⚠️ Os valores seguem a tabela promocional vigente para contratos assinados de "+VIGENCIA+" e são confirmados no momento da contratação.\n\n";
- t+="Fico à disposição para tirar qualquer dúvida ou fazer uma simulação com outra combinação. Qual das opções faz mais sentido para vocês?\n\nAbraço,\n*"+cons+"*\nConsultor Hapvida NotreDame Intermédica";
+ t+="\n⚠️ Os valores seguem a tabela promocional vigente para contratos assinados de "+vigOf(R)+" e são confirmados no momento da contratação.\n\n";
+ t+="Fico à disposição para tirar qualquer dúvida ou fazer uma simulação com outra combinação. Qual das opções faz mais sentido para "+(PF?"você":"vocês")+"?\n\nAbraço,\n*"+cons+"*\n"+regionOf(R.cityId).sign;
  return t;}
 
 /* ---------- Proposta em PDF (impressão) ---------- */
@@ -869,14 +960,14 @@ const THEMES={nd:{"--navy":"#00134F","--pgold":"#d4af37","--pdark":"#000b2e","--
  hap:{"--navy":"#013BA6","--pgold":"#FF5A00","--pdark":"#002A78","--pkick":"#FFB000","--ptot":"#fff1e8","--phi-ink":"#ffffff"},
  both:{"--navy":"#013BA6","--pgold":"#FF5A00","--pdark":"#002A78","--pkick":"#FFB000","--ptot":"#fff1e8","--phi-ink":"#ffffff"}};
 function brandLogos(b,cls){const L={nd:'<img src="'+LOGO_WHITE+'" alt="NotreDame Saúde">',hap:'<img src="'+HAP_LOGO+'" alt="Hapvida">'};return b==="both"?'<div class="'+cls+'">'+L.hap+'<i></i>'+L.nd+'</div>':'<div class="'+cls+'">'+L[b]+'</div>';}
-function openPrint(mode){const R=viewResult();if(!R||!R.opts.length)return;const pv=$("#printView");const cli=R.client||"Empresa";const groups=[...new Set(R.opts.map(o=>o.cg))];
- const vid=n=>n+(n===1?" vida":" vidas");
+function openPrint(mode){const R=viewResult();if(!R||!R.opts.length)return;const pv=$("#printView");const cli=R.client||(R.seg==="pf"?"Cliente":"Empresa");const groups=[...new Set(R.opts.map(o=>o.cg))];
+ const vid=n=>n+(R.seg==="pf"?(n===1?" beneficiário":" beneficiários"):(n===1?" vida":" vidas"));
  const BR=brandOf(R);Object.entries(THEMES[BR]).forEach(([k,v])=>pv.style.setProperty(k,v));
  const lines=[...new Set(R.opts.map(o=>(multiOp(R)?OPS[o.op].short+" · ":"")+LINE_LABEL[o.p.line]))];
- const pills=[...lines.map(l=>'<span class="cv-pill hi">'+l+'</span>'),'<span class="cv-pill">'+copSummary(R)+'</span>',(descOn()?'<span class="cv-pill hi">'+DESC.pct+'% OFF na 1ª mensalidade</span>':'')+'<span class="cv-pill">Odonto Premium incluso</span>','<span class="cv-pill">Clube de Vantagens + TotalPass</span>','<span class="cv-pill">'+R.opts.length+(R.opts.length===1?' opção cotada':' opções comparadas')+'</span>'].join("");
+ const pills=[...lines.map(l=>'<span class="cv-pill hi">'+l+'</span>'),'<span class="cv-pill">'+copSummary(R)+'</span>',(descOn()?'<span class="cv-pill hi">'+DESC.pct+'% OFF na 1ª mensalidade</span>':'')+(clubeOn(R)?'<span class="cv-pill">Odonto Premium incluso</span>':'')+(R.opts.some(o=>o.odo)?'<span class="cv-pill">Com plano odontológico</span>':''),(clubeOn(R)?'<span class="cv-pill">Clube de Vantagens + TotalPass</span>':''),'<span class="cv-pill">'+R.opts.length+(R.opts.length===1?' opção cotada':' opções comparadas')+'</span>'].join("");
  const ph='<header class="ph">'+brandLogos(BR,"lgs")+'<div class="ph-t"><b>Proposta Comercial</b>'+esc(cli)+' · '+vid(R.N)+' · '+esc(R.city)+'</div></header>';
- const pf=(n,t)=>'<div class="pf"><span>'+(BR==="nd"?"NotreDame Saúde":BR==="hap"?"Hapvida":"Hapvida NotreDame Intermédica")+' · ANS nº 359017 · Tabela promocional para contratos assinados de '+VIGENCIA+'</span><span>'+esc(R.consultor?"Consultor: "+R.consultor+" · ":"")+'Página '+n+' de '+t+'</span></div>';
- const cover='<section class="pg cover">'+brandLogos(BR,"cv-logos")+'<div class="cv-body"><div class="kicker">Proposta Comercial</div><h1>Plano de Saúde<br>Empresarial</h1><div class="cv-sub">'+opsName(R)+' · '+TABLE_LABEL[R.table]+' · '+esc(cityFull(R))+'</div><div class="cv-client">'+esc(cli)+'</div><div class="cv-info">'+(R.cnpj?"CNPJ "+esc(R.cnpj)+" · ":"")+vid(R.N)+'</div><div class="cv-pills">'+pills+'</div></div><div class="cv-stripe"></div><div class="cv-block"></div><div class="cv-foot"><div><b>'+esc(R.consultor||"Consultor")+'</b>Consultor responsável</div><div><b>'+brDate(R.date)+'</b>Data da proposta</div><div><b>Tabela promocional</b>Contratos assinados de '+VIGENCIA+'</div><div><b>'+copSummary(R)+'</b>Modalidade cotada</div></div></section>';
+ const pf=(n,t)=>'<div class="pf"><span>'+(BR==="nd"?"NotreDame Saúde":BR==="hap"?"Hapvida":"Hapvida NotreDame Intermédica")+' · ANS nº '+regionOf(R.cityId).ans+' · Tabela promocional para contratos assinados de '+vigOf(R)+'</span><span>'+esc(R.consultor?"Consultor: "+R.consultor+" · ":"")+'Página '+n+' de '+t+'</span></div>';
+ const cover='<section class="pg cover">'+brandLogos(BR,"cv-logos")+'<div class="cv-body"><div class="kicker">Proposta Comercial</div><h1>Plano de Saúde<br>'+(R.seg==="pf"?"Individual / Familiar":"Empresarial")+'</h1><div class="cv-sub">'+opsName(R)+' · '+TABLE_LABEL[R.table]+' · '+esc(cityFull(R))+'</div><div class="cv-client">'+esc(cli)+'</div><div class="cv-info">'+(R.seg!=="pf"&&R.cnpj?"CNPJ "+esc(R.cnpj)+" · ":"")+vid(R.N)+'</div><div class="cv-pills">'+pills+'</div></div><div class="cv-stripe"></div><div class="cv-block"></div><div class="cv-foot"><div><b>'+esc(R.consultor||"Consultor")+'</b>Consultor responsável</div><div><b>'+brDate(R.date)+'</b>Data da proposta</div><div><b>Tabela promocional</b>Contratos assinados de '+vigOf(R)+'</div><div><b>'+copSummary(R)+'</b>Modalidade cotada</div></div></section>';
  const B=[];const add=(html,br)=>B.push({html,br:!!br});
  const livesIdx=BANDS.map((b,i)=>i).filter(i=>R.lives[i]>0);
  // 1. resumo
@@ -884,7 +975,7 @@ function openPrint(mode){const R=viewResult();if(!R||!R.opts.length)return;const
  const sumHead='<tr>'+(MO?'<th>Operadora</th>':'')+'<th>Produto</th><th>Acomodação</th><th>Reembolso</th><th>Coparticipação</th><th>Total mensal</th>'+(descOn()?'<th>1ª mensalidade ('+DESC.pct+'% off)</th>':'')+'</tr>';
  const sumRow=o=>'<tr'+(o.best&&R.opts.length>1?' class="best"':"")+'>'+(MO?'<td>'+OPS[o.op].short+'</td>':'')+'<td><b>'+esc(o.p.name)+'</b></td><td>'+ACOM[o.acom]+'</td><td>'+(o.op==="hap"?"—":o.reemb==="parcial"?"Parcial":"Total")+'</td><td>'+(o.cop==="parcial"?"Parcial":"Total")+'</td><td><b>'+fmt(o.total)+'</b></td>'+(descOn()?'<td><b style="color:#1C7A4E">'+fmt(firstMonth(o.total))+'</b></td>':'')+'</tr>';
  chunk(R.opts,14).forEach((c,i)=>add((i===0?'<h2>Resumo do investimento mensal</h2><p class="lead">Valores calculados a partir da distribuição de vidas informada, conforme a tabela promocional '+TABLE_LABEL[R.table]+' — '+esc(cityFull(R))+'.'+(R.opts.length>1?' A opção de menor investimento está destacada em verde.':'')+'</p>':'')+'<table class="pt">'+sumHead+c.map(sumRow).join("")+'</table>'));
- add('<h3>Dados da cotação</h3><div class="kv"><div><span>Empresa</span><span>'+esc(cli)+'</span></div><div><span>CNPJ</span><span>'+esc(R.cnpj||"—")+'</span></div><div><span>Cidade do contrato</span><span>'+esc(R.city)+'</span></div><div><span>Tabela</span><span>'+TABLE_SHORT[R.table]+' · '+esc(R.tableCity.replace(/ - (SP|RJ)$/,""))+'</span></div><div><span>Total de vidas</span><span>'+R.N+'</span></div><div><span>Consultor</span><span>'+esc(R.consultor||"—")+'</span></div></div>');
+ add('<h3>Dados da cotação</h3><div class="kv"><div><span>'+(R.seg==="pf"?"Cliente":"Empresa")+'</span><span>'+esc(cli)+'</span></div>'+(R.seg==="pf"?'':'<div><span>CNPJ</span><span>'+esc(R.cnpj||"—")+'</span></div>')+'<div><span>Cidade do contrato</span><span>'+esc(R.city)+'</span></div><div><span>Tabela</span><span>'+TABLE_SHORT[R.table]+' · '+esc(R.tableCity.replace(/ - [A-Z]{2}$/,""))+'</span></div><div><span>'+(R.seg==="pf"?"Beneficiários":"Total de vidas")+'</span><span>'+R.N+'</span></div><div><span>Consultor</span><span>'+esc(R.consultor||"—")+'</span></div></div>');
  // 2. distribuição (só faixas com vidas)
  chunk(R.opts,5).forEach((c,i)=>add((i===0?'<h3>Investimento por faixa etária (vidas informadas)</h3>':'')+'<table class="pt"><tr><th>Faixa etária</th><th>Vidas</th>'+c.map(o=>'<th>'+optHead(o)+'</th>').join("")+'</tr>'+livesIdx.map(i=>'<tr><td>'+BANDS[i]+' anos</td><td>'+R.lives[i]+'</td>'+c.map(o=>'<td>'+fmt(o.lines[i].sub)+'</td>').join("")+'</tr>').join("")+'<tr class="tot"><td>Total mensal</td><td>'+R.N+'</td>'+c.map(o=>'<td>'+fmt(o.total)+'</td>').join("")+'</tr></table>'));
  B[B.length-1].html+=('<p class="lead">Enf. = Enfermaria · Apto. = Apartamento'+(R.opts.some(o=>o.op==="nd")?' · RP = reembolso parcial · RT = reembolso total':'')+'. A diferença entre Enfermaria e Apartamento está apenas na acomodação em caso de internação (quarto compartilhado x privativo).</p>');
@@ -894,13 +985,14 @@ function openPrint(mode){const R=viewResult();if(!R||!R.opts.length)return;const
  // 4. coparticipação
  copGroups(R).forEach((g,i)=>{add((i===0?'<h2>Coparticipação</h2><p class="lead">Cobrança por procedimento realizado, apenas quando há utilização. Internação considerada na rede credenciada.</p>':'')+'<h3>'+(MO?OPS[g.op].short+' · ':'')+esc(g.prods.join(", "))+' — '+COPL[g.cop].toLowerCase()+'</h3><table class="pt"><tr><th>Procedimento</th><th>Coparticipação</th></tr>'+COPART_ROWS.map((r,k)=>'<tr><td>'+r+'</td><td>'+g.rule.v[k]+'</td></tr>').join("")+'</table>',i===0);});
  // 5. condições
- const cond=['<b>Vigência da tabela:</b> tabela de vendas promocional '+opsName(R)+' válida para contratos assinados de '+VIGENCIA+'. Os valores são confirmados no momento da contratação.'];
+ const cond=['<b>Vigência da tabela:</b> tabela de vendas promocional '+opsName(R)+' válida para contratos assinados de '+vigOf(R)+'. Os valores são confirmados no momento da contratação.'];
  if(R.opts.some(o=>o.op==="nd"))cond.push('<b>Reembolso'+(MO?' (NotreDame)':'')+':</b> parcial ou total conforme previsto em instrumento contratual, para atendimentos fora da rede credenciada.');
  if(descOn())cond.push('<b>Desconto promocional:</b> '+DESC.pct+'% de desconto na primeira mensalidade, válido somente até '+DESC.ate+'. Da segunda mensalidade em diante, aplicam-se os valores integrais desta proposta.');
- if(R.opts.some(o=>o.op==="hap"))cond.push('<b>Planos Hapvida:</b> sem reembolso; atendimento na rede própria e credenciada do plano contratado.');
- cond.push('<b>Carência:</b> '+carenciaTxt(R.table),'<b>Plano odontológico:</b> Odonto Premium (ANS 495.614/23-1) com valor promocional R$ 0,00 quando o beneficiário adquire, no ato da contratação, o plano médico-hospitalar. Contratação em contrato separado do médico; taxa de implantação R$ 25,00.');cond.push('<b>Clube de Vantagens:</b> +300 parceiros em diversos segmentos, até 35% de desconto em medicamentos nas principais redes de farmácias e TotalPass sem nenhum custo para a empresa (o colaborador adere 100% digital pelo app, sem fidelidade, planos a partir de R$ 69,90/mês). Acesso em clube.hapvidandi.com.br.');cond.push('<b>Mescla de planos:</b> é possível contratar planos diferentes na mesma empresa; apenas não é possível mesclar coparticipação parcial com total.');
+ if(hapNote(R))cond.push('<b>Atendimento Hapvida:</b> '+hapNote(R).replace(/^Planos Hapvida: /,""));
+ if(age50Note(R))cond.push('<b>Planos 50+:</b> '+age50Note(R));
+ cond.push('<b>Carência:</b> '+carenciaTxt(R.table));if(odontoOf(R)||odoNote(R))cond.push('<b>Plano odontológico:</b> '+[odoNote(R),odontoOf(R)].filter(Boolean).join(" "));if(taxaOf(R))cond.push('<b>Taxa de adesão:</b> '+taxaOf(R)+'.');if(clubeOn(R))cond.push('<b>Clube de Vantagens:</b> +300 parceiros em diversos segmentos, até 35% de desconto em medicamentos nas principais redes de farmácias e TotalPass sem nenhum custo para a empresa (o colaborador adere 100% digital pelo app, sem fidelidade, planos a partir de R$ 69,90/mês). Acesso em clube.hapvidandi.com.br.');if(R.seg==="pme")cond.push('<b>Mescla de planos:</b> é possível contratar planos diferentes na mesma empresa; apenas não é possível mesclar coparticipação parcial com total.');
  if(R.opts.some(o=>o.p.id==="infinity"))cond.push('<b>Infinity 1000.11:</b> apenas para contratos a partir de 2 vidas; elegibilidade para adesão apenas para sócios, cônjuges e descendentes.');
- cond.push('<b>Área de atuação:</b> condições e valores destinados aos colaboradores da contratante e seus dependentes lotados e domiciliados em '+esc(R.city)+' (área de atuação da tabela '+esc(R.tableCity)+'), conforme registro na ANS.');
+ cond.push(R.seg==="pf"?'<b>Área de atuação:</b> condições e valores destinados a beneficiários residentes em '+esc(R.city)+' (área de atuação da tabela '+esc(R.tableCity)+'), conforme registro na ANS.':'<b>Área de atuação:</b> condições e valores destinados aos colaboradores da contratante e seus dependentes lotados e domiciliados em '+esc(R.city)+' (área de atuação da tabela '+esc(R.tableCity)+'), conforme registro na ANS.');
  add('<h2 style="margin-top:6px">Condições gerais</h2><ul>'+cond.map(c=>'<li>'+c+'</li>').join("")+'</ul>');
  const RP=reajProfiles(R);add('<h3>Reajuste por mudança de faixa etária</h3><table class="pt sm"><tr><th>Mudança de faixa</th>'+RP.map(x=>'<th>'+esc(x.prods.join(", "))+'</th>').join("")+'</tr>'+REAJ_STEPS.map((st,i)=>'<tr><td>'+st+'</td>'+RP.map(x=>'<td>'+x.vals[i]+'</td>').join("")+'</tr>').join("")+'</table>');
  netPdfBlocks(R,add);
@@ -932,7 +1024,9 @@ function bind(){
  $$("#segMei button").forEach(b=>b.classList.toggle("on",(b.dataset.v==="1")===state.mei));
  $("#segCop").onclick=e=>{const b=e.target.closest("button");if(!b||b.disabled)return;state.copart=b.dataset.v;renderTableInfo();renderProducts();refreshResults();save();};
  $("#segDesc").onclick=e=>{const b=e.target.closest("button");if(!b||b.disabled)return;state.desc=b.dataset.v==="1";renderTableInfo();refreshResults();save();};
- $("#segOps").onclick=e=>{const b=e.target.closest("button");if(!b)return;state.ops=b.dataset.v;renderTableInfo();renderProducts();refreshResults();save();};
+ $("#segSeg").onclick=e=>{const b=e.target.closest("button");if(!b||b.dataset.v===state.seg)return;state.seg=b.dataset.v;state.result=null;$("#results").style.display="none";renderBands();renderTableInfo();renderProducts();save();};
+ $("#segOdo").onclick=e=>{const b=e.target.closest("button");if(!b)return;state.odo=b.dataset.v==="1";renderTableInfo();renderProducts();refreshResults();save();};
+ $("#segOps").onclick=e=>{const b=e.target.closest("button");if(!b||b.disabled)return;state.ops=b.dataset.v;renderTableInfo();renderProducts();refreshResults();save();};
  $("#segReemb").onclick=e=>{const b=e.target.closest("button");if(!b)return;state.reemb=b.dataset.v;$$("#segReemb button").forEach(x=>x.classList.toggle("on",x===b));renderProducts();refreshResults();save();};
  $$("#segReemb button").forEach(b=>b.classList.toggle("on",b.dataset.v===state.reemb));
  $("#segAcom").onclick=e=>{const b=e.target.closest("button");if(!b)return;state.acom=b.dataset.v;$$("#segAcom button").forEach(x=>x.classList.toggle("on",x===b));renderProducts();refreshResults();save();};
@@ -946,8 +1040,8 @@ function bind(){
  $("#oneDate").oninput=e=>{let v=e.target.value.replace(/[^\d\/]/g,"");if(/^\d{3,}$/.test(v)&&v.length<=8&&v.length>2){v=v.replace(/^(\d{2})(\d{0,2})(\d{0,4}).*/,(m,a,b,c)=>a+(b?"/"+b:"")+(c?"/"+c:""));}e.target.value=v;};
  $("#people").onclick=e=>{const x=e.target.closest(".x");if(!x)return;people.splice(+x.dataset.i,1);renderPeople();};
  $("#btnClearPeople").onclick=()=>{people=[];renderPeople();};
- $("#btnApply").onclick=()=>{state.lives=peopleCounts();renderBands();toast("Faixas etárias atualizadas");};
- $("#btnApplyAdd").onclick=()=>{const c=peopleCounts();state.lives=state.lives.map((v,i)=>v+c[i]);renderBands();toast("Vidas somadas às faixas");};
+ $("#btnApply").onclick=()=>{state.lives=peopleCounts();state.ages=people.filter(x=>!x.bad).map(x=>x.age);renderBands();toast("Faixas etárias atualizadas");};
+ $("#btnApplyAdd").onclick=()=>{const c=peopleCounts();const ex=exactAges()||(livesTotal()?null:[]);state.ages=ex?ex.concat(people.filter(x=>!x.bad).map(x=>x.age)):null;state.lives=state.lives.map((v,i)=>v+c[i]);renderBands();toast("Vidas somadas às faixas");};
  // faixas
  $("#bands").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const i=+b.dataset.i;state.lives[i]=Math.max(0,state.lives[i]+(b.classList.contains("plus")?1:-1));renderBands();});
  $("#bands").addEventListener("input",e=>{const inp=e.target.closest("input");if(!inp)return;const i=+inp.dataset.i;state.lives[i]=Math.max(0,Math.min(999,parseInt(inp.value)||0));renderBands();});
@@ -1002,14 +1096,15 @@ function selfTest(){const T=[];const ok=(name,cond,detail)=>T.push({name,ok:!!co
  if(!(parseBirth("35")&&parseBirth("35").age===35&&bandIdx(35)===4))bad.push("idade direta 35");if(parseBirth("31/02/2000")!==null)bad.push("31/02/2000 deveria ser inválida");
  ok("Conversor de idades (idade e faixa etária na data de referência 22/10/2026)",bad.length===0,bad.join(" | "));
  // 10. mapeamento cidade → grupo
- bad=[];CITIES.forEach(c=>{["demais","mei","v1","p2"].forEach(t=>{if(!PRICES[t][c.g[t]])bad.push(c.id+"/"+t);});["v1","mei","demais","p2"].forEach(t=>{if(!HP[t]||!HP[t][c.id])bad.push("Hapvida "+c.id+"/"+t);});});ok("Todas as cidades mapeadas para as 4 tabelas (1 vida, MEI, Demais, 30 a 99 vidas)",bad.length===0,bad.join(", "));
+ const EXPH={sprj:["v1","mei","demais","p2","pf"],fortaleza:["mei","demais","pf"],goiania:["mei","demais","p2","pf","p2odo","pfodo"],anapolis:["mei","demais","p2","pf","p2odo","pfodo"],quirinopolis:["mei","demais","p2","p2odo"],rioverde:["mei","demais","p2","p2odo"]};
+ bad=[];CITIES.forEach(c=>{if(regionOf(c.id).ops.includes("nd"))["demais","mei","v1","p2"].forEach(t=>{if(!PRICES[t][c.g[t]])bad.push(c.id+"/"+t);});(EXPH[isSPRJ(c.id)?"sprj":c.id]||[]).forEach(t=>{if(!HP[t]||!HP[t][c.id])bad.push("Hapvida "+c.id+"/"+t);});});ok("Todas as cidades mapeadas para as tabelas da região (empresarial e Pessoa Física)",bad.length===0,bad.join(", "));
  bad=[];let nm=0;const seen={};for(const id in MUNIS){if(!CITIES.find(c=>c.id===id))bad.push("região "+id);MUNIS[id].forEach(m=>{nm++;if(seen[m])bad.push(m+" duplicado");seen[m]=1;});if(!MUNIS[id].includes(baseMuni(id)))bad.push("falta sede "+id);}if(CITIES.some(c=>!MUNIS[c.id]))bad.push("região sem municípios");
  ok("Municípios ligados às tabelas regionais ("+nm+" municípios em "+Object.keys(MUNIS).length+" regiões)",bad.length===0,bad.join(", "));
  // 11. Hapvida — estrutura, amostras do PDF e reajuste por faixa
  let hs=0;bad=[];for(const t in HP)for(const r in HP[t])for(const c in HP[t][r])for(const k in HP[t][r][c]){hs++;const v=HP[t][r][c][k];if(!Array.isArray(v)||v.length!==10||v.some(x=>typeof x!=="number"||!(x>0)))bad.push(t+"/"+r+"/"+c+"/"+k);}
- ok("Hapvida: estrutura das tabelas ("+hs+" séries de 10 faixas, 4 tabelas × 9 regiões)",bad.length===0&&hs===396+132,bad.join(", ")||"esperado "+(396+132));
+ ok("Hapvida: estrutura das tabelas ("+hs+" séries de 10 faixas)",bad.length===0&&hs>=528,bad.join(", ")||"esperado ao menos 528");
  const pct=x=>parseFloat(x.replace(",","."))/100;bad=[];let hk=0;
- for(const t in HP)for(const r in HP[t])for(const c in HP[t][r])for(const k in HP[t][r][c]){const v=HP[t][r][c][k];const R=HREAJ[k.split("|")[0]];for(let i=1;i<10;i++){hk++;if(Math.abs(v[i]-v[i-1]*(1+pct(R[i-1])))>0.10)bad.push(t+"/"+r+"/"+c+"/"+k+" faixa "+BANDS[i]);}}
+ for(const t in HP){if(/odo$/.test(t))continue;for(const r in HP[t])for(const c in HP[t][r])for(const k in HP[t][r][c]){const v=HP[t][r][c][k];const pk=k.split("|")[0];const R=(((HAPD.reaj||{})[t]||{})[r]||{})[pk]||(t!=="pf"&&isSPRJ(r)?HREAJ[pk]:null);if(!R)continue;for(let i=1;i<10;i++){hk++;if(Math.abs(v[i]-v[i-1]*(1+pct(R[i-1])))>0.10)bad.push(t+"/"+r+"/"+c+"/"+k+" faixa "+BANDS[i]);}}}
  ok("Hapvida: progressão entre faixas conforme o reajuste de cada produto ("+hk+" transições; tolerância de arredondamento da operadora)",bad.length===0,bad.join(" | "));
  bad=[];if(NM_MUNIS.rmsp.length!==19)bad.push("RMSP com "+NM_MUNIS.rmsp.length);Object.entries(NM_MUNIS).forEach(([rg,l])=>l.forEach(m=>{const reg=Object.keys(NM_REGION).filter(id=>NM_REGION[id]===rg);if(!reg.some(id=>(MUNIS[id]||[]).includes(m)))bad.push(m+" fora das regiões "+rg);}));
  ok("Hapvida: Nosso Médico restrito aos municípios atendidos (19 da RMSP + Campinas, Jundiaí, Americana e Sorocaba)",bad.length===0,bad.join(", "));
@@ -1025,14 +1120,16 @@ const RT=JSON.parse(document.getElementById("redeTrad").textContent);
 const nrm=s=>String(s==null?"":s).normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[’`´]/g,"'").toLowerCase().trim();
 RM.hosp.forEach(h=>{h.p=RM.planos.map(p=>p.id).filter(id=>h.cov[id]);});
 const RH=JSON.parse(document.getElementById("redeHap").textContent);
-RH.cidades=RH.cidades.map(c=>({c,uf:"SP"}));RH.hosp=RH.cred.filter(e=>e.tp==="H");RH.labs=RH.cred.filter(e=>e.tp==="L");
+RH.cidades=RH.cidades.map(c=>({c,uf:"SP"}));
+/* Smart UP Pessoa Física: atendimento somente na rede própria (unidades próprias do Smart UP) */
+RH.planos.push({id:"upp",nome:"Smart UP PF (rede própria)",curto:"UP PF",grupo:"Smart"});RH.propria.forEach(u=>{if(u.p.includes("up"))u.p.push("upp");});RH.hosp=RH.cred.filter(e=>e.tp==="H");RH.labs=RH.cred.filter(e=>e.tp==="L");
 const NETL={m:{label:"Linha Metais",D:RM},t:{label:"Linha Tradicional",D:RT},h:{label:"Hapvida",D:RH}};
 const NM_NET={rmsp:"nmrmsp",campinas:"nmcamp",jundiai:"nmjund",americana:"nmamer",sorocaba:"nmsoro"};
 /* produto do cotador → [base de rede, plano na base]; Smart 200/300/500 não estão na base de rede enviada */
-function netMapOf(p){if(p.op==="hap"){if(p.key==="nm")return NM_NET[nmRegion()]?["h",NM_NET[nmRegion()]]:null;return {smartup:["h","up"],flex:["h","flex"],prime:["h","prime"]}[p.key]||null;}return NETMAP[p.id]||null;}
+function netMapOf(p){if(p.op==="hap"){if(!isSPRJ())return null;if(p.nm)return NM_NET[nmRegion()]?["h",NM_NET[nmRegion()]]:null;return {smartup:["h","up"],flex:["h","flex"],prime:["h","prime"],pfup:["h","upp"],pfup50:["h","upp"],pfupamb:["h","upp"]}[p.key]||null;}return NETMAP[p.id]||null;}
 function netNoBase(R){return [...new Set(R.opts.filter(o=>o.op==="hap"&&!netMapOf(o.p)).map(o=>o.p.name))];}
 function hVariants(e,sel){const out=[],seen={};sel.forEach(p=>{const v=e.v&&e.v[p];if(!v)return;const k=JSON.stringify(v);if(seen[k])seen[k].plans.push(p);else{seen[k]={plans:[p],t:v.t||[],w:v.w||[]};out.push(seen[k]);}});return out;}
-const NETSHORT={nmrmsp:"Nosso Médico RMSP",nmcamp:"Nosso Médico Campinas",nmjund:"Nosso Médico Jundiaí",nmamer:"Nosso Médico Americana",nmsoro:"Nosso Médico Sorocaba",up:"Smart UP",flex:"Smart Flex",prime:"Smart Prime",prata:"Prata",pratamax:"Prata Max",ouro:"Ouro",ouromax:"Ouro Max",diamante:"Diamante",diamantemax:"Diamante Max",a600:"Advance 600",a700:"Advance 700",p900c:"Premium 900 Care",p9001:"Premium 900",i1000:"Infinity"};
+const NETSHORT={nmrmsp:"Nosso Médico RMSP",nmcamp:"Nosso Médico Campinas",nmjund:"Nosso Médico Jundiaí",nmamer:"Nosso Médico Americana",nmsoro:"Nosso Médico Sorocaba",up:"Smart UP",upp:"Smart UP PF (rede própria)",flex:"Smart Flex",prime:"Smart Prime",prata:"Prata",pratamax:"Prata Max",ouro:"Ouro",ouromax:"Ouro Max",diamante:"Diamante",diamantemax:"Diamante Max",a600:"Advance 600",a700:"Advance 700",p900c:"Premium 900 Care",p9001:"Premium 900",i1000:"Infinity"};
 const NETMAP={prata:["m","prata"],prata_max:["m","pratamax"],ouro:["m","ouro"],ouro_max:["m","ouromax"],diamante:["m","diamante"],diamante_max:["m","diamantemax"],adv600:["t","a600"],adv700:["t","a700"],p900care:["t","p900c"],p900:["t","p9001"],infinity:["t","i1000"]};
 const COVL={H:"Hospital eletivo",PS:"PS adulto, infantil e obstétrico",PSA:"PS adulto",PSI:"PS infantil",PSO:"PS obstétrico",M:"Maternidade"};
 const COVO=["H","PS","PSA","PSI","PSO","M"];
@@ -1118,13 +1215,13 @@ function netRenderRes(){const R=net.res;const box=$("#netRes");if(!R){box.style.
 function goRede(line,plans){net.line=line;net.mode="cidade";net.plans=new Set(plans);
  const R=state.result;const uf=UF(state.city);const muni=R?R.muni:state.muni;
  let c=NETL[line].D.cidades.find(x=>nrm(x.c)===nrm(muni)&&x.uf===uf);
- if(!c||!netQuery(line,c.c,c.uf,plans).total){const sede=(R?R.tableCity:cityObj().name).replace(/ - (SP|RJ)$/,"");const cs=NETL[line].D.cidades.find(x=>nrm(x.c)===nrm(sede)&&x.uf===uf);if(cs){if(c)toast("Sem rede em "+muni+" para esses planos — mostrando "+cs.c);c=cs;}}
+ if(!c||!netQuery(line,c.c,c.uf,plans).total){const sede=(R?R.tableCity:cityObj().name).replace(/ - [A-Z]{2}$/,"");const cs=NETL[line].D.cidades.find(x=>nrm(x.c)===nrm(sede)&&x.uf===uf);if(cs){if(c)toast("Sem rede em "+muni+" para esses planos — mostrando "+cs.c);c=cs;}}
  netRenderLine();setTab("rede");
  if(c){net.city={c:c.c,uf:c.uf};$("#netCity").value=c.c+" · "+c.uf;netGo();}else{net.city=null;$("#netCity").value="";$("#netErr").textContent="Sem rede cadastrada para "+muni+".";}netSave();}
 function netLinesOfResult(R){const out={};R.opts.forEach(o=>{const m=netMapOf(o.p);if(!m)return;(out[m[0]]=out[m[0]]||new Set()).add(m[1]);});
  return ["m","t","h"].filter(l=>out[l]).map(l=>({line:l,plans:netIds(l).filter(p=>out[l].has(p))}));}
 /* rede para a proposta: município cotado (e sede da tabela, se pedido ou se o município não tiver rede) */
-function filialName(R){return (R.tableCity||cityObj().name).replace(/ - (SP|RJ)$/,"");}
+function filialName(R){return (R.tableCity||cityObj().name).replace(/ - [A-Z]{2}$/,"");}
 /* rede para a proposta: todos os municípios da filial (tabela regional) com atendimento para os planos cotados; a cidade cotada vem primeiro */
 function netForProposal(R){const mode=state.netPdf==="sede"?"filial":(state.netPdf||"filial");if(mode==="off")return[];const uf=UF(state.city);const coll=new Intl.Collator("pt-BR");
  const others=[...(MUNIS[state.city]||[])].filter(m=>m!==R.muni).sort(coll.compare);const out=[];
@@ -1143,7 +1240,7 @@ function netSummaryText(R){const N=netForProposal(Object.assign({},R));if(!N.len
 function netScope(R,L){if(L.mode==="filial"){const T=netTotals(L);return '<p class="lead"><b>Rede completa da filial '+esc(filialName(R))+'</b> — '+plu(T.cities,"cidade","cidades")+' com atendimento para estes planos: '+esc(L.places.map(P=>P.city).join(", "))+'. Total: '+plu(T.total,"unidade","unidades")+'.</p>';}
  if(L.fallback)return '<p class="lead">Não há unidades em '+esc(R.muni)+' para estes planos; abaixo, a rede nas demais cidades da filial '+esc(filialName(R))+'.</p>';return '';}
 function netPdfBlocks(R,add){const N=netForProposal(R);const NB=state.netPdf==="off"?[]:netNoBase(R);if(!N.length&&!NB.length)return;let first=true;
- if(NB.length){add('<h2>Rede de atendimento — Hapvida</h2><p class="lead">Planos '+esc(NB.join(", "))+': consulte o guia médico da operadora para a rede de atendimento em '+esc(R.city)+'. Rede sujeita a alterações pela operadora.</p>',true);first=false;}
+ if(NB.length){add('<h2>Rede de atendimento — Hapvida</h2><p class="lead">'+(isSPRJ(R.cityId)?'Planos '+esc(NB.join(", "))+': consulte o guia médico da operadora para a rede de atendimento em '+esc(R.city)+'.':'A rede de atendimento de '+esc(R.city)+' está em atualização e estará disponível em breve no cotador. Até lá, consulte o guia médico da operadora.')+' Rede sujeita a alterações pela operadora.</p>',true);first=false;}
  N.forEach(L=>{const multi=L.plans.length>1;const pl=L.plans.map(p=>NETSHORT[p]).join(", ");
   const head='<h2>Rede de atendimento — '+NETL[L.line].label+'</h2><p class="lead">Planos: '+esc(pl)+'. Rede sujeita a alterações pela operadora; confirme a rede vigente no momento da contratação.</p>';
   if(!L.places.length){add(head+'<p class="lead">Não há unidades cadastradas na filial '+esc(filialName(R))+' para estes planos. Consulte o consultor sobre a rede regional.</p>',first);first=false;return;}
@@ -1218,12 +1315,12 @@ function newQuote(){const b=$("#btnNew");if(Date.now()-newArmed>3500){newArmed=D
 const HKEY="nd_cotador_hist";
 function histLoad(){try{return JSON.parse(localStorage.getItem(HKEY)||"[]")||[];}catch(e){return[];}}
 function histSave(list){try{localStorage.setItem(HKEY,JSON.stringify(list.slice(0,10)));}catch(e){}}
-function snapState(){return JSON.parse(JSON.stringify({client:state.client,cnpj:state.cnpj,city:state.city,muni:state.muni,mei:state.mei,ops:state.ops,lives:state.lives,copart:state.copart,reemb:state.reemb,acom:state.acom,desc:state.desc,netPdf:state.netPdf,sel:state.sel}));}
+function snapState(){return JSON.parse(JSON.stringify({client:state.client,cnpj:state.cnpj,city:state.city,muni:state.muni,mei:state.mei,ops:state.ops,lives:state.lives,copart:state.copart,reemb:state.reemb,acom:state.acom,desc:state.desc,netPdf:state.netPdf,seg:state.seg,odo:state.odo,ages:state.ages,sel:state.sel}));}
 function histAdd(R){const snap=snapState();const list=histLoad().filter(h=>JSON.stringify(h.snap)!==JSON.stringify(snap));
  list.unshift({ts:Date.now(),snap,label:(state.client||"Sem nome"),info:R.N+(R.N===1?" vida":" vidas")+" · "+state.muni+" · "+(OPS[state.ops]?OPS[state.ops].short:"NotreDame e Hapvida")+" · "+R.opts.length+(R.opts.length===1?" opção":" opções"),min:Math.min(...R.opts.map(o=>o.total))});histSave(list);}
 function histRender(){const box=$("#histBox");const list=histLoad();
  box.innerHTML=list.length?list.map((h,i)=>{const d=new Date(h.ts);return '<div class="hitem" data-i="'+i+'"><div class="ht"><b>'+esc(h.label)+'</b>'+String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+" · "+esc(h.info)+'</div><div class="hv">a partir de<br>'+fmt(h.min)+'</div></div>';}).join("")+'<button class="btn sm ghost" id="btnHistClear">Limpar histórico</button>':'<p class="hint" style="margin:0">Nenhuma cotação salva ainda. Cada cotação calculada fica guardada aqui (as 10 últimas, só neste aparelho).</p>';}
-function histOpen(i){const h=histLoad()[i];if(!h)return;const s=h.snap;Object.assign(state,{client:s.client||"",cnpj:s.cnpj||"",city:s.city,muni:s.muni,mei:!!s.mei,ops:s.ops||"nd",lives:s.lives,copart:s.copart,reemb:s.reemb,acom:s.acom,desc:!!s.desc,netPdf:s.netPdf||"muni"});
+function histOpen(i){const h=histLoad()[i];if(!h)return;const s=h.snap;Object.assign(state,{client:s.client||"",cnpj:s.cnpj||"",city:s.city,muni:s.muni,mei:!!s.mei,ops:s.ops||"nd",lives:s.lives,copart:s.copart,reemb:s.reemb,acom:s.acom,desc:!!s.desc,netPdf:s.netPdf||"muni",seg:s.seg==="pf"?"pf":"pme",odo:s.odo!==false,ages:s.ages||null});
  PRODUCTS.forEach(p=>{state.sel[p.id]=s.sel&&s.sel[p.id]?{on:!!s.sel[p.id].on,acom:(s.sel[p.id].acom||p.acom).filter(a=>p.acom.includes(a))}:{on:false,acom:[...p.acom]};if(!state.sel[p.id].acom.length)state.sel[p.id].acom=[...p.acom];});
  $("#histBox").hidden=true;syncUI();save();calc();}
 
@@ -1267,12 +1364,12 @@ function favApply(){let sel=null;try{sel=JSON.parse(localStorage.getItem(FKEY)||
 function barAction(){if(state.result&&state.result.opts&&state.result.opts.length&&$("#results").style.display!=="none"){const sb=$("#sendBox");if(sb)sb.scrollIntoView({behavior:"smooth",block:"center"});return;}calc();}
 
 /* ---- texto resumido ---- */
-function buildTextShort(R){const N=R.N;const vidas=N+(N===1?" vida":" vidas");const cli=R.client?"*"+R.client+"*":"sua empresa";const cons=R.consultor||"Consultor";
- let t="Olá! Tudo bem?\n\nSegue a cotação de plano de saúde empresarial *"+opsName(R)+"* para "+cli+", *"+vidas+"* em "+R.city+":\n\n";
+function buildTextShort(R){const N=R.N;const PF=R.seg==="pf";const vidas=N+(PF?(N===1?" beneficiário":" beneficiários"):(N===1?" vida":" vidas"));const cli=R.client?"*"+R.client+"*":(PF?"você":"sua empresa");const cons=R.consultor||"Consultor";
+ let t="Olá! Tudo bem?\n\nSegue a cotação de plano de saúde "+segWord(R)+" *"+opsName(R)+"* para "+cli+", *"+vidas+"* em "+R.city+":\n\n";
  t+=R.opts.map(o=>"• "+optLabel(o)+": *"+fmt(o.total)+"*/mês"+(descOn()?" → 1ª mensalidade *"+fmt(firstMonth(o.total))+"*":"")).join("\n")+"\n\n";
  if(descOn())t+="🔥 *"+DESC.pct+"% de desconto na 1ª mensalidade* — válido somente até "+DESC.ate+".\n\n";
- t+="✅ "+(R.table==="p2"?"Isenção de carências":"Carência de 60 dias")+" · 🦷 Odonto incluso · 🎁 Clube de Vantagens com TotalPass\n📄 Envio a proposta completa em PDF com valores por faixa etária, coparticipação e rede de atendimento.\n\n";
- t+="Qual opção faz mais sentido para vocês?\n\nAbraço,\n*"+cons+"*\nConsultor Hapvida NotreDame Intermédica";return t;}
+ t+="✅ "+[R.table==="p2"?"Isenção de carências":PF?"Carências conforme contrato":"Carência de 60 dias",R.opts.some(o=>o.odo)?"🦷 Com plano odontológico":(clubeOn(R)?"🦷 Odonto incluso":""),clubeOn(R)?"🎁 Clube de Vantagens com TotalPass":"",R.opts.some(o=>o.p.own)?"🏥 Smart UP/Rio PF: só rede própria":""].filter(Boolean).join(" · ")+"\n📄 Envio a proposta completa em PDF com valores por faixa etária, coparticipação e rede de atendimento.\n\n";
+ t+="Qual opção faz mais sentido para "+(PF?"você":"vocês")+"?\n\nAbraço,\n*"+cons+"*\n"+regionOf(R.cityId).sign;return t;}
 
 /* ---- PDF direto no aparelho + compartilhar ---- */
 const LIBS={h2c:"https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",pdf:"https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"};
@@ -1302,7 +1399,7 @@ function netPrefill(){if(net.res||net.city)return;const ln=state.ops==="hap"?"h"
    ===================================================================== */
 const STEPS=[{id:"s1",t:"Dados"},{id:"s2",t:"Vidas"},{id:"s3",t:"Modalidade"},{id:"s4",t:"Produtos"},{id:"results",t:"Resultado"}];
 let curStep=1,maxStep=1;
-function stepValid(n){if(n===2){const t=currentTable();if(!t){markNeed("s2","Informe pelo menos uma vida em alguma faixa etária para prosseguir.");return false;}if(t==="over"){markNeed("s2","Acima de 99 vidas: fora das tabelas deste cotador (para 100 vidas ou mais, cotação especial com a operadora).");return false;}}
+function stepValid(n){if(n===2){const t=currentTable();if(!t){markNeed("s2","Informe pelo menos uma vida em alguma faixa etária para prosseguir.");return false;}if(t==="over"){markNeed("s2","Acima de 99 vidas: fora das tabelas deste cotador (para 100 vidas ou mais, cotação especial com a operadora).");return false;}if(state.seg!=="pf"&&noHapTable(t)&&!ndAvail()){markNeed("s2",noTableMsg(t));return false;}}
  if(n===4&&!countOptions()){markNeed("s4","Selecione ao menos um produto disponível para calcular.");return false;}return true;}
 function goStep(n,noScroll){n=Math.max(1,Math.min(5,n));if(n===5&&!(state.result&&state.result.opts&&state.result.opts.length))n=4;curStep=n;maxStep=Math.max(maxStep,n);
  $("#tabCot").dataset.step=String(n);renderWiz();if(n===4)renderProducts();if(n===5)renderResults();if(!noScroll)window.scrollTo({top:0,behavior:"smooth"});}
@@ -1326,7 +1423,7 @@ function cityComboInit(){cityItems=[];CITIES.forEach(c=>MUNIS[c.id].forEach(m=>c
  const coll=new Intl.Collator("pt-BR");cityItems.sort((a,b)=>coll.compare(a.m,b.m));
  const inp=$("#cityInput"),list=$("#cityList");let act=0,cur=[];
  const show=q=>{const nq=nrm(q);cur=cityItems.filter(x=>!nq||x.k.indexOf(nq)>-1||nrm(x.lab).indexOf(nq)>-1).sort((a,b)=>(a.k.indexOf(nq)===0?0:1)-(b.k.indexOf(nq)===0?0:1)).slice(0,40);act=0;
-  list.innerHTML=cur.length?cur.map((x,i)=>'<div class="nopt'+(i===act?" act":"")+'" data-i="'+i+'"><span>'+esc(x.lab)+'</span><span>tabela '+esc(x.tab.replace(/ - (SP|RJ)$/,""))+'</span></div>').join(""):'<div class="nopt" style="cursor:default;color:var(--muted)">Cidade não atendida. Digite outra cidade da lista.</div>';list.hidden=false;};
+  list.innerHTML=cur.length?cur.map((x,i)=>'<div class="nopt'+(i===act?" act":"")+'" data-i="'+i+'"><span>'+esc(x.lab)+'</span><span>tabela '+esc(x.tab.replace(/ - [A-Z]{2}$/,""))+'</span></div>').join(""):'<div class="nopt" style="cursor:default;color:var(--muted)">Cidade não atendida. Digite outra cidade da lista.</div>';list.hidden=false;};
  const pick=x=>{state.city=x.id;state.muni=x.m;inp.value=x.lab;list.hidden=true;clearNeed("s1");renderCityHint();renderBands();renderTableInfo();};
  inp.addEventListener("focus",()=>{inp.select();show("");});
  inp.addEventListener("input",()=>show(inp.value));
