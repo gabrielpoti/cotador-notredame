@@ -84,6 +84,11 @@ html.booting #loginForm,html.booting #pwForm{display:none!important}
 .umsg{margin-top:10px;font-size:13px}
 .cred{background:#111116;border:1px solid rgba(255,154,10,.35);border-radius:12px;padding:12px;margin-top:10px}
 .cred pre{white-space:pre-wrap;font-family:inherit;font-size:12.5px;color:var(--text);margin:8px 0 10px}
+.vig-alert{border-color:rgba(255,107,107,.55);background:linear-gradient(180deg,rgba(255,107,107,.10),rgba(255,107,107,.03))}
+.vig-alert h2{color:#ff9b9b}.vig-warn{border-color:rgba(255,209,102,.5)}.vig-warn h2{color:#ffd166}
+.vig-alert ul,.vig-warn ul,.vig-all ul{margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.6}
+.vig-all{margin:-4px 0 14px;font-size:13px;color:var(--muted)}.vig-all summary{cursor:pointer;font-weight:700}
+.tab-dot{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;border-radius:999px;background:#ff5a5a;color:#fff;font-size:10.5px;font-weight:800;margin-left:4px;padding:0 4px;vertical-align:middle}
 .soon{text-align:center;padding:48px 20px}
 body.tab-soon .foot{display:none}
 .soon-k{display:inline-block;border:1px solid rgba(255,154,10,.45);color:var(--gold2);background:rgba(255,154,10,.08);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px}
@@ -516,6 +521,7 @@ table.pt.sm th,table.pt.sm td{text-align:left}
 <details class="diag" id="diagBox" hidden><summary>Diagnóstico e testes de valores</summary><div id="diag">Carregando…</div></details>
 </div>
 <div id="tabAdmin" hidden>
+<div id="admVig"></div>
 <section class="card"><h2>Painel do administrador</h2><p class="sub">Crie acessos, renove validades e acompanhe quem está usando o NotreOne.</p>
  <div class="adm-stats" id="admStats"></div></section>
 <section class="card"><h2>Novo acesso</h2>
@@ -587,7 +593,22 @@ const TABLE_LABEL={v1:"PME Porte I · 1 vida",mei:"PME Porte I · 2 a 29 vidas �
 const TABLE_SHORT={v1:"1 vida",mei:"2 a 29 vidas (MEI)",demais:"2 a 29 vidas (Demais Empresas)",p2:"30 a 99 vidas (Porte II)",pf:"Pessoa Física (individual / familiar)"};
 const MAX_LIVES=99;
 /* carência: 60 dias até 29 vidas; isenção a partir de 30 vidas (conforme tabelas) */
-function carenciaTxt(t){if(t==="pf")return"Carências conforme contrato, dentro dos prazos máximos previstos na Lei 9.656/98.";return t==="p2"?"Isenção de carências para empresas com 30 vidas ou mais (conforme tabela).":"60 dias apenas para empresas com até 29 vidas; acima de 30 vidas há isenção de carências (conforme tabela).";}
+/* Carências (Hapvida NotreDame Intermédica · outubro/2026): SS/PME por porte e Pessoa Física; 30 vidas ou mais: isenção */
+const CAR_ROWS=[
+ {g:"A",t:"Urgência e emergência",d:"Acidentes pessoais e complicações do processo gestacional, conforme a CONSU nº 13/98.",pme:{v1:"24 horas",s15:"24 horas",s29:"24 horas"},pf:"24 horas",amb:1},
+ {g:"B",t:"Consultas e exames simples",d:"Consultas médicas, exames laboratoriais simples (exceto imunológicos, hormonais e PAC), raio-X simples e eletrocardiograma.",pme:{v1:"24 horas (promocional)",s15:"24 horas",s29:"24 horas"},pf:"24 horas (promocional)",amb:1},
+ {g:"C",t:"Outros exames",d:"Exames cardiológicos, oftalmológicos e otorrinolaringológicos simples, raio-X contrastado, ultrassonografias, mamografia e densitometria óssea (exceto PAC).",pme:{v1:"180 dias",s15:"60 dias",s29:"24 horas"},pf:"90 dias",amb:1},
+ {g:"D",t:"Internações, cirurgias, terapias e exames especiais",ta:"Exames especiais e terapias",d:"Internações, cirurgias ambulatoriais, tomografia, ressonância, endoscopia, colonoscopia, medicina nuclear, hemodinâmica, radioterapia, quimioterapia, consultas e sessões de terapias e demais procedimentos.",da:"Tomografia, ressonância, endoscopia, colonoscopia, medicina nuclear, radioterapia, quimioterapia e consultas e sessões de terapias (psicoterapia, fonoaudiologia, nutrição, fisioterapia e terapia ocupacional).",pme:{v1:"180 dias",s15:"180 dias",s29:"180 dias"},pf:"180 dias",amb:1},
+ {g:"E",t:"Parto a termo",d:"Somente planos com obstetrícia.",pme:{v1:"300 dias",s15:"300 dias",s29:"300 dias"},pf:"300 dias",amb:0},
+ {g:"F",t:"Doenças e lesões preexistentes (CPT)",d:"Cobertura parcial temporária para procedimentos de alta complexidade, cirurgias e leitos de alta tecnologia ligados à doença declarada. Sem restrição para consultas, internações não cirúrgicas e exames que não sejam de alta complexidade.",pme:{v1:"730 dias",s15:"730 dias",s29:"730 dias"},pf:"730 dias",amb:1}];
+const CAR_REDUCAO="Quem vem de outra operadora tem redução: permanência de 30 a 179 dias reduz 30 dias dos prazos; de 180 dias a 12 meses aproveita 50% do tempo do contrato de origem; acima de 12 meses aproveita 100% (exceto parto, preexistência e sessões de terapias).";
+function carCol(R){if(R.table==="pf")return"pf";if(R.table==="v1")return"v1";return R.N<=15?"s15":"s29";}
+function carColLabel(R){const c=carCol(R);return c==="pf"?"Pessoa Física":c==="v1"?"1 vida":c==="s15"?"2 a 15 vidas":"16 a 29 vidas";}
+function carRows(R,amb){if(R.table==="p2")return[];const c=carCol(R);return CAR_ROWS.filter(r=>!amb||r.amb).map(r=>({g:r.g,t:amb&&r.ta?r.ta:r.t,d:amb&&r.da?r.da:r.d,v:c==="pf"?r.pf:r.pme[c]}));}
+/* grupos de carência da cotação: planos com internação e planos ambulatoriais (sem internação nem cirurgia) */
+function carGroups(R){if(R.table==="p2")return[];const nm=f=>[...new Set(R.opts.filter(f).map(o=>o.p.name))];const H=nm(o=>o.acom!=="sa"),A=nm(o=>o.acom==="sa");const out=[];if(H.length)out.push({amb:false,prods:H,rows:carRows(R,false)});if(A.length)out.push({amb:true,prods:A,rows:carRows(R,true)});return out;}
+function carSummary(R){if(R.table==="p2")return"Isenção de carências para empresas com 30 vidas ou mais.";return carGroups(R).map(g=>(carGroups(R).length>1?g.prods.join(", ")+": ":"")+g.rows.map(r=>r.t.toLowerCase().replace(/^./,s=>s.toUpperCase())+" "+r.v).join(" · ")+(g.amb?" (plano ambulatorial: não cobre internação nem cirurgia)":"")).join(" | ")+" ("+carColLabel(R)+").";}
+function carenciaTxt(t){return t==="p2"?"Isenção de carências para empresas com 30 vidas ou mais (conforme tabela).":"Conforme o quadro de carências da proposta.";}
 const ACOM={enf:"Enfermaria",apt:"Apartamento",sa:"Ambulatorial (sem internação)"};
 const ACOM_S={enf:"Enf.",apt:"Apto.",sa:"Amb."};
 const REEMB={parcial:"Reembolso parcial",total:"Reembolso total"};
@@ -909,10 +930,12 @@ function renderResults(){const R0=state.result;const R=viewResult();const box=$(
  h+='<h3 class="sec">Tabela de valores por faixa etária (valor unitário)</h3><div class="scroll"><table class="t"><tr><th>Faixa</th>'+R.opts.map(o=>'<th>'+esc(o.p.name)+'<br><span style="font-weight:500;text-transform:none;letter-spacing:0">'+optSub(o)+'</span></th>').join("")+'</tr>'+BANDS.map((b,i)=>'<tr><td>'+b+'</td>'+R.opts.map(o=>'<td>'+fmt(o.unit[i])+'</td>').join("")+'</tr>').join("")+'</table></div>';
  // coparticipação
  h+='<h3 class="sec">Coparticipação — cobrada por procedimento realizado, somente quando há utilização</h3><div class="rules">'+copGroups(R).map(g=>'<div class="rule"><b>'+(multiOp(R)?OPS[g.op].short+' · ':'')+esc(g.prods.join(", "))+' <span style="color:var(--muted);font-weight:600">('+COPL[g.cop].toLowerCase()+')</span></b>'+COPART_ROWS.map((r,i)=>'<div><span>'+r+'</span><span>'+g.rule.v[i]+'</span></div>').join("")+'</div>').join("")+'</div>';
+ // carências
+ h+='<h3 class="sec">Carências — '+(R.table==="p2"?"isenção (30 vidas ou mais)":carColLabel(R))+'</h3>'+(R.table==="p2"?'<div class="hint">Isenção de carências para empresas com 30 vidas ou mais.</div>':'<div class="rules">'+carGroups(R).map(g=>'<div class="rule"><b>'+esc(g.prods.join(", "))+(g.amb?' <span style="color:var(--muted);font-weight:600">(ambulatorial: sem internação e sem cirurgia)</span>':'')+'</b>'+g.rows.map(r=>'<div><span>'+r.g+' · '+r.t+'</span><span>'+r.v+'</span></div>').join("")+'</div>').join("")+'</div>'+(R.seg==="pme"?'<div class="hint" style="margin-top:6px">'+CAR_REDUCAO+'</div>':''));
  // observações
  const hasInf=R.opts.some(o=>o.p.id==="infinity");const hasEnf=R.opts.some(o=>o.acom==="enf");
  const hasND=R.opts.some(o=>o.op==="nd");
- h+='<h3 class="sec">Observações</h3><ul class="obs"><li>Tabela de vendas promocional '+opsName(R)+' válida para contratos assinados de '+vigOf(R)+'. Valores confirmados no momento da contratação.</li>'+(hasEnf?'<li>Enfermaria x Apartamento: a diferença está apenas na acomodação em caso de internação (quarto compartilhado x quarto privativo).</li>':"")+(hasND?'<li>Reembolso (parcial ou total) dos planos NotreDame segue conforme previsto em instrumento contratual.</li>':'')+(hapNote(R)?'<li>'+hapNote(R)+'</li>':'')+'<li>Carência: '+carenciaTxt(R.table)+'</li>'+(odontoOf(R)?'<li>Odontologia: '+odontoOf(R)+'</li>':'')+(odoNote(R)?'<li>'+odoNote(R)+'</li>':'')+(taxaOf(R)?'<li>Taxa de adesão: '+taxaOf(R)+'.</li>':'')+(age50Note(R)?'<li>'+age50Note(R)+'</li>':'')+'<li>Reajuste por mudança de faixa etária: '+reajProfiles(R).map(x=>'<b>'+esc(x.prods.join(", "))+'</b>: '+REAJ_STEPS.map((st,i)=>st+" "+x.vals[i]).join(" · ")).join("<br>")+'.</li>'+(R.seg==="pme"?'<li>É possível mesclar planos diferentes na mesma contratação; apenas não é possível mesclar coparticipação parcial com total.</li>':'')+(hasInf?'<li>Infinity: apenas para contratos a partir de 2 vidas; elegibilidade para adesão apenas para sócios, cônjuges e descendentes.</li>':"")+'</ul>';
+ h+='<h3 class="sec">Observações</h3><ul class="obs"><li>Tabela de vendas promocional '+opsName(R)+' válida para contratos assinados de '+vigOf(R)+'. Valores confirmados no momento da contratação.</li>'+(hasEnf?'<li>Enfermaria x Apartamento: a diferença está apenas na acomodação em caso de internação (quarto compartilhado x quarto privativo).</li>':"")+(hasND?'<li>Reembolso (parcial ou total) dos planos NotreDame segue conforme previsto em instrumento contratual.</li>':'')+(hapNote(R)?'<li>'+hapNote(R)+'</li>':'')+'<li>Carência: '+carSummary(R)+'</li>'+(odontoOf(R)?'<li>Odontologia: '+odontoOf(R)+'</li>':'')+(odoNote(R)?'<li>'+odoNote(R)+'</li>':'')+(taxaOf(R)?'<li>Taxa de adesão: '+taxaOf(R)+'.</li>':'')+(age50Note(R)?'<li>'+age50Note(R)+'</li>':'')+'<li>Reajuste por mudança de faixa etária: '+reajProfiles(R).map(x=>'<b>'+esc(x.prods.join(", "))+'</b>: '+REAJ_STEPS.map((st,i)=>st+" "+x.vals[i]).join(" · ")).join("<br>")+'.</li>'+(R.seg==="pme"?'<li>É possível mesclar planos diferentes na mesma contratação; apenas não é possível mesclar coparticipação parcial com total.</li>':'')+(hasInf?'<li>Infinity: apenas para contratos a partir de 2 vidas; elegibilidade para adesão apenas para sócios, cônjuges e descendentes.</li>':"")+'</ul>';
  h+=netResultHtml(R);
  h+='<h3 class="sec">Enviar proposta</h3><div class="actions" id="sendBox" style="margin-top:6px"><button class="btn gold js-pdffile" id="btnPdfFile">Baixar / compartilhar PDF</button><button class="btn" id="btnWa">Enviar texto no WhatsApp</button><button class="btn" id="btnTxt">Ver / copiar texto</button><button class="btn ghost" id="btnPdf">Visualizar e imprimir</button></div><div class="txtbox" id="txtbox"><div class="seg" id="txtMode" style="margin-bottom:8px"><button data-v="short"'+(state.txtMode==="short"?' class="on"':'')+'>Texto resumido</button><button data-v="full"'+(state.txtMode!=="short"?' class="on"':'')+'>Texto completo</button></div><textarea id="txtarea" readonly></textarea><div class="row" style="margin-top:8px"><button class="btn sm" id="btnCopy">Copiar texto</button></div></div>';
  box.innerHTML=h;
@@ -940,7 +963,7 @@ function buildText(){const R=viewResult();if(!R||!R.opts.length)return"";if(stat
  if(age50Note(R))t+="👴 *PLANOS 50+*\n"+age50Note(R)+"\n\n";
  t+="🧾 *O QUE É COPARTICIPAÇÃO*\nCobrada apenas quando o serviço é utilizado, por procedimento realizado:\n";
  copGroups(R).forEach(g=>{t+="▪ "+(multiOp(R)?OPS[g.op].short+" ":"")+g.prods.join(", ")+" ("+COPL[g.cop].toLowerCase()+"): "+COPART_ROWS.map((r,i)=>r+" — "+g.rule.v[i]).join("; ")+"\n";});
- t+="\n✅ *CARÊNCIA*\n"+carenciaTxt(R.table)+"\n\n";
+ t+="\n✅ *CARÊNCIAS"+(R.table==="p2"?"":" ("+carColLabel(R).toUpperCase()+")")+"*\n"+(R.table==="p2"?"Isenção de carências para empresas com 30 vidas ou mais.\n":carGroups(R).map(g=>(carGroups(R).length>1||g.amb?"_"+g.prods.join(", ")+(g.amb?" (ambulatorial: sem internação e sem cirurgia)":"")+"_\n":"")+g.rows.map(r=>"• "+r.t+": "+r.v).join("\n")).join("\n")+"\n")+"\n";
  if(odontoOf(R)||odoNote(R))t+="🦷 *PLANO ODONTOLÓGICO*\n"+[odoNote(R),odontoOf(R)].filter(Boolean).join("\n")+"\n\n";
  if(taxaOf(R))t+="🧾 *TAXA DE ADESÃO*\n"+taxaOf(R)+".\n\n";
  t+=netSummaryText(R);if(!isSPRJ(R.cityId))t+="📍 *REDE DE ATENDIMENTO*\nA rede de "+R.city+" está em atualização no cotador; consulte o guia médico da operadora.\n\n";
@@ -984,13 +1007,15 @@ function openPrint(mode){const R=viewResult();if(!R||!R.opts.length)return;const
  B[B.length-1].html+='<p class="lead">Faixas destacadas = faixas com vidas nesta cotação.</p>';
  // 4. coparticipação
  copGroups(R).forEach((g,i)=>{add((i===0?'<h2>Coparticipação</h2><p class="lead">Cobrança por procedimento realizado, apenas quando há utilização. Internação considerada na rede credenciada.</p>':'')+'<h3>'+(MO?OPS[g.op].short+' · ':'')+esc(g.prods.join(", "))+' — '+COPL[g.cop].toLowerCase()+'</h3><table class="pt"><tr><th>Procedimento</th><th>Coparticipação</th></tr>'+COPART_ROWS.map((r,k)=>'<tr><td>'+r+'</td><td>'+g.rule.v[k]+'</td></tr>').join("")+'</table>',i===0);});
+ // 4b. carências
+ if(R.table!=="p2")carGroups(R).forEach((g,i)=>add((i===0?'<h2>Carências</h2><p class="lead">Prazos a partir do início da vigência do contrato — '+carColLabel(R)+'.</p>':'')+'<h3>'+esc(g.prods.join(", "))+(g.amb?' — plano ambulatorial (sem internação e sem cirurgia)':'')+'</h3><table class="pt sm"><tr><th>Grupo</th><th>Cobertura</th><th>Carência</th></tr>'+g.rows.map(r=>'<tr><td><b>'+r.g+'</b></td><td><b>'+r.t+'</b><br>'+esc(r.d)+'</td><td><b>'+r.v+'</b></td></tr>').join("")+'</table>',i===0));
  // 5. condições
  const cond=['<b>Vigência da tabela:</b> tabela de vendas promocional '+opsName(R)+' válida para contratos assinados de '+vigOf(R)+'. Os valores são confirmados no momento da contratação.'];
  if(R.opts.some(o=>o.op==="nd"))cond.push('<b>Reembolso'+(MO?' (NotreDame)':'')+':</b> parcial ou total conforme previsto em instrumento contratual, para atendimentos fora da rede credenciada.');
  if(descOn())cond.push('<b>Desconto promocional:</b> '+DESC.pct+'% de desconto na primeira mensalidade, válido somente até '+DESC.ate+'. Da segunda mensalidade em diante, aplicam-se os valores integrais desta proposta.');
  if(hapNote(R))cond.push('<b>Atendimento Hapvida:</b> '+hapNote(R).replace(/^Planos Hapvida: /,""));
  if(age50Note(R))cond.push('<b>Planos 50+:</b> '+age50Note(R));
- cond.push('<b>Carência:</b> '+carenciaTxt(R.table));if(odontoOf(R)||odoNote(R))cond.push('<b>Plano odontológico:</b> '+[odoNote(R),odontoOf(R)].filter(Boolean).join(" "));if(taxaOf(R))cond.push('<b>Taxa de adesão:</b> '+taxaOf(R)+'.');if(clubeOn(R))cond.push('<b>Clube de Vantagens:</b> +300 parceiros em diversos segmentos, até 35% de desconto em medicamentos nas principais redes de farmácias e TotalPass sem nenhum custo para a empresa (o colaborador adere 100% digital pelo app, sem fidelidade, planos a partir de R$ 69,90/mês). Acesso em clube.hapvidandi.com.br.');if(R.seg==="pme")cond.push('<b>Mescla de planos:</b> é possível contratar planos diferentes na mesma empresa; apenas não é possível mesclar coparticipação parcial com total.');
+ cond.push('<b>Carência:</b> '+(R.table==="p2"?"isenção de carências para empresas com 30 vidas ou mais.":"conforme o quadro de carências desta proposta ("+carColLabel(R)+")."+(R.seg==="pme"?" "+CAR_REDUCAO:"")));if(odontoOf(R)||odoNote(R))cond.push('<b>Plano odontológico:</b> '+[odoNote(R),odontoOf(R)].filter(Boolean).join(" "));if(taxaOf(R))cond.push('<b>Taxa de adesão:</b> '+taxaOf(R)+'.');if(clubeOn(R))cond.push('<b>Clube de Vantagens:</b> +300 parceiros em diversos segmentos, até 35% de desconto em medicamentos nas principais redes de farmácias e TotalPass sem nenhum custo para a empresa (o colaborador adere 100% digital pelo app, sem fidelidade, planos a partir de R$ 69,90/mês). Acesso em clube.hapvidandi.com.br.');if(R.seg==="pme")cond.push('<b>Mescla de planos:</b> é possível contratar planos diferentes na mesma empresa; apenas não é possível mesclar coparticipação parcial com total.');
  if(R.opts.some(o=>o.p.id==="infinity"))cond.push('<b>Infinity 1000.11:</b> apenas para contratos a partir de 2 vidas; elegibilidade para adesão apenas para sócios, cônjuges e descendentes.');
  cond.push(R.seg==="pf"?'<b>Área de atuação:</b> condições e valores destinados a beneficiários residentes em '+esc(R.city)+' (área de atuação da tabela '+esc(R.tableCity)+'), conforme registro na ANS.':'<b>Área de atuação:</b> condições e valores destinados aos colaboradores da contratante e seus dependentes lotados e domiciliados em '+esc(R.city)+' (área de atuação da tabela '+esc(R.tableCity)+'), conforme registro na ANS.');
  add('<h2 style="margin-top:6px">Condições gerais</h2><ul>'+cond.map(c=>'<li>'+c+'</li>').join("")+'</ul>');
@@ -1368,7 +1393,7 @@ function buildTextShort(R){const N=R.N;const PF=R.seg==="pf";const vidas=N+(PF?(
  let t="Olá! Tudo bem?\n\nSegue a cotação de plano de saúde "+segWord(R)+" *"+opsName(R)+"* para "+cli+", *"+vidas+"* em "+R.city+":\n\n";
  t+=R.opts.map(o=>"• "+optLabel(o)+": *"+fmt(o.total)+"*/mês"+(descOn()?" → 1ª mensalidade *"+fmt(firstMonth(o.total))+"*":"")).join("\n")+"\n\n";
  if(descOn())t+="🔥 *"+DESC.pct+"% de desconto na 1ª mensalidade* — válido somente até "+DESC.ate+".\n\n";
- t+="✅ "+[R.table==="p2"?"Isenção de carências":PF?"Carências conforme contrato":"Carência de 60 dias",R.opts.some(o=>o.odo)?"🦷 Com plano odontológico":(clubeOn(R)?"🦷 Odonto incluso":""),clubeOn(R)?"🎁 Clube de Vantagens com TotalPass":"",R.opts.some(o=>o.p.own)?"🏥 Smart UP/Rio PF: só rede própria":""].filter(Boolean).join(" · ")+"\n📄 Envio a proposta completa em PDF com valores por faixa etária, coparticipação e rede de atendimento.\n\n";
+ t+="✅ "+[R.table==="p2"?"Isenção de carências":"Urgência e consultas com carência de 24 horas",R.opts.some(o=>o.odo)?"🦷 Com plano odontológico":(clubeOn(R)?"🦷 Odonto incluso":""),clubeOn(R)?"🎁 Clube de Vantagens com TotalPass":"",R.opts.some(o=>o.p.own)?"🏥 Smart UP/Rio PF: só rede própria":""].filter(Boolean).join(" · ")+"\n📄 Envio a proposta completa em PDF com valores por faixa etária, coparticipação e rede de atendimento.\n\n";
  t+="Qual opção faz mais sentido para "+(PF?"você":"vocês")+"?\n\nAbraço,\n*"+cons+"*\n"+regionOf(R.cityId).sign;return t;}
 
 /* ---- PDF direto no aparelho + compartilhar ---- */
@@ -1518,7 +1543,7 @@ async function doPwChange(e){e.preventDefault();const a=$("#pwNew").value,b=$("#
 /* ---------- Conta ---------- */
 function validTxt(me){if(!me)return"";if(!me.expira_em)return"Sem vencimento";const d=new Date(me.expira_em);const days=Math.ceil((d-new Date())/86400000);return"Acesso até "+fmtDate(me.expira_em)+(days<=7&&days>=0?" · vence em "+days+(days===1?" dia":" dias"):"");}
 function renderAccount(){const me=ACC.me||{};const isAdm=me.role==="admin";
- const b=$('.tabs-main button[data-tab="admin"]');if(b)b.hidden=!isAdm;
+ const b=$('.tabs-main button[data-tab="admin"]');if(b){b.hidden=!isAdm;const n=isAdm?vigAlertCount():0;b.innerHTML="Painel"+(n?' <span class="tab-dot" title="Tabela desatualizada">'+n+'</span>':"");}
  $("#accName").textContent=me.nome||me.email||"";$("#accEmail").textContent=me.email||"";$("#accValid").textContent=validTxt(me);
  const days=me.expira_em?Math.ceil((new Date(me.expira_em)-new Date())/86400000):99;const w=$("#expWarn");
  if(w){w.hidden=!(me.expira_em&&days<=5&&days>=0);w.innerHTML='Seu acesso vence em '+fmtDate(me.expira_em)+'. <a href="https://wa.me/'+SUPPORT_WA+'?text='+encodeURIComponent("Olá! Quero renovar meu acesso ao NotreOne ("+(me.email||"")+").")+'" target="_blank" rel="noopener">Renovar pelo WhatsApp</a>';}}
@@ -1561,7 +1586,19 @@ async function admLoad(){const box=$("#admList");box.innerHTML='<div class="hint
  try{ADM.users=await rpc("admin_list_users");}catch(e){box.innerHTML='<div class="hint err">'+esc(sbErr(e))+'</div>';return;}
  try{ACC.dataInfo=await rpc("price_info");}catch(e){}
  admRender();}
-function admRender(){const U=ADM.users;const act=U.filter(u=>uState(u).k==="ok"||uState(u).k==="warn").length;
+/* vigência de cada tabela cadastrada: alerta de tabela desatualizada no Painel */
+function vigList(){return [["São Paulo e Rio · Empresarial (NotreDame e Hapvida)",VIGENCIA],["São Paulo e Rio · Pessoa Física (Hapvida)",RG_SPRJ.vig.pf],["Fortaleza · Empresarial 2 a 29 vidas",REGION.fortaleza.vig.demais],["Fortaleza · Pessoa Física",REGION.fortaleza.vig.pf],["Goiás · Empresarial 2 a 29 vidas",RG_GO.vig.demais],["Goiás · Empresarial 30 a 99 vidas",RG_GO.vig.p2],["Goiás · Pessoa Física",RG_GO.vig.pf]];}
+function vigEnd(s){const m=String(s||"").match(/(\d{2})\/(\d{2})\/(\d{4})\s*$/);return m?new Date(+m[3],+m[2]-1,+m[1],23,59,59):null;}
+function vigStatus(){const now=new Date();return vigList().map(([nome,v])=>{const e=vigEnd(v);const d=e?Math.ceil((e-now)/86400000):null;return {nome,v,e,d,st:!e?"sem":d<0?"venc":d<=10?"warn":"ok"};});}
+function vigAlertCount(){return vigStatus().filter(x=>x.st==="venc").length;}
+function renderVigAlert(){const box=$("#admVig");if(!box)return;const S=vigStatus();const V=S.filter(x=>x.st==="venc"),W=S.filter(x=>x.st==="warn");
+ const line=x=>'<li><b>'+esc(x.nome)+'</b> — '+(x.st==="venc"?'venceu em '+fmtDate(x.e.toISOString())+' (há '+(-x.d)+(x.d===-1?' dia':' dias')+')':x.st==="warn"?'vence em '+fmtDate(x.e.toISOString())+' ('+(x.d===0?'hoje':x.d+(x.d===1?' dia':' dias'))+')':x.st==="sem"?'sem data final ('+esc(x.v)+')':'válida até '+fmtDate(x.e.toISOString()))+'</li>';
+ let html='';
+ if(V.length)html+='<section class="card vig-alert"><h2>Tabela desatualizada</h2><p class="sub">'+(V.length===1?'Esta tabela está com a vigência encerrada':'Estas tabelas estão com a vigência encerrada')+'. Os consultores continuam cotando com os valores antigos até você enviar a tabela nova.</p><ul>'+V.map(line).join("")+'</ul></section>';
+ if(W.length)html+='<section class="card vig-warn"><h2>Tabela vencendo</h2><ul>'+W.map(line).join("")+'</ul></section>';
+ html+='<details class="vig-all"><summary>Vigência de todas as tabelas</summary><ul>'+S.map(line).join("")+'</ul></details>';
+ box.innerHTML=html;}
+function admRender(){renderVigAlert();const U=ADM.users;const act=U.filter(u=>uState(u).k==="ok"||uState(u).k==="warn").length;
  $("#admStats").innerHTML=[["Usuários",U.length],["Ativos",act],["Vencendo (7 dias)",U.filter(u=>uState(u).k==="warn").length],["Online agora",U.filter(online).length]].map(([l,v])=>'<div class="st"><b>'+v+'</b><span>'+l+'</span></div>').join("");
  const di=ACC.dataInfo;$("#admTabInfo").innerHTML=di?"Vigência atual: <b>"+esc(di.vigencia||"—")+"</b> · atualizadas em "+fmtDT(di.updated_at):"—";
  const q=ADM.q.trim().toLowerCase();const L=U.filter(u=>!q||(u.nome||"").toLowerCase().includes(q)||u.email.toLowerCase().includes(q));
